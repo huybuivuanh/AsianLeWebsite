@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import Footer from "./components/Footer";
 import Nav from "./components/Nav";
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ export default function RootLayout({
       <body className="min-h-screen antialiased">
         <Nav />
         <main>{children}</main>
+        <Footer />
       </body>
     </html>
   );

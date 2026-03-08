@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Nav from "./components/Nav";
 
 export const metadata: Metadata = {
   title: "Asian Le Restaurant",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="min-h-screen antialiased">
+        <Nav />
+        <main>{children}</main>
+      </body>
     </html>
   );
 }

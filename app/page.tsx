@@ -1,7 +1,9 @@
+import PageContainer from "./components/PageContainer";
+
 export default function Home() {
   return (
-    <div>
-      <h1>Asian Le Restaurant</h1>
-    </div>
+    <PageContainer>
+      <h1 className="text-2xl font-semibold text-stone-900">Asian Le Restaurant</h1>
+    </PageContainer>
   );
 }

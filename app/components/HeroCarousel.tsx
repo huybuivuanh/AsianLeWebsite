@@ -14,13 +14,13 @@ const slides = [
   {
     title: "Welcome",
     subtitle: "Come and taste for yourself our Grilled roasted pork — Bánh mì heo quay",
-    image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=1600&q=80",
+    image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
     cta: "Order Now",
   },
   {
     title: "Welcome",
     subtitle: "Traditional dishes with local products of the highest quality — Chicken Noodle Soup",
-    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1600&q=80",
+    image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
     cta: "Order Now",
   },
 ];

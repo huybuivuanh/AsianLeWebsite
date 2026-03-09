@@ -30,6 +30,7 @@ export const STORE = {
     skipthedishes: "https://www.skipthedishes.com/asian-le-1400-6",
     tripadvisor:
       "https://www.tripadvisor.com/Restaurant_Review-g155041-d4881805-Reviews-Asian_Le-Prince_Albert_Saskatchewan.html",
+    restaurantguru: "https://restaurantguru.com/Asian-Le-Prince-Albert",
   },
 } as const;
 

@@ -15,39 +15,6 @@ const VALUE_PILLARS = [
   { label: "Happy", sub: "Guests" },
 ];
 
-const TESTIMONIALS = [
-  {
-    quote:
-      "The flavours are wonderful. Had Special Vietnamese Pho and Stir fried Ginger beef. Food 10 out of 10. Reasonable prices. Will be back for sure.",
-    author: "— Karen F.",
-    rating: 5,
-  },
-  {
-    quote:
-      "Had a bowl of delicious Pho today, it was extremely tasty and filling. The hosts are so pleasant and welcoming. Definitely PA's go-to for great food.",
-    author: "— Cindy T.",
-    rating: 5,
-  },
-  {
-    quote:
-      "Ordered the deluxe vermicelli bowl with beef. Absolutely outstanding — so fresh and well balanced. Service was very friendly. Fantastic experience!",
-    author: "— Krysta A.",
-    rating: 5,
-  },
-];
-
-function StarRating({ stars }: { stars: number }) {
-  return (
-    <div className="flex gap-0.5 text-amber-500" aria-hidden>
-      {Array.from({ length: stars }).map((_, i) => (
-        <span key={i} className="text-sm">
-          ★
-        </span>
-      ))}
-    </div>
-  );
-}
-
 export default function AboutUs() {
   return (
     <>

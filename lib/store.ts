@@ -35,3 +35,45 @@ export const STORE = {
 } as const;
 
 export type StoreHours = { days: string; time: string }[];
+
+export const menuItems: MenuItem[] = [
+  {
+    id: "item-1",
+    name: "item-1",
+    description: "item-1 description",
+    price: 10.0,
+    image:
+      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80",
+    categoryIds: ["category-1"],
+    createdAt: new Date(),
+  },
+  {
+    id: "item-2",
+    name: "item-2",
+    description: "item-2 description",
+    price: 10.0,
+    image:
+      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80",
+    categoryIds: ["category-2"],
+    createdAt: new Date(),
+  },
+];
+
+export const foodCategories: FoodCategory[] = [
+  {
+    id: "category-1",
+    name: "category-1",
+    description: "category-1 description",
+    itemIds: ["item-1", "item-2"],
+    order: 1,
+    createdAt: new Date(),
+  },
+  {
+    id: "category-2",
+    name: "category-2",
+    description: "category-2 description",
+    itemIds: ["item-2"],
+    order: 2,
+    createdAt: new Date(),
+  },
+];

@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { STORE } from "@/lib/store";
 import PageContainer from "../PageContainer";
+import StoreHours from "../contact/StoreHours";
 
 const PLACEHOLDER_IMAGE =
   "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80";
@@ -21,19 +23,10 @@ export default function OpenHoursSection() {
               Join us for lunch or dinner. We look forward to serving you.
             </p>
             <div className="mt-8 rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
-              <dl className="space-y-4">
-                <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                  <dt className="text-stone-700">Monday – Saturday</dt>
-                  <dd className="font-semibold tabular-nums text-stone-900">11 AM – 8 PM</dd>
-                </div>
-                <div className="flex items-center justify-between pb-1">
-                  <dt className="text-stone-700">Sunday</dt>
-                  <dd className="font-semibold tabular-nums text-stone-900">11 AM – 7 PM</dd>
-                </div>
-              </dl>
+              <StoreHours hours={STORE.hours} bordered className="space-y-4" />
             </div>
             <Link
-              href="/contact"
+              href="/contact-us"
               className="mt-8 inline-block rounded-lg bg-amber-600 px-8 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-amber-500 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
             >
               Book Now

@@ -1,13 +1,5 @@
 import Link from "next/link";
-
-const FOOTER = {
-  name: "Asian Le Restaurant",
-  address: {
-    line1: "Unit #3, 1400 6 Ave E",
-    city: "Prince Albert, SK S6V 2K2",
-  },
-  phone: "(306) 764-7799",
-};
+import { STORE } from "@/lib/store";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -21,7 +13,7 @@ export default function Footer() {
               href="/"
               className="text-lg font-semibold text-white hover:text-amber-200"
             >
-              {FOOTER.name}
+              {STORE.name}
             </Link>
           </div>
           <div>
@@ -29,9 +21,9 @@ export default function Footer() {
               Address
             </p>
             <address className="mt-2 not-italic text-stone-300">
-              {FOOTER.address.line1}
+              {STORE.address.line1}
               <br />
-              {FOOTER.address.city}
+              {STORE.address.city}
             </address>
           </div>
           <div>
@@ -39,16 +31,16 @@ export default function Footer() {
               Phone
             </p>
             <a
-              href={`tel:${FOOTER.phone.replace(/\D/g, "")}`}
+              href={`tel:${STORE.phone.replace(/\D/g, "")}`}
               className="mt-2 block text-stone-300 hover:text-amber-200"
             >
-              {FOOTER.phone}
+              {STORE.phone}
             </a>
           </div>
         </div>
         <div className="mt-10 border-t border-stone-800 pt-8 text-center text-sm text-stone-500">
           <p>
-            © {year} {FOOTER.name}. All rights reserved.
+            © {year} {STORE.name}. All rights reserved.
           </p>
         </div>
       </div>

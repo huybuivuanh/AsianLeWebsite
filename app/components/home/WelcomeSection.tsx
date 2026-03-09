@@ -26,7 +26,7 @@ export default function WelcomeSection() {
               will make sure your visit is a memorable one.
             </p>
             <Link
-              href="/about"
+              href="/about-us"
               className="mt-8 inline-block font-semibold text-amber-700 underline-offset-4 transition hover:text-amber-800 hover:underline"
             >
               About Us →

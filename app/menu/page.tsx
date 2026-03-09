@@ -37,22 +37,20 @@ export default function Menu() {
       {/* Menu by category */}
       <section className="border-t border-stone-200 bg-white py-16 md:py-24">
         <PageContainer>
-          <div className="mx-auto max-w-6xl space-y-16">
+          <div className="mx-auto max-w-6xl space-y-30">
             {categoriesSorted.map((category, catIndex) => {
               const itemsInCategory = menuItems.filter(
-                (item) =>
-                  item.categoryIds?.includes(category.id ?? "") ||
-                  (category.itemIds?.includes(item.id ?? "") ?? false),
+                (item) => category.itemIds?.includes(item.id ?? "") ?? false,
               );
 
               return (
                 <div key={category.id ?? catIndex}>
-                  <div className="border-b-2 border-stone-800 pb-2">
-                    <h2 className="text-2xl font-bold uppercase tracking-wide text-stone-900 sm:text-3xl">
+                  <div className="pb-2">
+                    <h2 className="text-2xl text-center font-bold uppercase tracking-wide text-stone-900 sm:text-3xl">
                       {category.name}
                     </h2>
                     {category.description ? (
-                      <p className="mt-2 text-stone-600">
+                      <p className="mt-2 text-center text-stone-600">
                         {category.description}
                       </p>
                     ) : null}
@@ -73,8 +71,8 @@ export default function Menu() {
           </div>
 
           <p className="mt-16 border-t border-stone-200 pt-8 text-center text-sm text-stone-500">
-            Please let us know about any allergies (e.g. gluten, peanuts,
-            cilantro).
+            Please let us know if you have any allergies or dietary
+            restrictions.
           </p>
         </PageContainer>
       </section>

@@ -44,7 +44,6 @@ export const menuItems: MenuItem[] = [
     price: 10.0,
     image:
       "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80",
-    categoryIds: ["category-1"],
     createdAt: new Date(),
   },
   {
@@ -54,7 +53,24 @@ export const menuItems: MenuItem[] = [
     price: 10.0,
     image:
       "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80",
-    categoryIds: ["category-2"],
+    createdAt: new Date(),
+  },
+  {
+    id: "item-3",
+    name: "item-3",
+    description: "item-3 description",
+    price: 10.0,
+    image:
+      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80",
+    createdAt: new Date(),
+  },
+  {
+    id: "item-4",
+    name: "item-4",
+    description: "item-4 description",
+    price: 10.0,
+    image:
+      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80",
     createdAt: new Date(),
   },
 ];
@@ -64,7 +80,7 @@ export const foodCategories: FoodCategory[] = [
     id: "category-1",
     name: "category-1",
     description: "category-1 description",
-    itemIds: ["item-1", "item-2"],
+    itemIds: ["item-1", "item-2", "item-3", "item-4"],
     order: 1,
     createdAt: new Date(),
   },
@@ -72,8 +88,16 @@ export const foodCategories: FoodCategory[] = [
     id: "category-2",
     name: "category-2",
     description: "category-2 description",
-    itemIds: ["item-2"],
+    itemIds: ["item-1", "item-2", "item-3", "item-4"],
     order: 2,
+    createdAt: new Date(),
+  },
+  {
+    id: "category-3",
+    name: "category-3",
+    description: "category-3 description",
+    itemIds: ["item-1", "item-2", "item-3", "item-4"],
+    order: 3,
     createdAt: new Date(),
   },
 ];

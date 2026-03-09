@@ -7,8 +7,8 @@ const menuLinks = [
   { href: "/", label: "Home" },
   { href: "/menu", label: "Menu" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/about", label: "About Us" },
-  { href: "/contact", label: "Contact Us" },
+  { href: "/about-us", label: "About Us" },
+  { href: "/contact-us", label: "Contact Us" },
 ];
 
 export default function Nav() {

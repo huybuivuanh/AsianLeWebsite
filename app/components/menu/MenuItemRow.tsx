@@ -18,8 +18,8 @@ export default function MenuItemRow({ item }: MenuItemRowProps) {
     <li className="flex items-end gap-4">
       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-stone-200">
         <Image
-          src={item.image}
-          alt={item.name}
+          src={item.image || ""}
+          alt={item.name || ""}
           fill
           className="object-cover"
           sizes="56px"

@@ -1,19 +1,20 @@
 declare global {
   interface FoodCategory {
-    id?: string;
+    id: string;
     name: string;
-    description: string;
+    description?: string;
     itemIds?: string[];
     order: number;
     createdAt: Date;
   }
 
   interface MenuItem {
-    id?: string;
+    id: string;
     name: string;
-    description: string;
+    description?: string;
     price: number;
-    image: string;
+    image?: string;
+    categoryIds?: string[];
     createdAt: Date;
   }
 }

@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
+import MenuDataLoader from "../components/MenuDataLoader";
 
 export const metadata: Metadata = {
   title: "Asian Le Restaurant",
@@ -16,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-white text-stone-900 antialiased">
+        <MenuDataLoader />
         <Nav />
         <main>{children}</main>
         <Footer />

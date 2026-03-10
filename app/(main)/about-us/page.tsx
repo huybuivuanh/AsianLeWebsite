@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import PageContainer from "../components/PageContainer";
+import PageContainer from "../../../components/PageContainer";
 
 const TITLE_BG_IMAGE =
   "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80";

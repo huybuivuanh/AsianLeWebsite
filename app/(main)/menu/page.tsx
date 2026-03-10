@@ -1,7 +1,7 @@
 import Image from "next/image";
-import PageContainer from "../components/PageContainer";
+import PageContainer from "../../../components/PageContainer";
 import { menuItems, foodCategories } from "@/lib/store";
-import MenuItemRow from "../components/menu/MenuItemRow";
+import MenuItemRow from "../../../components/menu/MenuItemRow";
 
 const TITLE_BG_IMAGE =
   "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80";

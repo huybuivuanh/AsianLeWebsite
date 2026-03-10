@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { STORE } from "@/lib/store";
-import PageContainer from "../components/PageContainer";
-import ContactDetails from "../components/contact/ContactDetails";
-import StoreMap from "../components/contact/StoreMap";
+import PageContainer from "../../../components/PageContainer";
+import ContactDetails from "../../../components/contact/ContactDetails";
+import StoreMap from "../../../components/contact/StoreMap";
 
 const TITLE_BG_IMAGE =
   "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80";
@@ -48,10 +48,7 @@ export default function ContactUs() {
               </div>
               <div className="lg:col-span-3">
                 <div className="sticky top-4">
-                  <StoreMap
-                    embedSrc={STORE.mapEmbedSrc}
-                    aspect="responsive"
-                  />
+                  <StoreMap embedSrc={STORE.mapEmbedSrc} aspect="responsive" />
                 </div>
               </div>
             </div>

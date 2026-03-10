@@ -1,5 +1,5 @@
 import Image from "next/image";
-import PageContainer from "../components/PageContainer";
+import PageContainer from "../../../components/PageContainer";
 
 const PLACEHOLDER_IMAGE =
   "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=600&q=80";
@@ -46,27 +46,27 @@ export default function Gallery() {
       </section>
 
       <PageContainer>
-      <div className="py-12">
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {GALLERY_ITEMS.map((item, i) => (
-          <figure key={i} className="group">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-stone-200">
-              <Image
-                src={item.src}
-                alt={item.caption}
-                fill
-                className="object-cover transition duration-300 group-hover:scale-105"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              />
-            </div>
-            <figcaption className="mt-3 text-center font-medium text-stone-700">
-              {item.caption}
-            </figcaption>
-          </figure>
-        ))}
-      </div>
-      </div>
-    </PageContainer>
+        <div className="py-12">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {GALLERY_ITEMS.map((item, i) => (
+              <figure key={i} className="group">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-stone-200">
+                  <Image
+                    src={item.src}
+                    alt={item.caption}
+                    fill
+                    className="object-cover transition duration-300 group-hover:scale-105"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                </div>
+                <figcaption className="mt-3 text-center font-medium text-stone-700">
+                  {item.caption}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </PageContainer>
     </>
   );
 }

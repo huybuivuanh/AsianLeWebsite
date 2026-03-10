@@ -1,7 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import Footer from "./components/Footer";
-import Nav from "./components/Nav";
+import Footer from "../components/Footer";
+import Nav from "../components/Nav";
 
 export const metadata: Metadata = {
   title: "Asian Le Restaurant",

@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import PageContainer from "../../../components/PageContainer";
 import DailySpecialsGrid from "../../../components/daily-specials/DailySpecialsGrid";
 import MenuItemRow from "../../../components/menu/MenuItemRow";
+import { STORE } from "@/lib/store";
 import { useCategoriesStore } from "@/stores/categoriesStore";
 import { useMenuItemsStore } from "@/stores/menuItemsStore";
 
@@ -48,99 +49,201 @@ export default function Menu() {
           <p className="mt-4 text-lg text-stone-200 sm:text-xl">
             Enjoy one of our delicious plates
           </p>
+          <a
+            href={STORE.socialLinks.skipthedishes}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3.5 text-base font-semibold text-stone-900 shadow-lg transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900"
+          >
+            Order on Skip the Dishes
+            <svg
+              className="size-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              />
+            </svg>
+          </a>
         </div>
       </section>
 
-      {/* Menu by category */}
-      <section className="border-t border-stone-200 bg-white py-16 md:py-24">
+      {/* Order online bar */}
+      <section className="border-b border-stone-200 bg-stone-50 py-4">
         <PageContainer>
-          {/* Daily Specials */}
-          <div className="relative mt-24 overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 px-6 py-10 shadow-lg shadow-amber-900/5 sm:px-8 sm:py-12">
-            {/* Decorative top accent */}
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber-400/80 to-transparent" />
-            <div className="relative">
-              <h2 className="mt-2 text-center text-2xl font-bold uppercase tracking-wide text-stone-900 sm:text-3xl">
-                Daily Special
-              </h2>
-              <div
-                className="mx-auto mt-3 h-px w-16 bg-amber-400/60"
+          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row sm:gap-6">
+            <p className="text-center text-sm text-stone-600 sm:text-left">
+              Order for delivery or pickup
+            </p>
+            <a
+              href={STORE.socialLinks.skipthedishes}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-stone-900 px-6 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 sm:w-auto"
+            >
+              <svg
+                className="size-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
                 aria-hidden
-              />
-              <p className="mt-4 text-center text-sm leading-relaxed text-stone-600">
-                Great value specials by day. Available at the times shown.
-              </p>
-              <div className="mt-8">
-                <DailySpecialsGrid variant="light" />
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
+              Skip the Dishes
+            </a>
+          </div>
+        </PageContainer>
+      </section>
+
+      {/* Menu content */}
+      <section className="bg-white py-16 md:py-24">
+        <PageContainer>
+          <div className="mx-auto max-w-6xl">
+            {/* Intro */}
+            <p className="text-center text-sm font-medium uppercase tracking-widest text-amber-700">
+              Dine in or order online
+            </p>
+            <h2 className="mt-3 text-center text-2xl font-bold text-stone-900 sm:text-3xl">
+              Our dishes
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-center text-stone-600">
+              Browse by category below. For delivery or pickup, order through
+              Skip the Dishes.
+            </p>
+
+            {/* Daily Specials */}
+            <div className="mt-16">
+              <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 px-6 py-10 shadow-lg shadow-amber-900/5 sm:px-8 sm:py-12">
+                <div
+                  className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber-400/80 to-transparent"
+                  aria-hidden
+                />
+                <div className="relative">
+                  <h3 className="border-l-4 border-amber-500 pl-4 text-xl font-bold tracking-tight text-stone-900 sm:text-2xl">
+                    Daily Special
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-stone-600">
+                    Great value specials by day. Available at the times shown.
+                  </p>
+                  <div className="mt-8">
+                    <DailySpecialsGrid variant="light" />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          {loading ? (
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
-                Loading menu
-              </p>
-              <p className="mt-3 text-stone-600">Please wait a moment.</p>
-            </div>
-          ) : error ? (
-            <div className="mx-auto max-w-3xl rounded-xl border border-stone-200 bg-stone-50/50 p-6 text-center">
-              <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
-                Couldn&apos;t load menu
-              </p>
-              <p className="mt-3 text-stone-700">{error}</p>
-              <button
-                type="button"
-                onClick={() => {
-                  useCategoriesStore.getState().fetchCategories();
-                  useMenuItemsStore.getState().fetchMenuItems();
-                }}
-                className="mt-6 inline-flex items-center justify-center rounded-lg bg-amber-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
-              >
-                Retry
-              </button>
-            </div>
-          ) : (
-            <div className="mx-auto max-w-6xl space-y-24">
-              {categoriesSorted.map((category) => {
-                const itemsInCategory = menuItems.filter((item) => {
-                  const byCategoryItemIds =
-                    category.itemIds?.includes(item.id ?? "") ?? false;
-                  const byItemCategoryIds =
-                    item.categoryIds?.includes(category.id ?? "") ?? false;
-                  return byCategoryItemIds || byItemCategoryIds;
-                });
-                return (
-                  <div key={category.id}>
-                    <div className="pb-2">
-                      <h2 className="text-center text-2xl font-bold uppercase tracking-wide text-stone-900 sm:text-3xl">
+            {/* Categories */}
+            {loading ? (
+              <div className="mx-auto mt-20 max-w-3xl text-center">
+                <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
+                  Loading menu
+                </p>
+                <p className="mt-3 text-stone-600">Please wait a moment.</p>
+              </div>
+            ) : error ? (
+              <div className="mx-auto mt-20 max-w-3xl rounded-xl border border-stone-200 bg-stone-50/50 p-6 text-center">
+                <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
+                  Couldn&apos;t load menu
+                </p>
+                <p className="mt-3 text-stone-700">{error}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    useCategoriesStore.getState().fetchCategories();
+                    useMenuItemsStore.getState().fetchMenuItems();
+                  }}
+                  className="mt-6 inline-flex items-center justify-center rounded-lg bg-amber-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : (
+              <div className="mt-20 space-y-20">
+                {categoriesSorted.map((category) => {
+                  const itemsInCategory = menuItems.filter((item) => {
+                    const byCategoryItemIds =
+                      category.itemIds?.includes(item.id ?? "") ?? false;
+                    const byItemCategoryIds =
+                      item.categoryIds?.includes(category.id ?? "") ?? false;
+                    return byCategoryItemIds || byItemCategoryIds;
+                  });
+                  return (
+                    <div key={category.id}>
+                      <h3 className="mb-6 border-l-4 border-amber-500 pl-4 text-xl font-bold tracking-tight text-stone-900 sm:text-2xl">
                         {category.name}
-                      </h2>
+                      </h3>
                       {category.description ? (
-                        <p className="mt-2 text-center text-stone-600">
+                        <p className="mb-6 text-stone-600">
                           {category.description}
                         </p>
                       ) : null}
+                      <ul className="grid grid-cols-1 gap-x-10 gap-y-6 lg:grid-cols-2">
+                        {itemsInCategory.map((item, itemIndex) => (
+                          <MenuItemRow
+                            key={item.id ?? itemIndex}
+                            item={item}
+                            index={itemIndex}
+                          />
+                        ))}
+                      </ul>
                     </div>
+                  );
+                })}
+              </div>
+            )}
 
-                    <ul className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 lg:grid-cols-2">
-                      {itemsInCategory.map((item, itemIndex) => (
-                        <MenuItemRow
-                          key={item.id ?? itemIndex}
-                          item={item}
-                          index={itemIndex}
-                        />
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
+            {/* Order online CTA */}
+            <div className="relative mt-20 overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 px-8 py-12 text-center shadow-lg shadow-amber-900/5 sm:px-12">
+              <div
+                className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber-400/80 to-transparent"
+                aria-hidden
+              />
+              <div className="relative">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">
+                  Order online
+                </p>
+                <a
+                  href={STORE.socialLinks.skipthedishes}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-8 inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3.5 text-base font-semibold text-stone-900 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400 hover:shadow-amber-500/30 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
+                >
+                  Order on Skip the Dishes
+                  <svg
+                    className="size-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                </a>
+              </div>
             </div>
-          )}
 
-          <p className="mt-16 border-t border-stone-200 pt-8 text-center text-sm text-stone-500">
-            Please let us know if you have any allergies or dietary
-            restrictions.
-          </p>
+            <p className="mt-16 border-t border-stone-200 pt-8 text-center text-sm text-stone-500">
+              Please let us know if you have any allergies or dietary
+              restrictions.
+            </p>
+          </div>
         </PageContainer>
       </section>
     </>

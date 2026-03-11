@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useMemo } from "react";
 import PageContainer from "../../../components/PageContainer";
 import DailySpecialsGrid from "../../../components/daily-specials/DailySpecialsGrid";
+import MenuCategoryNav from "../../../components/menu/MenuCategoryNav";
 import MenuItemRow from "../../../components/menu/MenuItemRow";
 import { STORE } from "@/lib/store";
 import { useCategoriesStore } from "@/stores/categoriesStore";
@@ -31,6 +32,7 @@ export default function Menu() {
 
   return (
     <>
+      <MenuCategoryNav />
       {/* Hero */}
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image
@@ -79,7 +81,7 @@ export default function Menu() {
         <PageContainer>
           <div className="mx-auto max-w-6xl">
             {/* Daily Specials */}
-            <div>
+            <div id="daily-special" className="scroll-mt-28">
               <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 px-6 py-10 shadow-lg shadow-amber-900/5 sm:px-8 sm:py-12">
                 <div
                   className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber-400/80 to-transparent"
@@ -135,7 +137,7 @@ export default function Menu() {
                     return byCategoryItemIds || byItemCategoryIds;
                   });
                   return (
-                    <div key={category.id}>
+                    <div key={category.id} id={`category-${category.id}`} className="scroll-mt-28">
                       <h3 className="mb-6 border-l-4 border-amber-500 pl-4 text-xl font-bold tracking-tight text-stone-900 sm:text-2xl">
                         {category.name}
                       </h3>

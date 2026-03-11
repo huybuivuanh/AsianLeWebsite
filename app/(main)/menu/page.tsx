@@ -87,9 +87,6 @@ export default function Menu() {
                     item.categoryIds?.includes(category.id ?? "") ?? false;
                   return byCategoryItemIds || byItemCategoryIds;
                 });
-
-                if (!itemsInCategory.length) return null;
-
                 return (
                   <div key={category.id}>
                     <div className="pb-2">

@@ -4,7 +4,7 @@ import PageContainer from "../PageContainer";
 
 export default function ExperienceSection() {
   return (
-    <section className="bg-stone-900 py-16 text-stone-100 md:py-24">
+    <section id="experience" className="scroll-mt-28 bg-stone-900 py-16 text-stone-100 md:py-24">
       <PageContainer>
         <div className="grid gap-12 md:grid-cols-2 md:items-center md:gap-16">
           <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-stone-800">

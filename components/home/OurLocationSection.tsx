@@ -4,7 +4,7 @@ import StoreMap from "../contact/StoreMap";
 
 export default function OurLocationSection() {
   return (
-    <section className="border-t border-stone-200 bg-white py-16 md:py-24">
+    <section id="our-location" className="scroll-mt-28 border-t border-stone-200 bg-white py-16 md:py-24">
       <PageContainer>
         <div className="mx-auto max-w-6xl">
           <div className="text-center">

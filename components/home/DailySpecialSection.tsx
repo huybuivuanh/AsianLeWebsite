@@ -4,7 +4,7 @@ import PageContainer from "../PageContainer";
 
 export default function DailySpecialSection() {
   return (
-    <section className="relative overflow-hidden py-16 md:py-24">
+    <section id="daily-special" className="scroll-mt-28 relative overflow-hidden py-16 md:py-24">
       {/* Background image with dark overlay */}
       <div className="absolute inset-0">
         <Image

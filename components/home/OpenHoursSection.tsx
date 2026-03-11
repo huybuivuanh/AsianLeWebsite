@@ -9,7 +9,7 @@ const PLACEHOLDER_IMAGE =
 
 export default function OpenHoursSection() {
   return (
-    <section className="border-y border-stone-200 bg-stone-50 py-16 md:py-24">
+    <section id="open-hours" className="scroll-mt-28 border-y border-stone-200 bg-stone-50 py-16 md:py-24">
       <PageContainer>
         <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-16">
           <div className="order-2 md:order-1">

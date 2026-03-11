@@ -119,7 +119,7 @@ function MenuItemRow({
 
 export default function DiscoverMenuSection() {
   return (
-    <section className="border-t border-stone-200 bg-stone-50 py-16 md:py-24">
+    <section id="discover-menu" className="scroll-mt-28 border-t border-stone-200 bg-stone-50 py-16 md:py-24">
       <PageContainer>
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-600">

@@ -20,7 +20,7 @@ const HIGHLIGHTS = [
 
 export default function TestimonialsSection() {
   return (
-    <section className="border-t border-stone-800 bg-stone-900 py-16 text-stone-100 md:py-24">
+    <section id="testimonials" className="scroll-mt-28 border-t border-stone-800 bg-stone-900 py-16 text-stone-100 md:py-24">
       <PageContainer>
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-medium uppercase tracking-widest text-amber-300">

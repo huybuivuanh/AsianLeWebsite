@@ -38,8 +38,10 @@ export const DAILY_SPECIALS: DailySpecial[] = [
   {
     id: "monday",
     dayOfWeek: 1,
-    startTime: "11:00 AM",
-    endTime: "2:00 PM",
+    timeRange: {
+      startTime: new Date(1970, 0, 1, 11, 0),
+      endTime: new Date(1970, 0, 1, 14, 0),
+    },
     createdAt: new Date(),
     items: [
       {
@@ -76,8 +78,10 @@ export const DAILY_SPECIALS: DailySpecial[] = [
   {
     id: "tuesday",
     dayOfWeek: 2,
-    startTime: "11:00 AM",
-    endTime: "2:00 PM",
+    timeRange: {
+      startTime: new Date(1970, 0, 1, 11, 0),
+      endTime: new Date(1970, 0, 1, 14, 0),
+    },
     createdAt: new Date(),
     items: [
       {
@@ -114,8 +118,10 @@ export const DAILY_SPECIALS: DailySpecial[] = [
   {
     id: "wednesday",
     dayOfWeek: 3,
-    startTime: "11:00 AM",
-    endTime: "2:00 PM",
+    timeRange: {
+      startTime: new Date(1970, 0, 1, 11, 0),
+      endTime: new Date(1970, 0, 1, 14, 0),
+    },
     createdAt: new Date(),
     items: [
       {
@@ -152,8 +158,10 @@ export const DAILY_SPECIALS: DailySpecial[] = [
   {
     id: "thursday",
     dayOfWeek: 4,
-    startTime: "11:00 AM",
-    endTime: "2:00 PM",
+    timeRange: {
+      startTime: new Date(1970, 0, 1, 11, 0),
+      endTime: new Date(1970, 0, 1, 14, 0),
+    },
     createdAt: new Date(),
     items: [
       {
@@ -190,8 +198,10 @@ export const DAILY_SPECIALS: DailySpecial[] = [
   {
     id: "friday",
     dayOfWeek: 5,
-    startTime: "11:00 AM",
-    endTime: "2:00 PM",
+    timeRange: {
+      startTime: new Date(1970, 0, 1, 11, 0),
+      endTime: new Date(1970, 0, 1, 14, 0),
+    },
     createdAt: new Date(),
     items: [
       {

@@ -2,6 +2,32 @@ import Image from "next/image";
 import PageContainer from "../PageContainer";
 import { DAILY_SPECIALS } from "@/lib/store";
 
+const DAY_NAMES = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+] as const;
+
+function formatPrice(price: number) {
+  return new Intl.NumberFormat("en-CA", {
+    style: "currency",
+    currency: "CAD",
+    minimumFractionDigits: 2,
+  }).format(price);
+}
+
+function formatTime(date: Date) {
+  return new Intl.DateTimeFormat("en-CA", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+}
+
 export default function DailySpecialSection() {
   return (
     <section className="relative overflow-hidden py-16 md:py-24">
@@ -35,35 +61,44 @@ export default function DailySpecialSection() {
           </div>
 
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {DAILY_SPECIALS.map(({ dayOfWeek, items }, index) => (
-              <div
-                key={dayOfWeek}
-                className={`rounded-lg bg-stone-900/70 p-5 backdrop-blur-sm ${index === 6 ? "lg:col-start-2" : ""}`}
-              >
-                <p className="text-center text-lg font-bold uppercase tracking-wide text-amber-400">
-                  {dayOfWeek}
-                </p>
-                <ul className="mt-4 space-y-3">
-                  {items.map((item, i) => (
-                    <li
-                      key={i}
-                      className="flex items-baseline gap-2 text-sm text-white"
-                    >
-                      <span className="min-w-0 shrink overflow-hidden text-ellipsis whitespace-nowrap">
-                        {item.name}
-                      </span>
-                      <span
-                        className="min-w-[2ch] flex-1 border-b border-dotted border-white/50"
-                        aria-hidden
-                      />
-                      <span className="shrink-0 font-medium tabular-nums">
-                        {item.price}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {DAILY_SPECIALS.map(
+              ({ id, dayOfWeek, timeRange, items }, index) => (
+                <div
+                  key={id}
+                  className={`rounded-lg bg-stone-900/70 p-5 backdrop-blur-sm ${index === DAILY_SPECIALS.length - 1 && DAILY_SPECIALS.length % 3 === 1 ? "lg:col-start-2" : ""}`}
+                >
+                  <p className="text-center text-xl font-bold uppercase tracking-wide text-amber-400">
+                    {DAY_NAMES[dayOfWeek - 1]}
+                  </p>
+                  <p className="text-center text-sm text-white/70">
+                    {formatTime(timeRange.startTime)} – {formatTime(timeRange.endTime)}
+                  </p>
+                  <ul className="mt-4 space-y-4">
+                    {items.map((item) => (
+                      <li key={item.id} className="text-base text-white">
+                        <p className="leading-snug">{item.name}</p>
+                        {item.options && item.options.length > 0 && (
+                          <ul className="mt-2 list-inside list-disc space-y-0.5 pl-2 text-medium font-bold text-blue-400">
+                            {item.options.map((opt, i) => (
+                              <li key={i}>{opt}</li>
+                            ))}
+                          </ul>
+                        )}
+                        <div className="mt-0.5 flex items-baseline gap-2">
+                          <span
+                            className="min-w-[2ch] flex-1 border-b border-dotted border-white/50"
+                            aria-hidden
+                          />
+                          <span className="shrink-0 text-red-500 font-bold tabular-nums">
+                            {formatPrice(item.price)}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ),
+            )}
           </div>
         </PageContainer>
       </div>

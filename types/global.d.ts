@@ -25,10 +25,14 @@ declare global {
   interface DailySpecial {
     id: string;
     dayOfWeek: number;
-    startTime: string;
-    endTime: string;
+    timeRange: TimeRange;
     items: DailySpecialItem[];
     createdAt: Date;
+  }
+
+  interface TimeRange {
+    startTime: Date;
+    endTime: Date;
   }
 }
 

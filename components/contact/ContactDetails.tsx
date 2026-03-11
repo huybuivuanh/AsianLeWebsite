@@ -125,7 +125,7 @@ export default function ContactDetails({
         href={`tel:${contact.phone.replace(/\D/g, "")}`}
         className="inline-block w-full rounded-lg bg-amber-600 px-6 py-3.5 text-center text-sm font-semibold text-white shadow-md transition hover:bg-amber-500 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
       >
-        Call to book
+        Call Us
       </a>
     </div>
   );

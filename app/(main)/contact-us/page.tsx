@@ -41,7 +41,7 @@ export default function ContactUs() {
               We&apos;re here for you
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-center text-stone-600">
-              Stop by for a meal, give us a call to book, or send a message below.
+              Stop by for a meal, give us a Call Us, or send a message below.
             </p>
 
             <div className="mt-14 grid gap-10 lg:grid-cols-2 lg:gap-14 xl:gap-16">

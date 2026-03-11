@@ -68,7 +68,7 @@ export default function ContactForm() {
 
   return (
     <div className="rounded-xl border border-stone-200 bg-stone-50/50 p-6">
-      <h3 className="text-sm font-medium uppercase tracking-widest text-amber-700">
+      <h3 className="mb-5 border-l-4 border-amber-500 pl-4 text-lg font-bold tracking-tight text-stone-900">
         Get in touch
       </h3>
       <p className="mt-2 text-sm text-stone-600">

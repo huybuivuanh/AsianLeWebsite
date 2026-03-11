@@ -33,9 +33,22 @@ export default function ContactUs() {
 
       <section className="border-t border-stone-200 bg-white py-16 md:py-24">
         <PageContainer>
-          <div className="mx-auto max-w-5xl">
-            <div className="grid gap-10 lg:grid-cols-5 lg:gap-12">
-              <div className="lg:col-span-2 space-y-10">
+          <div className="mx-auto max-w-6xl">
+            <p className="text-center text-sm font-semibold uppercase tracking-[0.2em] text-amber-600">
+              Visit us & get in touch
+            </p>
+            <h2 className="mt-4 text-center text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
+              We&apos;re here for you
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-center text-stone-600">
+              Stop by for a meal, give us a call to book, or send a message below.
+            </p>
+
+            <div className="mt-14 grid gap-10 lg:grid-cols-2 lg:gap-14 xl:gap-16">
+              <div>
+                <h3 className="mb-5 border-l-4 border-amber-500 pl-4 text-lg font-bold tracking-tight text-stone-900">
+                  Contact & hours
+                </h3>
                 <ContactDetails
                   contact={{
                     address: STORE.address,
@@ -46,13 +59,22 @@ export default function ContactUs() {
                   socialLinks={STORE.socialLinks}
                   googleMapsLink={STORE.googleMapsLink}
                 />
+              </div>
+
+              <div className="lg:min-w-0">
                 <ContactForm />
               </div>
-              <div className="lg:col-span-3">
-                <div className="sticky top-4">
-                  <StoreMap embedSrc={STORE.mapEmbedSrc} aspect="responsive" />
-                </div>
-              </div>
+            </div>
+
+            <div className="mt-16 lg:mt-20">
+              <h3 className="mb-5 border-l-4 border-amber-500 pl-4 text-lg font-bold tracking-tight text-stone-900">
+                Find us
+              </h3>
+              <StoreMap
+                embedSrc={STORE.mapEmbedSrc}
+                aspect="responsive"
+                className="rounded-2xl shadow-sm"
+              />
             </div>
           </div>
         </PageContainer>

@@ -36,7 +36,7 @@ export default function ContactDetails({
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-stone-200 bg-stone-50/50 p-6">
-        <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
+        <p className="text-sm font-semibold uppercase tracking-widest text-amber-700">
           Address
         </p>
         <address className="mt-3 not-italic leading-relaxed text-stone-700">
@@ -55,7 +55,7 @@ export default function ContactDetails({
       </div>
 
       <div className="rounded-xl border border-stone-200 bg-stone-50/50 p-6">
-        <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
+        <p className="text-sm font-semibold uppercase tracking-widest text-amber-700">
           Contact
         </p>
         <div className="mt-4 space-y-3">
@@ -113,7 +113,7 @@ export default function ContactDetails({
       </div>
 
       <div className="rounded-xl border border-stone-200 bg-stone-50/50 p-6">
-        <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
+        <p className="text-sm font-semibold uppercase tracking-widest text-amber-700">
           Hours
         </p>
         <div className="mt-3">

@@ -17,13 +17,15 @@ export default function MenuItemRow({ item }: MenuItemRowProps) {
   return (
     <li className="flex items-end gap-4">
       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-stone-200">
-        <Image
-          src={item.image || ""}
-          alt={item.name || ""}
-          fill
-          className="object-cover"
-          sizes="56px"
-        />
+        {item.image ? (
+          <Image
+            src={item.image}
+            alt={item.name}
+            fill
+            className="object-cover"
+            sizes="56px"
+          />
+        ) : null}
       </div>
       <div className="min-w-0 flex-1 border-b border-dotted border-stone-300 pb-1">
         <p className="text-2xl font-semibold text-stone-900">{item.name}</p>

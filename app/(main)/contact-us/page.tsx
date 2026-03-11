@@ -2,6 +2,7 @@ import Image from "next/image";
 import { STORE } from "@/lib/store";
 import PageContainer from "../../../components/PageContainer";
 import ContactDetails from "../../../components/contact/ContactDetails";
+import ContactForm from "../../../components/contact/ContactForm";
 import StoreMap from "../../../components/contact/StoreMap";
 
 const TITLE_BG_IMAGE =
@@ -34,7 +35,7 @@ export default function ContactUs() {
         <PageContainer>
           <div className="mx-auto max-w-5xl">
             <div className="grid gap-10 lg:grid-cols-5 lg:gap-12">
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 space-y-10">
                 <ContactDetails
                   contact={{
                     address: STORE.address,
@@ -45,6 +46,7 @@ export default function ContactUs() {
                   socialLinks={STORE.socialLinks}
                   googleMapsLink={STORE.googleMapsLink}
                 />
+                <ContactForm />
               </div>
               <div className="lg:col-span-3">
                 <div className="sticky top-4">

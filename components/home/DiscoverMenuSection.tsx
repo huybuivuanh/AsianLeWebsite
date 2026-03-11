@@ -119,7 +119,10 @@ function MenuItemRow({
 
 export default function DiscoverMenuSection() {
   return (
-    <section id="discover-menu" className="scroll-mt-28 border-t border-stone-200 bg-stone-50 py-16 md:py-24">
+    <section
+      id="discover-menu"
+      className="scroll-mt-28 border-t border-stone-200 bg-stone-50 py-16 md:py-24"
+    >
       <PageContainer>
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-600">
@@ -219,15 +222,6 @@ export default function DiscoverMenuSection() {
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="mt-16 text-center">
-          <Link
-            href="/menu"
-            className="inline-flex items-center rounded-lg bg-amber-600 px-8 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-amber-500 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
-          >
-            View full menu →
-          </Link>
         </div>
       </PageContainer>
     </section>

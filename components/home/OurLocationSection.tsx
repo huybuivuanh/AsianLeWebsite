@@ -6,7 +6,7 @@ export default function OurLocationSection() {
   return (
     <section className="border-t border-stone-200 bg-white py-16 md:py-24">
       <PageContainer>
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-6xl">
           <div className="text-center">
             <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
               Find us
@@ -16,7 +16,7 @@ export default function OurLocationSection() {
             </h2>
           </div>
 
-          <div className="mt-10 grid gap-8 md:grid-cols-2 md:items-start">
+          <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_1.4fr] lg:gap-12 lg:items-start">
             <div className="rounded-xl border border-stone-200 bg-stone-50/50 p-6">
               <h3 className="font-semibold text-stone-900">Address</h3>
               <address className="mt-3 not-italic leading-relaxed text-stone-600">
@@ -34,7 +34,11 @@ export default function OurLocationSection() {
               </a>
             </div>
 
-            <StoreMap embedSrc={STORE.mapEmbedSrc} />
+            <StoreMap
+              embedSrc={STORE.mapEmbedSrc}
+              aspect="responsive"
+              className="rounded-2xl shadow-sm"
+            />
           </div>
         </div>
       </PageContainer>

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const SECTION_LINKS = [
   { id: "welcome", label: "Welcome" },
   { id: "daily-special", label: "Daily Special" },
+  { id: "news-updates", label: "Updates" },
   { id: "open-hours", label: "Hours" },
   { id: "experience", label: "Experience" },
   { id: "discover-menu", label: "Menu Highlights" },

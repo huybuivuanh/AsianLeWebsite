@@ -8,12 +8,17 @@ declare global {
     createdAt: Date;
   }
 
+  interface ImageItem {
+    name: string;
+    url: string;
+  }
+
   interface MenuItem {
     id: string;
     name: string;
     description?: string;
     price: number;
-    image?: string;
+    image?: ImageItem;
     categoryIds?: string[];
     createdAt: Date;
   }

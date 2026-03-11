@@ -16,11 +16,11 @@ function formatPrice(price: number) {
 export default function MenuItemRow({ item }: MenuItemRowProps) {
   return (
     <li className="flex items-end gap-4">
-      {item.image && (
+      {item.image?.url && (
         <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-stone-200">
           <Image
-            src={item.image}
-            alt={item.name}
+            src={item.image.url}
+            alt={item.image.name || item.name}
             fill
             className="object-cover"
             sizes="256px"

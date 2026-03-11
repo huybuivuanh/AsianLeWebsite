@@ -48,16 +48,20 @@ export const DAILY_SPECIALS: DailySpecial[] = [
         id: "#1",
         name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
         price: 10.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "Stir Fried Chicken Vermicelli",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
       {
         id: "#2",
         name: "#2 - Medium Deluxe Wonton Soup",
         price: 8.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "Wonton Soup",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
       {
@@ -69,8 +73,10 @@ export const DAILY_SPECIALS: DailySpecial[] = [
           "Ginger Chicken(Sauce on the side)",
         ],
         price: 10.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "Combo plate",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
     ],
@@ -88,16 +94,20 @@ export const DAILY_SPECIALS: DailySpecial[] = [
         id: "#1",
         name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
         price: 10.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
       {
         id: "#2",
         name: "#2 - Medium Deluxe Wonton Soup",
         price: 8.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
       {
@@ -109,8 +119,10 @@ export const DAILY_SPECIALS: DailySpecial[] = [
           "Ginger Chicken(Sauce on the side)",
         ],
         price: 10.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
     ],
@@ -128,16 +140,20 @@ export const DAILY_SPECIALS: DailySpecial[] = [
         id: "#1",
         name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
         price: 10.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
       {
         id: "#2",
         name: "#2 - Medium Deluxe Wonton Soup",
         price: 8.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
       {
@@ -149,8 +165,10 @@ export const DAILY_SPECIALS: DailySpecial[] = [
           "Ginger Chicken(Sauce on the side)",
         ],
         price: 10.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
     ],
@@ -168,16 +186,20 @@ export const DAILY_SPECIALS: DailySpecial[] = [
         id: "#1",
         name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
         price: 10.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
       {
         id: "#2",
         name: "#2 - Medium Deluxe Wonton Soup",
         price: 8.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
       {
@@ -189,8 +211,10 @@ export const DAILY_SPECIALS: DailySpecial[] = [
           "Ginger Chicken(Sauce on the side)",
         ],
         price: 10.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
     ],
@@ -208,16 +232,20 @@ export const DAILY_SPECIALS: DailySpecial[] = [
         id: "#1",
         name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
         price: 10.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
       {
         id: "#2",
         name: "#2 - Medium Deluxe Wonton Soup",
         price: 8.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
       {
@@ -229,8 +257,10 @@ export const DAILY_SPECIALS: DailySpecial[] = [
           "Ginger Chicken(Sauce on the side)",
         ],
         price: 10.95,
-        image:
-          "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        image: {
+          name: "",
+          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+        },
         createdAt: new Date(),
       },
     ],

@@ -30,14 +30,28 @@ export const useMenuItemsStore = create<MenuItemsState>((set) => ({
           typeof rawPrice === "number" && Number.isFinite(rawPrice)
             ? rawPrice
             : 0;
+        const rawImage = d.image;
+        const image: ImageItem | undefined =
+          rawImage &&
+          typeof rawImage === "object" &&
+          "url" in rawImage &&
+          typeof (rawImage as { url: unknown }).url === "string"
+            ? {
+                name:
+                  (typeof (rawImage as { name?: unknown }).name === "string"
+                    ? (rawImage as { name: string }).name
+                    : "") ?? "",
+                url: (rawImage as { url: string }).url,
+              }
+            : undefined;
         return {
           id: doc.id,
           name: (d.name as string) ?? "",
           description: d.description as string | undefined,
           price,
-          image: d.image as string | undefined,
+          image,
           categoryIds: d.categoryIds as string[] | undefined,
-          createdAt: d.createdAt?.toDate?.() ?? undefined,
+          createdAt: (d.createdAt?.toDate?.() ?? new Date()) as Date,
         };
       });
       set({ menuItems, loading: false });

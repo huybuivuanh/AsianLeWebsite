@@ -1,63 +1,6 @@
 import Image from "next/image";
 import PageContainer from "../PageContainer";
-
-const DAILY_SPECIALS = [
-  {
-    day: "Monday",
-    items: [
-      {
-        name: "Grilled Chicken & Spring Rolls (2) Noodle Bowl",
-        price: "$15.00",
-      },
-      { name: "Wonton Soup (M) + Shrimp Cold Rolls (2)", price: "$16.00" },
-    ],
-  },
-  {
-    day: "Tuesday",
-    items: [
-      { name: "Satay Beef Banh Mi + Spring Rolls (3)", price: "$15.00" },
-      { name: "Stir-fried Chicken & Vegetable on Rice", price: "$16.00" },
-    ],
-  },
-  {
-    day: "Wednesday",
-    items: [
-      { name: "1/2 Dry Ribs & French Fries", price: "$15.00" },
-      { name: "Satay Peanut Beef Soup with Spring Rolls (2)", price: "$16.00" },
-    ],
-  },
-  {
-    day: "Thursday",
-    items: [
-      { name: "Stir-fried Ginger Beef on Rice", price: "$15.00" },
-      { name: "Coconut Curry Shrimp & Vegetable on Noodle", price: "$17.00" },
-    ],
-  },
-  {
-    day: "Friday",
-    items: [
-      { name: "Fish (2pcs) & Chips", price: "$15.00" },
-      { name: "Stir-fried Ginger Chicken on Rice", price: "$16.00" },
-    ],
-  },
-  {
-    day: "Saturday",
-    items: [
-      { name: "Vietnamese Beef & Meat Balls Noodle Soup", price: "$15.00" },
-      { name: "Chicken Fried Rice with Panko Shrimp (2)", price: "$16.00" },
-    ],
-  },
-  {
-    day: "Sunday",
-    items: [
-      {
-        name: "Stir-fried Chicken & Shrimp Vegetable on Noodle",
-        price: "$15.00",
-      },
-      { name: "Chicken & Shrimp Satay Noodle Soup", price: "$16.00" },
-    ],
-  },
-];
+import { DAILY_SPECIALS } from "@/lib/store";
 
 export default function DailySpecialSection() {
   return (
@@ -92,13 +35,13 @@ export default function DailySpecialSection() {
           </div>
 
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {DAILY_SPECIALS.map(({ day, items }, index) => (
+            {DAILY_SPECIALS.map(({ dayOfWeek, items }, index) => (
               <div
-                key={day}
+                key={dayOfWeek}
                 className={`rounded-lg bg-stone-900/70 p-5 backdrop-blur-sm ${index === 6 ? "lg:col-start-2" : ""}`}
               >
                 <p className="text-center text-lg font-bold uppercase tracking-wide text-amber-400">
-                  {day}
+                  {dayOfWeek}
                 </p>
                 <ul className="mt-4 space-y-3">
                   {items.map((item, i) => (

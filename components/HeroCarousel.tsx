@@ -7,21 +7,27 @@ import { useState, useEffect } from "react";
 const slides = [
   {
     title: "Welcome",
-    subtitle: "Discover and experience our finest selection of Vietnamese Beef Noodle Soup",
-    image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-    cta: "Order Now",
+    subtitle:
+      "Discover and experience our finest selection of Vietnamese Beef Noodle Soup",
+    image:
+      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+    cta: "See Our Menu",
   },
   {
     title: "Welcome",
-    subtitle: "Come and taste for yourself our Grilled roasted pork — Bánh mì heo quay",
-    image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-    cta: "Order Now",
+    subtitle:
+      "Come and taste for yourself our Grilled roasted pork — Bánh mì heo quay",
+    image:
+      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+    cta: "See Our Menu",
   },
   {
     title: "Welcome",
-    subtitle: "Traditional dishes with local products of the highest quality — Chicken Noodle Soup",
-    image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-    cta: "Order Now",
+    subtitle:
+      "Traditional dishes with local products of the highest quality — Chicken Noodle Soup",
+    image:
+      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+    cta: "See Our Menu",
   },
 ];
 
@@ -29,7 +35,10 @@ export default function HeroCarousel() {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    const id = setInterval(() => setIndex((i) => (i + 1) % slides.length), 5000);
+    const id = setInterval(
+      () => setIndex((i) => (i + 1) % slides.length),
+      5000,
+    );
     return () => clearInterval(id);
   }, []);
 

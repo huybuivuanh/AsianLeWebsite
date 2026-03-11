@@ -23,7 +23,7 @@ export default function MenuItemRow({ item }: MenuItemRowProps) {
             alt={item.name}
             fill
             className="object-cover"
-            sizes="56px"
+            sizes="256px"
           />
         ) : null}
       </div>

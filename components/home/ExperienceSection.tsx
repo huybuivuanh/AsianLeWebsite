@@ -33,7 +33,7 @@ export default function ExperienceSection() {
               href="/menu"
               className="mt-8 inline-block rounded-md bg-amber-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900"
             >
-              Order Now
+              See Our Menu
             </Link>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useMemo } from "react";
 import PageContainer from "../../../components/PageContainer";
+import DailySpecialsGrid from "../../../components/daily-specials/DailySpecialsGrid";
 import MenuItemRow from "../../../components/menu/MenuItemRow";
 import { useCategoriesStore } from "@/stores/categoriesStore";
 import { useMenuItemsStore } from "@/stores/menuItemsStore";
@@ -53,6 +54,27 @@ export default function Menu() {
       {/* Menu by category */}
       <section className="border-t border-stone-200 bg-white py-16 md:py-24">
         <PageContainer>
+          {/* Daily Specials */}
+          <div className="relative mt-24 overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 px-6 py-10 shadow-lg shadow-amber-900/5 sm:px-8 sm:py-12">
+            {/* Decorative top accent */}
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber-400/80 to-transparent" />
+            <div className="relative">
+              <h2 className="mt-2 text-center text-2xl font-bold uppercase tracking-wide text-stone-900 sm:text-3xl">
+                Daily Special
+              </h2>
+              <div
+                className="mx-auto mt-3 h-px w-16 bg-amber-400/60"
+                aria-hidden
+              />
+              <p className="mt-4 text-center text-sm leading-relaxed text-stone-600">
+                Great value specials by day. Available at the times shown.
+              </p>
+              <div className="mt-8">
+                <DailySpecialsGrid variant="light" />
+              </div>
+            </div>
+          </div>
+
           {loading ? (
             <div className="mx-auto max-w-3xl text-center">
               <p className="text-sm font-medium uppercase tracking-widest text-amber-700">

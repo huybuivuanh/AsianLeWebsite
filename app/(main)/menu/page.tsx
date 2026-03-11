@@ -74,57 +74,12 @@ export default function Menu() {
         </div>
       </section>
 
-      {/* Order online bar */}
-      <section className="border-b border-stone-200 bg-stone-50 py-4">
-        <PageContainer>
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row sm:gap-6">
-            <p className="text-center text-sm text-stone-600 sm:text-left">
-              Order for delivery or pickup
-            </p>
-            <a
-              href={STORE.socialLinks.skipthedishes}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-stone-900 px-6 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 sm:w-auto"
-            >
-              <svg
-                className="size-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                />
-              </svg>
-              Skip the Dishes
-            </a>
-          </div>
-        </PageContainer>
-      </section>
-
       {/* Menu content */}
       <section className="bg-white py-16 md:py-24">
         <PageContainer>
           <div className="mx-auto max-w-6xl">
-            {/* Intro */}
-            <p className="text-center text-sm font-medium uppercase tracking-widest text-amber-700">
-              Dine in or order online
-            </p>
-            <h2 className="mt-3 text-center text-2xl font-bold text-stone-900 sm:text-3xl">
-              Our dishes
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-center text-stone-600">
-              Browse by category below. For delivery or pickup, order through
-              Skip the Dishes.
-            </p>
-
             {/* Daily Specials */}
-            <div className="mt-16">
+            <div>
               <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 px-6 py-10 shadow-lg shadow-amber-900/5 sm:px-8 sm:py-12">
                 <div
                   className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber-400/80 to-transparent"

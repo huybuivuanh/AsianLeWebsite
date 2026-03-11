@@ -16,8 +16,8 @@ function formatPrice(price: number) {
 export default function MenuItemRow({ item }: MenuItemRowProps) {
   return (
     <li className="flex items-end gap-4">
-      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-stone-200">
-        {item.image ? (
+      {item.image && (
+        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-stone-200">
           <Image
             src={item.image}
             alt={item.name}
@@ -25,8 +25,8 @@ export default function MenuItemRow({ item }: MenuItemRowProps) {
             className="object-cover"
             sizes="256px"
           />
-        ) : null}
-      </div>
+        </div>
+      )}
       <div className="min-w-0 flex-1 border-b border-dotted border-stone-300 pb-1">
         <p className="text-2xl font-semibold text-stone-900">{item.name}</p>
         {item.description ? (

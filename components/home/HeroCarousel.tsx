@@ -57,7 +57,7 @@ export default function HeroCarousel() {
         />
         <div className="absolute inset-0 bg-stone-900/50" />
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white">
-          <p className="text-sm font-medium uppercase tracking-widest text-amber-200">
+          <p className="text-3xl font-bold uppercase tracking-widest text-amber-200">
             {slide.title}
           </p>
           <h1 className="mt-2 max-w-2xl text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">

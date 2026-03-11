@@ -1,4 +1,4 @@
-import HeroCarousel from "../../components/HeroCarousel";
+import HeroCarousel from "../../components/home/HeroCarousel";
 import DailySpecialSection from "../../components/home/DailySpecialSection";
 import DiscoverMenuSection from "../../components/home/DiscoverMenuSection";
 import ExperienceSection from "../../components/home/ExperienceSection";

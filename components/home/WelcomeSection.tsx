@@ -4,7 +4,10 @@ import PageContainer from "../PageContainer";
 
 export default function WelcomeSection() {
   return (
-    <section id="welcome" className="scroll-mt-28 border-y border-stone-200 bg-stone-50 py-16 md:py-24">
+    <section
+      id="welcome"
+      className="scroll-mt-28 border-y border-stone-200 bg-stone-50 py-16 md:py-24"
+    >
       <PageContainer>
         <div className="grid gap-12 md:grid-cols-2 md:items-center md:gap-16">
           <div className="order-2 md:order-1">

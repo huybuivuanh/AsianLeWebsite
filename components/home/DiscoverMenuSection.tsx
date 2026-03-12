@@ -147,14 +147,6 @@ export default function DiscoverMenuSection() {
                     <MenuItemRow key={i} {...item} />
                   ))}
                 </div>
-                <div className="mt-8 flex justify-center lg:justify-start">
-                  <Link
-                    href="/menu"
-                    className="inline-flex items-center rounded-lg border-2 border-stone-900 px-6 py-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-900 hover:text-white focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2"
-                  >
-                    More appetizers →
-                  </Link>
-                </div>
               </div>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-stone-200 shadow-md">
@@ -210,14 +202,6 @@ export default function DiscoverMenuSection() {
                   {MAIN_COURSES.map((item, i) => (
                     <MenuItemRow key={i} {...item} />
                   ))}
-                </div>
-                <div className="mt-8 flex justify-center lg:justify-start">
-                  <Link
-                    href="/menu"
-                    className="inline-flex items-center rounded-lg border-2 border-stone-900 px-6 py-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-900 hover:text-white focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2"
-                  >
-                    More main courses →
-                  </Link>
                 </div>
               </div>
             </div>

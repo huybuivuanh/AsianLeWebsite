@@ -4,7 +4,7 @@ import { db } from "@/lib/firebase";
 import { DayOfWeek } from "@/types/enum";
 
 interface DailySpecialsState {
-  schedules: DailySpecial[];
+  dailySpecials: DailySpecial[];
   loading: boolean;
   error: string | null;
   fetchDailySpecials: () => Promise<void>;
@@ -14,19 +14,19 @@ interface DailySpecialsState {
 const DAY_VALUES = Object.values(DayOfWeek) as string[];
 
 export const useDailySpecialsStore = create<DailySpecialsState>((set) => ({
-  schedules: [],
+  dailySpecials: [],
   loading: false,
   error: null,
 
   reset: () => {
-    set({ schedules: [], loading: false, error: null });
+    set({ dailySpecials: [], loading: false, error: null });
   },
 
   fetchDailySpecials: async () => {
     set({ loading: true, error: null });
     try {
       const snapshot = await getDocs(collection(db, "dailySpecials"));
-      const schedules: DailySpecial[] = snapshot.docs.map((doc) => {
+      const dailySpecials: DailySpecial[] = snapshot.docs.map((doc) => {
         const d = doc.data();
         const rawRange = d.timeRange;
         const timeRange: TimeRange =
@@ -60,13 +60,11 @@ export const useDailySpecialsStore = create<DailySpecialsState>((set) => ({
           createdAt: (d.createdAt?.toDate?.() ?? new Date()) as Date,
         };
       });
-      set({ schedules, loading: false });
+      set({ dailySpecials, loading: false });
     } catch (err) {
       set({
         error:
-          err instanceof Error
-            ? err.message
-            : "Failed to fetch daily specials",
+          err instanceof Error ? err.message : "Failed to fetch daily specials",
         loading: false,
       });
     }

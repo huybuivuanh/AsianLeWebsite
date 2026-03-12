@@ -66,57 +66,62 @@ export default function DailySpecialsGrid({
   variant = "dark",
 }: DailySpecialsGridProps) {
   const s = variantStyles[variant];
-  const schedules = useDailySpecialsStore((state) => state.schedules);
-  const itemsById = useDailySpecialItemsStore((state) => state.items);
+  const dailySpecials = useDailySpecialsStore((state) => state.dailySpecials);
+  const dailySpecialItems = useDailySpecialItemsStore((state) => state.items);
 
-  const resolvedSchedules = useMemo(() => {
-    const itemsMap = new Map(itemsById.map((item) => [item.id, item]));
-    const resolved = schedules.map((schedule) => ({
-      ...schedule,
-      items: (schedule.itemIds ?? [])
-        .map((id) => itemsMap.get(id))
-        .filter((item): item is DailySpecialItem => item != null),
-    }));
-    resolved.sort((a, b) => {
+  const dailySpecialItemsById = useMemo(() => {
+    return new Map(dailySpecialItems.map((item) => [item.id, item]));
+  }, [dailySpecialItems]);
+
+  const sortedDailySpecials = useMemo(() => {
+    const sorted = [...dailySpecials];
+    sorted.sort((a, b) => {
       const i = DAY_ORDER_MONDAY_FIRST.indexOf(a.dayOfWeek);
       const j = DAY_ORDER_MONDAY_FIRST.indexOf(b.dayOfWeek);
       return (i === -1 ? 99 : i) - (j === -1 ? 99 : j);
     });
-    return resolved;
-  }, [schedules, itemsById]);
+    return sorted;
+  }, [dailySpecials]);
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {resolvedSchedules.map(({ id, dayOfWeek, timeRange, items }, index) => (
-        <div
-          key={id}
-          className={`${s.card} ${index === resolvedSchedules.length - 1 && resolvedSchedules.length % 3 === 1 ? "lg:col-start-2" : ""}`}
-        >
-          <p className={s.dayName}>{formatDayOfWeek(dayOfWeek)}</p>
-          <p className={s.time}>
-            {formatTimeString(timeRange.startTime)} –{" "}
-            {formatTimeString(timeRange.endTime)}
-          </p>
-          <ul className="mt-4 space-y-4">
-            {items.map((item) => (
-              <li key={item.id} className={s.itemText}>
-                <p className="leading-snug">{item.name}</p>
-                {item.options && item.options.length > 0 && (
-                  <ul className={s.optionsList}>
-                    {item.options.map((opt, i) => (
-                      <li key={i}>{opt}</li>
-                    ))}
-                  </ul>
-                )}
-                <div className="mt-0.5 flex items-baseline gap-2">
-                  <span className={s.dottedLine} aria-hidden />
-                  <span className={s.price}>{formatPrice(item.price)}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      {sortedDailySpecials.map(
+        ({ id, dayOfWeek, timeRange, itemIds }, index) => {
+          const items = (itemIds ?? [])
+            .map((itemId) => dailySpecialItemsById.get(itemId))
+            .filter((item): item is DailySpecialItem => item != null);
+          return (
+            <div
+              key={id}
+              className={`${s.card} ${index === sortedDailySpecials.length - 1 && sortedDailySpecials.length % 3 === 1 ? "lg:col-start-2" : ""}`}
+            >
+              <p className={s.dayName}>{formatDayOfWeek(dayOfWeek)}</p>
+              <p className={s.time}>
+                {formatTimeString(timeRange.startTime)} –{" "}
+                {formatTimeString(timeRange.endTime)}
+              </p>
+              <ul className="mt-4 space-y-4">
+                {items.map((item) => (
+                  <li key={item.id} className={s.itemText}>
+                    <p className="leading-snug">{item.name}</p>
+                    {item.options && item.options.length > 0 && (
+                      <ul className={s.optionsList}>
+                        {item.options.map((opt, i) => (
+                          <li key={i}>{opt}</li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="mt-0.5 flex items-baseline gap-2">
+                      <span className={s.dottedLine} aria-hidden />
+                      <span className={s.price}>{formatPrice(item.price)}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        },
+      )}
     </div>
   );
 }

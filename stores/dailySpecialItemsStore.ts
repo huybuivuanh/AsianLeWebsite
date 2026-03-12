@@ -23,9 +23,7 @@ export const useDailySpecialItemsStore = create<DailySpecialItemsState>(
     fetchDailySpecialItems: async () => {
       set({ loading: true, error: null });
       try {
-        const snapshot = await getDocs(
-          collection(db, "dailySpecialItems"),
-        );
+        const snapshot = await getDocs(collection(db, "specialItems"));
         const items: DailySpecialItem[] = snapshot.docs.map((doc) => {
           const d = doc.data();
           const price =
@@ -40,7 +38,9 @@ export const useDailySpecialItemsStore = create<DailySpecialItemsState>(
               ? (d.options as string[]).filter((o) => typeof o === "string")
               : undefined,
             dayOfWeekIds: Array.isArray(d.dayOfWeekIds)
-              ? (d.dayOfWeekIds as string[]).filter((id) => typeof id === "string")
+              ? (d.dayOfWeekIds as string[]).filter(
+                  (id) => typeof id === "string",
+                )
               : undefined,
             createdAt: (d.createdAt?.toDate?.() ?? new Date()) as Date,
           };

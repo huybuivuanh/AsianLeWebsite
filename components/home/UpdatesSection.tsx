@@ -43,8 +43,8 @@ export default function NewsUpdatesSection() {
 
   return (
     <section
-      id="news-updates"
-      className="scroll-mt-28 border-t border-stone-200 bg-stone-50 py-16 md:py-20"
+      id="updates"
+      className="scroll-mt-28 border-t border-stone-200 bg-white py-16 md:py-20"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <p className="text-center text-sm font-semibold uppercase tracking-[0.2em] text-amber-600">
@@ -67,7 +67,10 @@ export default function NewsUpdatesSection() {
               <div
                 key={i}
                 className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-                style={{ opacity: i === index ? 1 : 0, zIndex: i === index ? 1 : 0 }}
+                style={{
+                  opacity: i === index ? 1 : 0,
+                  zIndex: i === index ? 1 : 0,
+                }}
                 aria-hidden={i !== index}
               >
                 <Image
@@ -88,8 +91,18 @@ export default function NewsUpdatesSection() {
             className="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-stone-900/30 text-white backdrop-blur-sm transition hover:bg-stone-900/50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 md:left-4"
             aria-label="Previous slide"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
           <button
@@ -98,8 +111,18 @@ export default function NewsUpdatesSection() {
             className="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-stone-900/30 text-white backdrop-blur-sm transition hover:bg-stone-900/50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 md:right-4"
             aria-label="Next slide"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
           {/* Dots */}

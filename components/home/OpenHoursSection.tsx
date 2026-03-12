@@ -10,7 +10,7 @@ export default function OpenHoursSection() {
   return (
     <section
       id="open-hours"
-      className="scroll-mt-28 border-y border-stone-200 bg-stone-50 py-16 md:py-24"
+      className="scroll-mt-28 bg-amber-50 border-y border-stone-200 py-16 md:py-24"
     >
       <PageContainer>
         <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-16">

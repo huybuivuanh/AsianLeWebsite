@@ -1,17 +1,10 @@
 import Image from "next/image";
+import { formatPriceCAD } from "@/lib/utils";
 
 type MenuItemRowProps = {
   item: MenuItem;
   index: number;
 };
-
-function formatPrice(price: number) {
-  return new Intl.NumberFormat("en-CA", {
-    style: "currency",
-    currency: "CAD",
-    minimumFractionDigits: 2,
-  }).format(price);
-}
 
 export default function MenuItemRow({ item }: MenuItemRowProps) {
   return (
@@ -36,7 +29,7 @@ export default function MenuItemRow({ item }: MenuItemRowProps) {
         ) : null}
       </div>
       <p className="shrink-0 font-semibold tabular-nums text-stone-900">
-        {formatPrice(item.price)}
+        {formatPriceCAD(item.price)}
       </p>
     </li>
   );

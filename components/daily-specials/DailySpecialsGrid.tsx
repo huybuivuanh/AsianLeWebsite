@@ -4,32 +4,12 @@ import { useMemo } from "react";
 import { useDailySpecialsStore } from "@/stores/dailySpecialsStore";
 import { useDailySpecialItemsStore } from "@/stores/dailySpecialItemsStore";
 import { DAY_ORDER_MONDAY_FIRST } from "@/types/enum";
-
-function formatPrice(price: number) {
-  return new Intl.NumberFormat("en-CA", {
-    style: "currency",
-    currency: "CAD",
-    minimumFractionDigits: 2,
-  }).format(price);
-}
-
-/** Format "11:00" / "14:00" style string to "11:00 AM" / "2:00 PM" */
-function formatTimeString(timeStr: string): string {
-  if (!timeStr || typeof timeStr !== "string") return "";
-  const [h, m] = timeStr.trim().split(":").map(Number);
-  if (Number.isNaN(h)) return timeStr;
-  const hours = h % 24;
-  const mins = Number.isNaN(m) ? 0 : m % 60;
-  const period = hours < 12 ? "AM" : "PM";
-  const hour12 = hours % 12 || 12;
-  return `${hour12}:${mins.toString().padStart(2, "0")} ${period}`;
-}
-
-/** "MONDAY" -> "Monday" */
-function formatDayOfWeek(day: string): string {
-  if (!day) return "";
-  return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
-}
+import {
+  formatDayOfWeekLabel,
+  formatPriceCAD,
+  formatTimeHHmmTo12h,
+  sortAlphabetically,
+} from "@/lib/utils";
 
 type DailySpecialsGridVariant = "dark" | "light";
 
@@ -53,7 +33,8 @@ const variantStyles = {
     itemText: "text-base text-stone-900",
     optionsList:
       "mt-2 list-inside list-disc space-y-0.5 pl-2 text-medium font-bold text-blue-400",
-    dottedLine: "min-w-[2ch] flex-1 border-b border-dotted border-amber-200/70",
+    dottedLine:
+      "min-w-[3ch] flex-1 border-b border-dotted border-red-500 bg-red-500",
     price: "shrink-0 font-bold tabular-nums text-amber-700",
   },
 } as const;
@@ -95,17 +76,20 @@ export default function DailySpecialsGrid({
               key={id}
               className={`${s.card} ${index === sortedDailySpecials.length - 1 && sortedDailySpecials.length % 3 === 1 ? "lg:col-start-2" : ""}`}
             >
-              <p className={s.dayName}>{formatDayOfWeek(dayOfWeek)}</p>
+              <p className={s.dayName}>{formatDayOfWeekLabel(dayOfWeek)}</p>
               <p className={s.time}>
-                {formatTimeString(timeRange.startTime)} –{" "}
-                {formatTimeString(timeRange.endTime)}
+                {formatTimeHHmmTo12h(timeRange.startTime)} –{" "}
+                {formatTimeHHmmTo12h(timeRange.endTime)}
               </p>
-              <ul className="mt-4 space-y-4">
-                {items.map((item) => (
+              <ul className="mt-4 space-y-4 text-left">
+                {sortAlphabetically<DailySpecialItem>(
+                  items,
+                  (item) => item.name,
+                ).map((item) => (
                   <li key={item.id} className={s.itemText}>
                     <p className="leading-snug">{item.name}</p>
                     {item.options && item.options.length > 0 && (
-                      <ul className={s.optionsList}>
+                      <ul className={`${s.optionsList} text-left`}>
                         {item.options.map((opt, i) => (
                           <li key={i}>{opt}</li>
                         ))}
@@ -113,7 +97,9 @@ export default function DailySpecialsGrid({
                     )}
                     <div className="mt-0.5 flex items-baseline gap-2">
                       <span className={s.dottedLine} aria-hidden />
-                      <span className={s.price}>{formatPrice(item.price)}</span>
+                      <span className={s.price}>
+                        {formatPriceCAD(item.price)}
+                      </span>
                     </div>
                   </li>
                 ))}

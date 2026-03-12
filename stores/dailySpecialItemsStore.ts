@@ -23,7 +23,7 @@ export const useDailySpecialItemsStore = create<DailySpecialItemsState>(
     fetchDailySpecialItems: async () => {
       set({ loading: true, error: null });
       try {
-        const snapshot = await getDocs(collection(db, "specialItems"));
+        const snapshot = await getDocs(collection(db, "dailySpecialItems"));
         const items: DailySpecialItem[] = snapshot.docs.map((doc) => {
           const d = doc.data();
           const price =

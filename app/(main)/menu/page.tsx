@@ -81,14 +81,14 @@ export default function Menu() {
         <PageContainer>
           <div className="mx-auto max-w-6xl">
             {/* Daily Specials */}
-            <div id="daily-special" className="scroll-mt-28">
+            <div id="daily-special" className="scroll-mt-28 text-center">
               <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 px-6 py-10 shadow-lg shadow-amber-900/5 sm:px-8 sm:py-12">
                 <div
                   className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber-400/80 to-transparent"
                   aria-hidden
                 />
                 <div className="relative">
-                  <h3 className="border-l-4 border-amber-500 pl-4 text-xl font-bold tracking-tight text-stone-900 sm:text-2xl">
+                  <h3 className="pl-4 text-xl font-bold tracking-tight text-stone-900 sm:text-2xl">
                     Daily Special (11:00 AM - 2:00 PM)
                   </h3>
                   <p className="mt-3 text-sm leading-relaxed text-stone-600">

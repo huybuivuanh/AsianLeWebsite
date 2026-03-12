@@ -7,16 +7,18 @@ const FORMSPREE_ENDPOINT = process.env.NEXT_PUBLIC_FORMSPREE_FORM_ID
   : null;
 
 export default function ContactForm() {
-  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">(
-    "idle",
-  );
+  const [status, setStatus] = useState<
+    "idle" | "sending" | "success" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!FORMSPREE_ENDPOINT) {
       setStatus("error");
-      setErrorMessage("Contact form is not configured. Please set NEXT_PUBLIC_FORMSPREE_FORM_ID.");
+      setErrorMessage(
+        "Contact form is not configured. Please set NEXT_PUBLIC_FORMSPREE_FORM_ID.",
+      );
       return;
     }
 
@@ -42,7 +44,11 @@ export default function ContactForm() {
       form.reset();
     } catch (err) {
       setStatus("error");
-      setErrorMessage(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setErrorMessage(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
     }
   }
 
@@ -51,7 +57,11 @@ export default function ContactForm() {
       <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-6 text-center text-sm text-amber-800">
         <p className="font-medium">Contact form not configured</p>
         <p className="mt-2">
-          Set <code className="rounded bg-amber-100 px-1.5 py-0.5 font-mono text-xs">NEXT_PUBLIC_FORMSPREE_FORM_ID</code> in your environment to enable the form. Get a free form ID at{" "}
+          Set{" "}
+          <code className="rounded bg-amber-100 px-1.5 py-0.5 font-mono text-xs">
+            NEXT_PUBLIC_FORMSPREE_FORM_ID
+          </code>{" "}
+          in your environment to enable the form. Get a free form ID at{" "}
           <a
             href="https://formspree.io"
             target="_blank"
@@ -72,7 +82,8 @@ export default function ContactForm() {
         Get in touch
       </h3>
       <p className="mt-2 text-sm text-stone-600">
-        Have a question or feedback? Send us a message and we&apos;ll get back to you.
+        Have a question or feedback? Send us a message and we&apos;ll get back
+        to you.
       </p>
 
       {status === "success" && (
@@ -80,7 +91,8 @@ export default function ContactForm() {
           className="mt-4 rounded-lg bg-green-50 p-4 text-sm text-green-800"
           role="alert"
         >
-          Thanks! Your message has been sent. We&apos;ll reply as soon as we can.
+          Thanks! Your message has been sent. We&apos;ll reply as soon as we
+          can.
         </div>
       )}
 
@@ -99,7 +111,10 @@ export default function ContactForm() {
         aria-label="Contact form"
       >
         <div>
-          <label htmlFor="contact-name" className="block text-sm font-medium text-stone-700">
+          <label
+            htmlFor="contact-name"
+            className="block text-sm font-medium text-stone-700"
+          >
             Name <span className="text-amber-600">*</span>
           </label>
           <input
@@ -113,7 +128,10 @@ export default function ContactForm() {
           />
         </div>
         <div>
-          <label htmlFor="contact-email" className="block text-sm font-medium text-stone-700">
+          <label
+            htmlFor="contact-email"
+            className="block text-sm font-medium text-stone-700"
+          >
             Email <span className="text-amber-600">*</span>
           </label>
           <input
@@ -127,7 +145,10 @@ export default function ContactForm() {
           />
         </div>
         <div>
-          <label htmlFor="contact-subject" className="block text-sm font-medium text-stone-700">
+          <label
+            htmlFor="contact-subject"
+            className="block text-sm font-medium text-stone-700"
+          >
             Subject <span className="text-amber-600">*</span>
           </label>
           <input
@@ -141,7 +162,10 @@ export default function ContactForm() {
           />
         </div>
         <div>
-          <label htmlFor="contact-message" className="block text-sm font-medium text-stone-700">
+          <label
+            htmlFor="contact-message"
+            className="block text-sm font-medium text-stone-700"
+          >
             Message <span className="text-amber-600">*</span>
           </label>
           <textarea

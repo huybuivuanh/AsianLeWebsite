@@ -9,6 +9,7 @@ declare global {
   }
 
   interface ImageItem {
+    id?: string;
     name: string;
     url: string;
   }

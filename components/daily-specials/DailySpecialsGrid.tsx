@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { useDailySpecialsStore } from "@/stores/dailySpecialsStore";
 import { useDailySpecialItemsStore } from "@/stores/dailySpecialItemsStore";
+import { DAY_ORDER_MONDAY_FIRST } from "@/types/enum";
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat("en-CA", {
@@ -66,14 +68,22 @@ export default function DailySpecialsGrid({
   const s = variantStyles[variant];
   const schedules = useDailySpecialsStore((state) => state.schedules);
   const itemsById = useDailySpecialItemsStore((state) => state.items);
-  const itemsMap = new Map(itemsById.map((item) => [item.id, item]));
 
-  const resolvedSchedules = schedules.map((schedule) => ({
-    ...schedule,
-    items: (schedule.itemIds ?? [])
-      .map((id) => itemsMap.get(id))
-      .filter((item): item is DailySpecialItem => item != null),
-  }));
+  const resolvedSchedules = useMemo(() => {
+    const itemsMap = new Map(itemsById.map((item) => [item.id, item]));
+    const resolved = schedules.map((schedule) => ({
+      ...schedule,
+      items: (schedule.itemIds ?? [])
+        .map((id) => itemsMap.get(id))
+        .filter((item): item is DailySpecialItem => item != null),
+    }));
+    resolved.sort((a, b) => {
+      const i = DAY_ORDER_MONDAY_FIRST.indexOf(a.dayOfWeek);
+      const j = DAY_ORDER_MONDAY_FIRST.indexOf(b.dayOfWeek);
+      return (i === -1 ? 99 : i) - (j === -1 ? 99 : j);
+    });
+    return resolved;
+  }, [schedules, itemsById]);
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

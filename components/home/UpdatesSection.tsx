@@ -2,30 +2,29 @@
 
 import Image from "next/image";
 import { useState, useEffect, useRef, useCallback } from "react";
-
-const UPDATE_IMAGES = [
-  "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-  "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600&q=80",
-  "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1600&q=80",
-];
+import { useUpdatesStore } from "@/stores/updatesStore";
 
 const SWIPE_THRESHOLD = 50;
 
-export default function NewsUpdatesSection() {
+export default function UpdatesSection() {
+  const { items, loading, error } = useUpdatesStore();
   const [index, setIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
   const goToPrev = useCallback(() => {
-    setIndex((i) => (i - 1 + UPDATE_IMAGES.length) % UPDATE_IMAGES.length);
-  }, []);
+    setIndex((i) => (i - 1 + items.length) % Math.max(items.length, 1));
+  }, [items.length]);
   const goToNext = useCallback(() => {
-    setIndex((i) => (i + 1) % UPDATE_IMAGES.length);
-  }, []);
+    setIndex((i) => (i + 1) % Math.max(items.length, 1));
+  }, [items.length]);
+
+  const safeIndex = items.length ? index % items.length : 0;
 
   useEffect(() => {
+    if (items.length === 0) return;
     const id = setInterval(goToNext, 5000);
     return () => clearInterval(id);
-  }, [goToNext]);
+  }, [items.length, goToNext]);
 
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -57,33 +56,46 @@ export default function NewsUpdatesSection() {
           Latest offers, events, and news — all in one place.
         </p>
 
-        <div className="relative mt-10 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-lg">
-          <div
-            className="relative aspect-[2/1] w-full min-h-[280px] sm:min-h-[320px] md:aspect-[5/2] md:min-h-[560px] touch-pan-y"
-            onTouchStart={onTouchStart}
-            onTouchEnd={onTouchEnd}
-          >
-            {UPDATE_IMAGES.map((src, i) => (
-              <div
-                key={i}
-                className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-                style={{
-                  opacity: i === index ? 1 : 0,
-                  zIndex: i === index ? 1 : 0,
-                }}
-                aria-hidden={i !== index}
-              >
-                <Image
-                  src={src}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 1200px"
-                  priority={i === 0}
-                />
-              </div>
-            ))}
-          </div>
+        {error && (
+          <p className="mt-6 text-center text-red-600" role="alert">
+            {error}
+          </p>
+        )}
+        {loading && (
+          <p className="mt-6 text-center text-stone-500">Loading updates…</p>
+        )}
+        {!loading && !error && items.length === 0 && (
+          <p className="mt-6 text-center text-stone-500">No updates yet.</p>
+        )}
+
+        {!loading && items.length > 0 && (
+          <div className="relative mt-10 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-lg">
+            <div
+              className="relative aspect-[2/1] w-full min-h-[280px] sm:min-h-[320px] md:aspect-[5/2] md:min-h-[560px] touch-pan-y"
+              onTouchStart={onTouchStart}
+              onTouchEnd={onTouchEnd}
+            >
+              {items.map((item, i) => (
+                <div
+                  key={item.id}
+                  className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+                  style={{
+                    opacity: i === safeIndex ? 1 : 0,
+                    zIndex: i === safeIndex ? 1 : 0,
+                  }}
+                  aria-hidden={i !== safeIndex}
+                >
+                  <Image
+                    src={item.url}
+                    alt={item.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 1200px"
+                    priority={i === 0}
+                  />
+                </div>
+              ))}
+            </div>
           {/* Arrows */}
           <button
             type="button"
@@ -127,17 +139,18 @@ export default function NewsUpdatesSection() {
           </button>
           {/* Dots */}
           <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-            {UPDATE_IMAGES.map((_, i) => (
+            {items.map((item, i) => (
               <button
-                key={i}
+                key={item.id}
                 type="button"
                 onClick={() => setIndex(i)}
-                className={`h-2 rounded-full transition ${i === index ? "w-6 bg-amber-500" : "w-2 bg-white/60 hover:bg-white/90"}`}
+                className={`h-2 rounded-full transition ${i === safeIndex ? "w-6 bg-amber-500" : "w-2 bg-white/60 hover:bg-white/90"}`}
                 aria-label={`Go to slide ${i + 1}`}
               />
             ))}
           </div>
-        </div>
+          </div>
+        )}
       </div>
     </section>
   );

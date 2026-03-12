@@ -4,7 +4,10 @@ import PageContainer from "../PageContainer";
 
 export default function DailySpecialSection() {
   return (
-    <section id="daily-special" className="scroll-mt-28 relative overflow-hidden py-16 md:py-24">
+    <section
+      id="daily-special"
+      className="scroll-mt-28 relative overflow-hidden py-16 md:py-24"
+    >
       {/* Background image with dark overlay */}
       <div className="absolute inset-0">
         <Image
@@ -20,12 +23,9 @@ export default function DailySpecialSection() {
 
       <div className="relative z-10">
         <PageContainer>
-          <div className="max-w-2xl">
-            <p className="text-sm font-medium uppercase tracking-widest text-white/90">
-              Happy customers
-            </p>
-            <h2 className="mt-2 border-b-4 border-double border-white/40 pb-2 text-3xl font-bold uppercase tracking-wide text-white sm:text-4xl">
-              Daily Special
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="mt-2 border-b-4 border-double border-white/40 pb-2 text-3xl font-bold uppercase tracking-wide text-amber-500 sm:text-4xl">
+              Daily Special (11:00 AM - 2:00 PM)
             </h2>
             <p className="mt-6 leading-relaxed text-white/95">
               From experiences with satisfied customers, the Chef introduces

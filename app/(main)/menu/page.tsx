@@ -89,7 +89,7 @@ export default function Menu() {
                 />
                 <div className="relative">
                   <h3 className="border-l-4 border-amber-500 pl-4 text-xl font-bold tracking-tight text-stone-900 sm:text-2xl">
-                    Daily Special
+                    Daily Special (11:00 AM - 2:00 PM)
                   </h3>
                   <p className="mt-3 text-sm leading-relaxed text-stone-600">
                     Great value specials by day. Available at the times shown.
@@ -137,7 +137,11 @@ export default function Menu() {
                     return byCategoryItemIds || byItemCategoryIds;
                   });
                   return (
-                    <div key={category.id} id={`category-${category.id}`} className="scroll-mt-28">
+                    <div
+                      key={category.id}
+                      id={`category-${category.id}`}
+                      className="scroll-mt-28"
+                    >
                       <h3 className="mb-6 border-l-4 border-amber-500 pl-4 text-xl font-bold tracking-tight text-stone-900 sm:text-2xl">
                         {category.name}
                       </h3>

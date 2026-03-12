@@ -1,3 +1,5 @@
+import type { DayOfWeek } from "@/types/enum";
+
 declare global {
   interface FoodCategory {
     id: string;
@@ -23,22 +25,24 @@ declare global {
     categoryIds?: string[];
     createdAt: Date;
   }
-
-  interface DailySpecialItem extends MenuItem {
-    options?: string[];
-  }
-
-  interface DailySpecial {
+  interface DailySpecialItem {
     id: string;
-    dayOfWeek: number;
-    timeRange: TimeRange;
-    items: DailySpecialItem[];
+    name: string;
+    price: number;
+    options?: string[];
+    dayOfWeekIds?: string[];
     createdAt: Date;
   }
-
+  interface DailySpecial {
+    id: string;
+    dayOfWeek: DayOfWeek;
+    timeRange: TimeRange;
+    itemIds?: string[];
+    createdAt: Date;
+  }
   interface TimeRange {
-    startTime: Date;
-    endTime: Date;
+    startTime: string;
+    endTime: string;
   }
 }
 

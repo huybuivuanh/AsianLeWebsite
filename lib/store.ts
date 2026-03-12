@@ -34,235 +34,237 @@ export const STORE = {
   },
 } as const;
 
-export const DAILY_SPECIALS: DailySpecial[] = [
-  {
-    id: "monday",
-    dayOfWeek: 1,
-    timeRange: {
-      startTime: new Date(1970, 0, 1, 11, 0),
-      endTime: new Date(1970, 0, 1, 14, 0),
-    },
-    createdAt: new Date(),
-    items: [
-      {
-        id: "#1",
-        name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
-        price: 10.95,
-        image: {
-          name: "Stir Fried Chicken Vermicelli",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-      {
-        id: "#2",
-        name: "#2 - Medium Deluxe Wonton Soup",
-        price: 8.95,
-        image: {
-          name: "Wonton Soup",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-      {
-        id: "#3",
-        name: "#3 - Combo: Egg Roll or Spring roll, Chicken Fried Rice, Mixed Vegetables and a choice of:",
-        options: [
-          "Chicken Balls",
-          "Boneless Dry Ribs",
-          "Ginger Chicken(Sauce on the side)",
-        ],
-        price: 10.95,
-        image: {
-          name: "Combo plate",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-    ],
-  },
-  {
-    id: "tuesday",
-    dayOfWeek: 2,
-    timeRange: {
-      startTime: new Date(1970, 0, 1, 11, 0),
-      endTime: new Date(1970, 0, 1, 14, 0),
-    },
-    createdAt: new Date(),
-    items: [
-      {
-        id: "#1",
-        name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
-        price: 10.95,
-        image: {
-          name: "",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-      {
-        id: "#2",
-        name: "#2 - Medium Deluxe Wonton Soup",
-        price: 8.95,
-        image: {
-          name: "",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-      {
-        id: "#3",
-        name: "#3 - Combo: Egg Roll or Spring roll, Chicken Fried Rice, Mixed Vegetables and a choice of:",
-        options: [
-          "Chicken Balls",
-          "Boneless Dry Ribs",
-          "Ginger Chicken(Sauce on the side)",
-        ],
-        price: 10.95,
-        image: {
-          name: "",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-    ],
-  },
-  {
-    id: "wednesday",
-    dayOfWeek: 3,
-    timeRange: {
-      startTime: new Date(1970, 0, 1, 11, 0),
-      endTime: new Date(1970, 0, 1, 14, 0),
-    },
-    createdAt: new Date(),
-    items: [
-      {
-        id: "#1",
-        name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
-        price: 10.95,
-        image: {
-          name: "",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-      {
-        id: "#2",
-        name: "#2 - Medium Deluxe Wonton Soup",
-        price: 8.95,
-        image: {
-          name: "",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-      {
-        id: "#3",
-        name: "#3 - Combo: Egg Roll or Spring roll, Chicken Fried Rice, Mixed Vegetables and a choice of:",
-        options: [
-          "Chicken Balls",
-          "Boneless Dry Ribs",
-          "Ginger Chicken(Sauce on the side)",
-        ],
-        price: 10.95,
-        image: {
-          name: "",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-    ],
-  },
-  {
-    id: "thursday",
-    dayOfWeek: 4,
-    timeRange: {
-      startTime: new Date(1970, 0, 1, 11, 0),
-      endTime: new Date(1970, 0, 1, 14, 0),
-    },
-    createdAt: new Date(),
-    items: [
-      {
-        id: "#1",
-        name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
-        price: 10.95,
-        image: {
-          name: "",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-      {
-        id: "#2",
-        name: "#2 - Medium Deluxe Wonton Soup",
-        price: 8.95,
-        image: {
-          name: "",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-      {
-        id: "#3",
-        name: "#3 - Combo: Egg Roll or Spring roll, Chicken Fried Rice, Mixed Vegetables and a choice of:",
-        options: [
-          "Chicken Balls",
-          "Boneless Dry Ribs",
-          "Ginger Chicken(Sauce on the side)",
-        ],
-        price: 10.95,
-        image: {
-          name: "",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-    ],
-  },
-  {
-    id: "friday",
-    dayOfWeek: 5,
-    timeRange: {
-      startTime: new Date(1970, 0, 1, 11, 0),
-      endTime: new Date(1970, 0, 1, 14, 0),
-    },
-    createdAt: new Date(),
-    items: [
-      {
-        id: "#1",
-        name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
-        price: 10.95,
-        image: {
-          name: "",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-      {
-        id: "#2",
-        name: "#2 - Medium Deluxe Wonton Soup",
-        price: 8.95,
-        image: {
-          name: "",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-      {
-        id: "#3",
-        name: "#3 - Combo: Egg Roll or Spring roll, Chicken Fried Rice, Mixed Vegetables and a choice of:",
-        options: [
-          "Chicken Balls",
-          "Boneless Dry Ribs",
-          "Ginger Chicken(Sauce on the side)",
-        ],
-        price: 10.95,
-        image: {
-          name: "",
-          url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
-        },
-        createdAt: new Date(),
-      },
-    ],
-  },
-];
+export const DAILY_SPECIALS: DailySpecial[] = [];
+
+// export const DAILY_SPECIALS: DailySpecial[] = [
+//   {
+//     id: "monday",
+//     dayOfWeek: 1,
+//     timeRange: {
+//       startTime: new Date(1970, 0, 1, 11, 0),
+//       endTime: new Date(1970, 0, 1, 14, 0),
+//     },
+//     createdAt: new Date(),
+//     items: [
+//       {
+//         id: "#1",
+//         name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
+//         price: 10.95,
+//         image: {
+//           name: "Stir Fried Chicken Vermicelli",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//       {
+//         id: "#2",
+//         name: "#2 - Medium Deluxe Wonton Soup",
+//         price: 8.95,
+//         image: {
+//           name: "Wonton Soup",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//       {
+//         id: "#3",
+//         name: "#3 - Combo: Egg Roll or Spring roll, Chicken Fried Rice, Mixed Vegetables and a choice of:",
+//         options: [
+//           "Chicken Balls",
+//           "Boneless Dry Ribs",
+//           "Ginger Chicken(Sauce on the side)",
+//         ],
+//         price: 10.95,
+//         image: {
+//           name: "Combo plate",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//     ],
+//   },
+//   {
+//     id: "tuesday",
+//     dayOfWeek: 2,
+//     timeRange: {
+//       startTime: new Date(1970, 0, 1, 11, 0),
+//       endTime: new Date(1970, 0, 1, 14, 0),
+//     },
+//     createdAt: new Date(),
+//     items: [
+//       {
+//         id: "#1",
+//         name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
+//         price: 10.95,
+//         image: {
+//           name: "",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//       {
+//         id: "#2",
+//         name: "#2 - Medium Deluxe Wonton Soup",
+//         price: 8.95,
+//         image: {
+//           name: "",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//       {
+//         id: "#3",
+//         name: "#3 - Combo: Egg Roll or Spring roll, Chicken Fried Rice, Mixed Vegetables and a choice of:",
+//         options: [
+//           "Chicken Balls",
+//           "Boneless Dry Ribs",
+//           "Ginger Chicken(Sauce on the side)",
+//         ],
+//         price: 10.95,
+//         image: {
+//           name: "",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//     ],
+//   },
+//   {
+//     id: "wednesday",
+//     dayOfWeek: 3,
+//     timeRange: {
+//       startTime: new Date(1970, 0, 1, 11, 0),
+//       endTime: new Date(1970, 0, 1, 14, 0),
+//     },
+//     createdAt: new Date(),
+//     items: [
+//       {
+//         id: "#1",
+//         name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
+//         price: 10.95,
+//         image: {
+//           name: "",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//       {
+//         id: "#2",
+//         name: "#2 - Medium Deluxe Wonton Soup",
+//         price: 8.95,
+//         image: {
+//           name: "",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//       {
+//         id: "#3",
+//         name: "#3 - Combo: Egg Roll or Spring roll, Chicken Fried Rice, Mixed Vegetables and a choice of:",
+//         options: [
+//           "Chicken Balls",
+//           "Boneless Dry Ribs",
+//           "Ginger Chicken(Sauce on the side)",
+//         ],
+//         price: 10.95,
+//         image: {
+//           name: "",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//     ],
+//   },
+//   {
+//     id: "thursday",
+//     dayOfWeek: 4,
+//     timeRange: {
+//       startTime: new Date(1970, 0, 1, 11, 0),
+//       endTime: new Date(1970, 0, 1, 14, 0),
+//     },
+//     createdAt: new Date(),
+//     items: [
+//       {
+//         id: "#1",
+//         name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
+//         price: 10.95,
+//         image: {
+//           name: "",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//       {
+//         id: "#2",
+//         name: "#2 - Medium Deluxe Wonton Soup",
+//         price: 8.95,
+//         image: {
+//           name: "",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//       {
+//         id: "#3",
+//         name: "#3 - Combo: Egg Roll or Spring roll, Chicken Fried Rice, Mixed Vegetables and a choice of:",
+//         options: [
+//           "Chicken Balls",
+//           "Boneless Dry Ribs",
+//           "Ginger Chicken(Sauce on the side)",
+//         ],
+//         price: 10.95,
+//         image: {
+//           name: "",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//     ],
+//   },
+//   {
+//     id: "friday",
+//     dayOfWeek: 5,
+//     timeRange: {
+//       startTime: new Date(1970, 0, 1, 11, 0),
+//       endTime: new Date(1970, 0, 1, 14, 0),
+//     },
+//     createdAt: new Date(),
+//     items: [
+//       {
+//         id: "#1",
+//         name: "#1 - Stir Fried Chicken Vermicelli With One Spring Roll",
+//         price: 10.95,
+//         image: {
+//           name: "",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//       {
+//         id: "#2",
+//         name: "#2 - Medium Deluxe Wonton Soup",
+//         price: 8.95,
+//         image: {
+//           name: "",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//       {
+//         id: "#3",
+//         name: "#3 - Combo: Egg Roll or Spring roll, Chicken Fried Rice, Mixed Vegetables and a choice of:",
+//         options: [
+//           "Chicken Balls",
+//           "Boneless Dry Ribs",
+//           "Ginger Chicken(Sauce on the side)",
+//         ],
+//         price: 10.95,
+//         image: {
+//           name: "",
+//           url: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+//         },
+//         createdAt: new Date(),
+//       },
+//     ],
+//   },
+// ];

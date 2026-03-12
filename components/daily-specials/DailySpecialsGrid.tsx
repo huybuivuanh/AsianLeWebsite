@@ -1,14 +1,7 @@
-import { DAILY_SPECIALS } from "@/lib/store";
+"use client";
 
-const DAY_NAMES = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-] as const;
+import { useDailySpecialsStore } from "@/stores/dailySpecialsStore";
+import { useDailySpecialItemsStore } from "@/stores/dailySpecialItemsStore";
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat("en-CA", {
@@ -18,12 +11,22 @@ function formatPrice(price: number) {
   }).format(price);
 }
 
-function formatTime(date: Date) {
-  return new Intl.DateTimeFormat("en-CA", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  }).format(date);
+/** Format "11:00" / "14:00" style string to "11:00 AM" / "2:00 PM" */
+function formatTimeString(timeStr: string): string {
+  if (!timeStr || typeof timeStr !== "string") return "";
+  const [h, m] = timeStr.trim().split(":").map(Number);
+  if (Number.isNaN(h)) return timeStr;
+  const hours = h % 24;
+  const mins = Number.isNaN(m) ? 0 : m % 60;
+  const period = hours < 12 ? "AM" : "PM";
+  const hour12 = hours % 12 || 12;
+  return `${hour12}:${mins.toString().padStart(2, "0")} ${period}`;
+}
+
+/** "MONDAY" -> "Monday" */
+function formatDayOfWeek(day: string): string {
+  if (!day) return "";
+  return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
 }
 
 type DailySpecialsGridVariant = "dark" | "light";
@@ -61,17 +64,28 @@ export default function DailySpecialsGrid({
   variant = "dark",
 }: DailySpecialsGridProps) {
   const s = variantStyles[variant];
+  const schedules = useDailySpecialsStore((state) => state.schedules);
+  const itemsById = useDailySpecialItemsStore((state) => state.items);
+  const itemsMap = new Map(itemsById.map((item) => [item.id, item]));
+
+  const resolvedSchedules = schedules.map((schedule) => ({
+    ...schedule,
+    items: (schedule.itemIds ?? [])
+      .map((id) => itemsMap.get(id))
+      .filter((item): item is DailySpecialItem => item != null),
+  }));
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {DAILY_SPECIALS.map(({ id, dayOfWeek, timeRange, items }, index) => (
+      {resolvedSchedules.map(({ id, dayOfWeek, timeRange, items }, index) => (
         <div
           key={id}
-          className={`${s.card} ${index === DAILY_SPECIALS.length - 1 && DAILY_SPECIALS.length % 3 === 1 ? "lg:col-start-2" : ""}`}
+          className={`${s.card} ${index === resolvedSchedules.length - 1 && resolvedSchedules.length % 3 === 1 ? "lg:col-start-2" : ""}`}
         >
-          <p className={s.dayName}>{DAY_NAMES[dayOfWeek - 1]}</p>
+          <p className={s.dayName}>{formatDayOfWeek(dayOfWeek)}</p>
           <p className={s.time}>
-            {formatTime(timeRange.startTime)} – {formatTime(timeRange.endTime)}
+            {formatTimeString(timeRange.startTime)} –{" "}
+            {formatTimeString(timeRange.endTime)}
           </p>
           <ul className="mt-4 space-y-4">
             {items.map((item) => (

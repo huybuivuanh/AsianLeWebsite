@@ -89,7 +89,7 @@ export default function UpdatesSection() {
                     src={item.url}
                     alt={item.name}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     sizes="(max-width: 768px) 100vw, 1200px"
                     priority={i === 0}
                   />

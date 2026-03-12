@@ -19,7 +19,9 @@ export default function MenuCategoryNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const categoryLinks = useMemo(() => {
-    const sorted = [...categories].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const sorted = [...categories].sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0),
+    );
     return [
       { id: "daily-special", label: "Daily Special" },
       ...sorted.map((c) => ({ id: `category-${c.id}`, label: c.name })),
@@ -33,7 +35,7 @@ export default function MenuCategoryNav() {
     <>
       {/* Desktop: fixed right sidebar */}
       <nav
-        className="fixed right-0 top-1/2 z-40 hidden -translate-y-1/2 lg:block"
+        className="fixed right-0 top-1/4 z-40 hidden -translate-y-1/2 lg:block"
         aria-label="Menu categories"
       >
         <div className="relative overflow-hidden rounded-l-2xl border-y border-l border-stone-200/80 bg-white/90 py-4 pl-4 pr-4 shadow-[0_0_24px_-4px_rgba(0,0,0,0.08)] backdrop-blur-md">
@@ -64,7 +66,10 @@ export default function MenuCategoryNav() {
       </nav>
 
       {/* Mobile: floating button + dropdown */}
-      <div className="fixed bottom-6 right-6 z-40 lg:hidden" aria-label="Menu categories">
+      <div
+        className="fixed bottom-6 right-6 z-40 lg:hidden"
+        aria-label="Menu categories"
+      >
         <button
           type="button"
           onClick={() => setMobileOpen((o) => !o)}

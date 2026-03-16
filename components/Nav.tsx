@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { STORE } from "@/lib/store";
@@ -23,14 +24,24 @@ export default function Nav() {
         {/* Logo */}
         <Link
           href="/"
-          className="group flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-stone-900"
+          className="group flex items-center gap-0 focus:outline-none"
+          aria-label="Asian Le Restaurant – Home"
         >
-          <span
-            className="hidden h-8 w-0.5 rounded-full bg-amber-500 sm:block"
-            aria-hidden
-          />
-          <span className="text-lg font-semibold tracking-tight text-white transition group-hover:text-amber-100 sm:text-xl">
-            Asian Le Restaurant
+          <span className="-mr-1 text-lg font-semibold font-serif uppercase tracking-tight text-white transition group-hover:text-amber-100 sm:text-xl">
+            Asian
+          </span>
+          <div className="relative -mx-1 h-11 w-11 shrink-0 overflow-hidden sm:h-12 sm:w-12">
+            <Image
+              src="/logo.png"
+              alt=""
+              fill
+              className="object-contain"
+              sizes="60px"
+              unoptimized
+            />
+          </div>
+          <span className="-ml-1 text-lg font-semibold font-serif uppercase tracking-tight text-white transition group-hover:text-amber-100 sm:text-xl">
+            Le
           </span>
         </Link>
 

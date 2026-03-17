@@ -18,17 +18,21 @@ export default function WelcomeSection() {
               Asian Le Restaurant
             </h2>
             <p className="mt-6 leading-relaxed text-stone-600">
-              We specialize in serving authentic Chinese and Vietnamese cuisine,
-              with a focus on vermicelli noodle bowls, phở beef soup with rice
-              noodles, and delicious bánh mì subs. We believe that the key to
-              great food lies in using fresh, high-quality ingredients.
+              A cozy spot for Chinese and Vietnamese favorites, made fresh and
+              served with care. We&apos;re best known for our flavorful fried rice
+              and hearty vermicelli bowls—comforting classics made with quality
+              ingredients.
             </p>
             <p className="mt-4 leading-relaxed text-stone-600">
-              We take pride in our commitment to customer satisfaction and
-              strive to provide every guest with a dining experience that
-              exceeds expectations. Whether you&apos;re stopping by for a quick
-              lunch or a leisurely dinner with family and friends, our friendly
-              staff will make sure your visit is a memorable one.
+              Whether you&apos;re grabbing a quick lunch or settling in for dinner,
+              you&apos;ll be welcomed like family. We&apos;re proud to be your local go-to
+              for comforting meals, warm hospitality, and a relaxed dining
+              experience you&apos;ll want to come back to.
+            </p>
+            <p className="mt-4 leading-relaxed text-stone-600">
+              Chào mừng bạn đến với Asian Le Restaurant! Chúng tôi rất hân hạnh
+              được đón tiếp bạn với những món ăn nóng hổi, nguyên liệu tươi ngon
+              và phong cách phục vụ thân thiện, ấm áp như ở nhà.
             </p>
             <Link
               href="/about-us"

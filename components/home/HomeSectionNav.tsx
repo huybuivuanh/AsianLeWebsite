@@ -60,7 +60,7 @@ export default function HomeSectionNav() {
     <>
       {/* Desktop: fixed right sidebar */}
       <nav
-        className="fixed right-0 top-1/4 z-40 hidden -translate-y-1/2 lg:block"
+        className="fixed right-0 top-1/2 z-40 hidden -translate-y-1/2 lg:block"
         aria-label="Page sections"
       >
         <div className="relative overflow-hidden rounded-l-2xl border-y border-l border-stone-200/80 bg-white/90 py-4 pl-4 pr-4 shadow-[0_0_24px_-4px_rgba(0,0,0,0.08)] backdrop-blur-md">

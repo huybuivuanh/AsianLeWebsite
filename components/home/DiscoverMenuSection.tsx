@@ -5,7 +5,7 @@ import PageContainer from "../PageContainer";
 import { useCallback, useEffect, useState } from "react";
 
 const MENU_INTRO =
-  "We invite you to celebrate our restaurant's delicious recipes whether you are here for a business lunch or dinner. Discover new tastes and inspired recipes from all over the world.";
+  "Whether you’re stopping in for lunch or sharing dinner with friends, explore a menu full of comforting favorites and fresh flavors—crafted to satisfy every craving.";
 
 const APPETIZERS = [
   {

@@ -28,9 +28,9 @@ export default function DailySpecialSection() {
               Daily Special (11:00 AM - 2:00 PM)
             </h2>
             <p className="mt-6 leading-relaxed text-white/95">
-              From experiences with satisfied customers, the Chef introduces
-              great value daily specials so you can choose your favourite dishes
-              each day at Asian Le Restaurant.
+              Join us for our daily specials—freshly prepared, great value, and
+              perfect for a quick lunch or an easy midday treat at Asian Le
+              Restaurant.
             </p>
           </div>
 

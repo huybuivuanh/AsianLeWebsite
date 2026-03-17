@@ -26,10 +26,10 @@ export default function ExperienceSection() {
               Delicious ingredients
             </h2>
             <p className="mt-6 leading-relaxed text-stone-300">
-              From ingredients familiar to every Asian food lover to those who
-              cook Asian dishes at home — we create extraordinary dishes with
-              absolutely fresh flavours. Under the guidance of our chefs, every
-              dish is prepared to bring you unforgettable tastes.
+              From pantry staples to vibrant market-fresh produce, we focus on
+              ingredients that bring every dish to life. Guided by our chefs,
+              each plate is cooked to order for bold, fresh flavors you’ll
+              remember.
             </p>
           </div>
         </div>

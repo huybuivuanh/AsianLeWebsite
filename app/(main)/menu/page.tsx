@@ -10,9 +10,6 @@ import { STORE } from "@/lib/store";
 import { useCategoriesStore } from "@/stores/categoriesStore";
 import { useMenuItemsStore } from "@/stores/menuItemsStore";
 
-const TITLE_BG_IMAGE =
-  "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80";
-
 export default function Menu() {
   const categories = useCategoriesStore((s) => s.categories);
   const categoriesLoading = useCategoriesStore((s) => s.loading);
@@ -36,8 +33,8 @@ export default function Menu() {
       {/* Hero */}
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image
-          src={TITLE_BG_IMAGE}
-          alt=""
+          src="/home/hero carousel/5.jpg"
+          alt="background image"
           fill
           className="object-cover"
           sizes="100vw"

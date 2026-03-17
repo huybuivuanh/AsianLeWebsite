@@ -5,16 +5,13 @@ import ContactDetails from "../../../components/contact/ContactDetails";
 import ContactForm from "../../../components/contact/ContactForm";
 import StoreMap from "../../../components/contact/StoreMap";
 
-const TITLE_BG_IMAGE =
-  "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80";
-
 export default function ContactUs() {
   return (
     <>
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image
-          src={TITLE_BG_IMAGE}
-          alt=""
+          src="/home/hero carousel/3.jpg"
+          alt="background image"
           fill
           className="object-cover"
           sizes="100vw"

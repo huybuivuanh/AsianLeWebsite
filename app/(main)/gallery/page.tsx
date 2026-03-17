@@ -4,9 +4,6 @@ import Image from "next/image";
 import PageContainer from "@/components/PageContainer";
 import { useGalleryStore } from "@/stores/galleryStore";
 
-const TITLE_BG_IMAGE =
-  "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80";
-
 export default function GalleryPage() {
   const { items, loading, error } = useGalleryStore();
 
@@ -15,8 +12,8 @@ export default function GalleryPage() {
       {/* Title section with background image */}
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image
-          src={TITLE_BG_IMAGE}
-          alt=""
+          src="/home/hero carousel/2.jpg"
+          alt="background image"
           fill
           className="object-cover"
           sizes="100vw"

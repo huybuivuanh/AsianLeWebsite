@@ -12,7 +12,7 @@ export const STORE = {
   },
 
   phone: "(306) 764-7799",
-  email: "info@asianle.ca",
+  email: "asianlepa@gmail.com",
 
   hours: [
     { days: "Monday – Saturday", time: "11:00 AM – 8:00 PM" },

@@ -1,28 +1,33 @@
 import { create } from "zustand";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 interface CategoriesState {
   categories: FoodCategory[];
   loading: boolean;
   error: string | null;
+  initialized: boolean;
   fetchCategories: () => Promise<void>;
   reset: () => void;
 }
 
-export const useCategoriesStore = create<CategoriesState>((set) => ({
+export const useCategoriesStore = create<CategoriesState>((set, get) => ({
   categories: [],
   loading: false,
   error: null,
+  initialized: false,
 
   reset: () => {
-    set({ categories: [], loading: false, error: null });
+    set({ categories: [], loading: false, error: null, initialized: false });
   },
 
   fetchCategories: async () => {
+    if (get().initialized) return;
+
     set({ loading: true, error: null });
     try {
-      const snapshot = await getDocs(collection(db, "categories"));
+      const q = query(collection(db, "categories"), orderBy("order"));
+      const snapshot = await getDocs(q);
       const categories: FoodCategory[] = snapshot.docs.map((doc) => {
         const d = doc.data();
         return {
@@ -34,11 +39,12 @@ export const useCategoriesStore = create<CategoriesState>((set) => ({
           createdAt: d.createdAt?.toDate?.() ?? undefined,
         };
       });
-      set({ categories, loading: false });
+      set({ categories, loading: false, initialized: true });
     } catch (err) {
       set({
         error: err instanceof Error ? err.message : "Failed to fetch categories",
         loading: false,
+        initialized: false,
       });
     }
   },

@@ -29,14 +29,8 @@ export default function MenuDataLoader() {
     fetchUpdates();
     fetchDailySpecials();
     fetchDailySpecialItems();
-  }, [
-    fetchCategories,
-    fetchMenuItems,
-    fetchGallery,
-    fetchUpdates,
-    fetchDailySpecials,
-    fetchDailySpecialItems,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return null;
 }

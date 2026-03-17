@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { sortAlphabetically } from "@/lib/utils";
 
@@ -7,23 +7,28 @@ interface MenuItemsState {
   menuItems: MenuItem[];
   loading: boolean;
   error: string | null;
+  initialized: boolean;
   fetchMenuItems: () => Promise<void>;
   reset: () => void;
 }
 
-export const useMenuItemsStore = create<MenuItemsState>((set) => ({
+export const useMenuItemsStore = create<MenuItemsState>((set, get) => ({
   menuItems: [],
   loading: false,
   error: null,
+  initialized: false,
 
   reset: () => {
-    set({ menuItems: [], loading: false, error: null });
+    set({ menuItems: [], loading: false, error: null, initialized: false });
   },
 
   fetchMenuItems: async () => {
+    if (get().initialized) return;
+
     set({ loading: true, error: null });
     try {
-      const snapshot = await getDocs(collection(db, "menuItems"));
+      const q = query(collection(db, "menuItems"), orderBy("name"));
+      const snapshot = await getDocs(q);
       const menuItems: MenuItem[] = snapshot.docs.map((doc) => {
         const d = doc.data();
         const rawPrice = d.price;
@@ -61,12 +66,13 @@ export const useMenuItemsStore = create<MenuItemsState>((set) => ({
         menuItems,
         (item) => item.name,
       );
-      set({ menuItems: sortedMenuItems, loading: false });
+      set({ menuItems: sortedMenuItems, loading: false, initialized: true });
     } catch (err) {
       set({
         error:
           err instanceof Error ? err.message : "Failed to fetch menu items",
         loading: false,
+        initialized: false,
       });
     }
   },

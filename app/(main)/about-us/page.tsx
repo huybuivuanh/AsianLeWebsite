@@ -2,9 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import PageContainer from "../../../components/PageContainer";
 
-const ABOUT_IMAGE =
-  "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80";
-
 const VALUE_PILLARS = [
   { label: "Fresh", sub: "Ingredients" },
   { label: "Authentic", sub: "Cuisines" },
@@ -49,22 +46,26 @@ export default function AboutUs() {
                   Our History
                 </h2>
                 <p className="mt-6 leading-relaxed text-stone-600">
-                  We specialize in serving authentic Chinese and Vietnamese
-                  cuisine, with a focus on vermicelli noodle bowls, phở beef
-                  soup with rice noodles, and delicious bánh mì subs. We believe
-                  that the key to great food lies in using fresh, high-quality
-                  ingredients.
+                  Asian Le Restaurant opened in 2008 with a simple goal: serve
+                  comforting Chinese and Vietnamese dishes that feel like home.
+                  Over the years, it became a familiar stop for quick lunches,
+                  family dinners, and takeout nights.
                 </p>
                 <p className="mt-4 leading-relaxed text-stone-600">
-                  We take pride in our commitment to customer satisfaction and
-                  strive to provide every guest with a dining experience that
-                  exceeds expectations. Whether you&apos;re stopping by for a
-                  quick lunch or a leisurely dinner with family and friends, our
-                  friendly staff will make sure your visit is a memorable one.
+                  In 2019, new ownership began a new chapter with fresh energy
+                  and a clear focus on quality. We improved the space, refined
+                  our recipes, and strengthened our day-to-day operations so
+                  every visit feels smoother, warmer, and more consistent.
                 </p>
                 <p className="mt-4 leading-relaxed text-stone-600">
-                  Thank you for choosing Asian Le for your dining experience. We
-                  look forward to serving you soon!
+                  Today, we’re proud to welcome you with friendly service and
+                  meals made with care. Thank you for being part of our story—we
+                  can’t wait to serve you.
+                </p>
+                <p className="mt-4 leading-relaxed text-stone-600">
+                  Asian Le Restaurant sẽ luôn nỗ lực nâng cao chất lượng món ăn,
+                  cải thiện không gian và phục vụ tận tâm để mỗi lần ghé thăm
+                  của bạn đều thật thoải mái và đáng nhớ.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-4">
                   <Link
@@ -83,8 +84,8 @@ export default function AboutUs() {
               </div>
               <div className="relative order-1 aspect-[4/3] overflow-hidden rounded-xl bg-stone-200 shadow-lg md:order-2">
                 <Image
-                  src={ABOUT_IMAGE}
-                  alt="Asian Le Restaurant"
+                  src="/About Us.jpg"
+                  alt="About Us"
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"

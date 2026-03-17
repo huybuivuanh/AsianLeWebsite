@@ -23,7 +23,7 @@ export default function MenuItemRow({ item }: MenuItemRowProps) {
   }, [isOpen, close]);
 
   return (
-    <li className="flex items-end gap-4">
+    <li className="flex items-start gap-4">
       <button
         type="button"
         onClick={open}
@@ -81,15 +81,15 @@ export default function MenuItemRow({ item }: MenuItemRowProps) {
           </p>
         ) : null}
         {item.options && item.options.length > 0 ? (
-          <ul className="mt-1.5 list-inside list-disc space-y-0.5 pl-2 text-medium font-bold text-blue-500">
+          <ul className="mt-1.5 list-inside list-disc space-y-0.5 pl-2 text-medium font-bold text-amber-500">
             {item.options.map((opt, i) => (
               <li key={i}>{opt}</li>
             ))}
           </ul>
         ) : null}
       </div>
-      <p className="shrink-0 font-semibold tabular-nums text-stone-900">
-        {formatPriceCAD(item.price)}
+      <p className="shrink-0 font-semibold tabular-nums text-amber-700">
+        {item.price > 0 ? formatPriceCAD(item.price) : ""}
       </p>
     </li>
   );

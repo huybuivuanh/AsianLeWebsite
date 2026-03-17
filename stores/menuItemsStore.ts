@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { sortAlphabetically } from "@/lib/utils";
 
 interface MenuItemsState {
   menuItems: MenuItem[];
@@ -56,7 +57,11 @@ export const useMenuItemsStore = create<MenuItemsState>((set) => ({
           createdAt: (d.createdAt?.toDate?.() ?? new Date()) as Date,
         };
       });
-      set({ menuItems, loading: false });
+      const sortedMenuItems = sortAlphabetically<MenuItem>(
+        menuItems,
+        (item) => item.name,
+      );
+      set({ menuItems: sortedMenuItems, loading: false });
     } catch (err) {
       set({
         error:

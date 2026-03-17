@@ -84,7 +84,7 @@ export default function AboutUs() {
               </div>
               <div className="relative order-1 aspect-[4/3] overflow-hidden rounded-xl bg-stone-200 shadow-lg md:order-2">
                 <Image
-                  src="/About Us.jpg"
+                  src="/About Us.JPG"
                   alt="About Us"
                   fill
                   className="object-cover"

@@ -19,15 +19,15 @@ export default function WelcomeSection() {
             </h2>
             <p className="mt-6 leading-relaxed text-stone-600">
               A cozy spot for Chinese and Vietnamese favorites, made fresh and
-              served with care. We&apos;re best known for our flavorful fried rice
-              and hearty vermicelli bowls—comforting classics made with quality
-              ingredients.
+              served with care. We&apos;re best known for our flavorful fried
+              rice and hearty vermicelli bowls—comforting classics made with
+              quality ingredients.
             </p>
             <p className="mt-4 leading-relaxed text-stone-600">
-              Whether you&apos;re grabbing a quick lunch or settling in for dinner,
-              you&apos;ll be welcomed like family. We&apos;re proud to be your local go-to
-              for comforting meals, warm hospitality, and a relaxed dining
-              experience you&apos;ll want to come back to.
+              Whether you&apos;re grabbing a quick lunch or settling in for
+              dinner, you&apos;ll be welcomed like family. We&apos;re proud to
+              be your local go-to for comforting meals, warm hospitality, and a
+              relaxed dining experience you&apos;ll want to come back to.
             </p>
             <p className="mt-4 leading-relaxed text-stone-600">
               Chào mừng bạn đến với Asian Le Restaurant! Chúng tôi rất hân hạnh
@@ -44,7 +44,7 @@ export default function WelcomeSection() {
           {/* Replace src with your restaurant image (e.g. from /public/restaurant.jpg) */}
           <div className="relative order-1 aspect-[4/3] overflow-hidden rounded-lg bg-stone-200 shadow-lg md:order-2">
             <Image
-              src="/home/Welcome.jpg"
+              src="/home/Welcome.JPG"
               alt="Asian Le Restaurant"
               fill
               className="object-cover"

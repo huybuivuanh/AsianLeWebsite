@@ -24,7 +24,7 @@ export default function OpenHoursSection() {
           </div>
           <div className="relative order-1 aspect-[4/3] overflow-hidden rounded-xl bg-stone-200 shadow-md md:order-2">
             <Image
-              src="/home/Opening Hours.jpg"
+              src="/home/Opening Hours.JPG"
               alt="Asian Le Restaurant"
               fill
               className="object-cover"

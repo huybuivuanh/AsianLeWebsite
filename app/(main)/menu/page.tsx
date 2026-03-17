@@ -124,7 +124,7 @@ export default function Menu() {
                 </button>
               </div>
             ) : (
-              <div className="mt-20 space-y-20">
+              <div className="mt-24 space-y-28">
                 {categoriesSorted.map((category) => {
                   const itemsInCategory = menuItems.filter((item) => {
                     const byCategoryItemIds =
@@ -137,13 +137,19 @@ export default function Menu() {
                     <div
                       key={category.id}
                       id={`category-${category.id}`}
-                      className="scroll-mt-28"
+                      className="scroll-mt-28 mx-auto w-full max-w-5xl"
                     >
-                      <h3 className="mb-6 border-l-4 border-amber-500 pl-4 text-xl font-bold tracking-tight text-stone-900 sm:text-2xl">
-                        {category.name}
-                      </h3>
+                      <div className="mb-8 text-center">
+                        <h3 className="text-4xl font-bold tracking-tight text-stone-900 sm:text-4xl">
+                          {category.name}
+                        </h3>
+                        <div
+                          className="mx-auto mt-3 h-1 w-20 rounded-full bg-amber-500/90"
+                          aria-hidden
+                        />
+                      </div>
                       {category.description ? (
-                        <p className="mb-6 text-stone-600">
+                        <p className="mx-auto mb-8 max-w-2xl text-center text-stone-600">
                           {category.description}
                         </p>
                       ) : null}

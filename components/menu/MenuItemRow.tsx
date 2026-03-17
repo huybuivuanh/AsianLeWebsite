@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { formatPriceCAD } from "@/lib/utils";
+import { useState, useCallback, useEffect } from "react";
 
 type MenuItemRowProps = {
   item: MenuItem;
@@ -7,19 +8,71 @@ type MenuItemRowProps = {
 };
 
 export default function MenuItemRow({ item }: MenuItemRowProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const open = useCallback(() => setIsOpen(true), []);
+  const close = useCallback(() => setIsOpen(false), []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, close]);
+
   return (
     <li className="flex items-end gap-4">
-      {item.image?.url && (
-        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-stone-200">
-          <Image
-            src={item.image.url}
-            alt={item.image.name || item.name}
-            fill
-            className="object-cover"
-            sizes="256px"
-          />
+      <button
+        type="button"
+        onClick={open}
+        className="relative h-20 w-25 shrink-0 overflow-hidden rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+        aria-label={`View larger image of ${item.name}`}
+      >
+        <Image
+          src={item.image?.url || "/Soup Bowl Icon.jpg"}
+          alt={item.name}
+          fill
+          className="object-cover"
+          sizes="100px"
+        />
+      </button>
+
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${item.name} image preview`}
+          onClick={close}
+        >
+          <div
+            className="relative w-full max-w-4xl overflow-hidden rounded-2xl bg-stone-900 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={close}
+              className="absolute right-3 top-3 z-10 rounded-full bg-black/50 px-3 py-1 text-sm font-semibold text-white backdrop-blur hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white/80"
+              aria-label="Close image preview"
+            >
+              Close
+            </button>
+            <div className="relative aspect-[4/3] w-full bg-stone-800">
+              <Image
+                src={item.image?.url || "/Soup Bowl Icon.jpg"}
+                alt={item.name}
+                fill
+                className="object-contain"
+                sizes="(max-width: 1024px) 100vw, 1024px"
+                priority
+              />
+            </div>
+          </div>
         </div>
       )}
+
       <div className="min-w-0 flex-1 border-b border-dotted border-stone-300 pb-1">
         <p className="text-2xl font-semibold text-stone-900">{item.name}</p>
         {item.description ? (

@@ -16,7 +16,7 @@ export default function AboutUs() {
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image
           src="/home/hero carousel/4.jpg"
-          alt="background image"
+          alt="Asian Le Restaurant exterior and signage in Prince Albert"
           fill
           className="object-cover"
           sizes="100vw"
@@ -59,8 +59,9 @@ export default function AboutUs() {
                 </p>
                 <p className="mt-4 leading-relaxed text-stone-600">
                   Today, we’re proud to welcome you with friendly service and
-                  meals made with care. Thank you for being part of our story—we
-                  can’t wait to serve you.
+                  meals made with care in Prince Albert. As a Chinese and
+                  Vietnamese restaurant, we&apos;re grateful to be part of the
+                  community and can&apos;t wait to serve you.
                 </p>
                 <p className="mt-4 leading-relaxed text-stone-600">
                   Asian Le Restaurant sẽ luôn nỗ lực nâng cao chất lượng món ăn,
@@ -85,7 +86,7 @@ export default function AboutUs() {
               <div className="relative order-1 aspect-[4/3] overflow-hidden rounded-xl bg-stone-200 shadow-lg md:order-2">
                 <Image
                   src="/About Us.JPG"
-                  alt="About Us"
+                  alt="Interior of Asian Le Restaurant dining area in Prince Albert"
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"

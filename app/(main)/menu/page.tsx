@@ -34,7 +34,7 @@ export default function Menu() {
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image
           src="/home/hero carousel/5.jpg"
-          alt="background image"
+          alt="Assorted Chinese and Vietnamese dishes at Asian Le Restaurant in Prince Albert"
           fill
           className="object-cover"
           sizes="100vw"
@@ -77,6 +77,19 @@ export default function Menu() {
       <section className="bg-white py-16 md:py-24">
         <PageContainer>
           <div className="mx-auto max-w-6xl">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
+                Chinese &amp; Vietnamese restaurant
+              </p>
+              <h2 className="mt-2 text-3xl font-bold text-stone-900 sm:text-4xl">
+                Lunch specials, takeout, and more in Prince Albert
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-stone-600">
+                Explore the full menu at our Chinese and Vietnamese restaurant in Prince Albert,
+                with comforting classics, flavourful lunch specials, and convenient takeout options.
+              </p>
+            </div>
+
             {/* Daily Specials */}
             <div id="daily-special" className="scroll-mt-28 text-center">
               <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 px-6 py-10 shadow-lg shadow-amber-900/5 sm:px-8 sm:py-12">

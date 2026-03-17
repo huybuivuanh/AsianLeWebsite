@@ -27,6 +27,13 @@ export default function MenuItemRow({ item }: MenuItemRowProps) {
             {item.description}
           </p>
         ) : null}
+        {item.options && item.options.length > 0 ? (
+          <ul className="mt-1.5 list-inside list-disc space-y-0.5 pl-2 text-medium font-bold text-blue-500">
+            {item.options.map((opt, i) => (
+              <li key={i}>{opt}</li>
+            ))}
+          </ul>
+        ) : null}
       </div>
       <p className="shrink-0 font-semibold tabular-nums text-stone-900">
         {formatPriceCAD(item.price)}

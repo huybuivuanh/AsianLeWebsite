@@ -44,12 +44,14 @@ export const useMenuItemsStore = create<MenuItemsState>((set) => ({
                 url: (rawImage as { url: string }).url,
               }
             : undefined;
+        const options = d.options as string[] | undefined;
         return {
           id: doc.id,
           name: (d.name as string) ?? "",
           description: d.description as string | undefined,
           price,
           image,
+          options,
           categoryIds: d.categoryIds as string[] | undefined,
           createdAt: (d.createdAt?.toDate?.() ?? new Date()) as Date,
         };

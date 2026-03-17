@@ -11,7 +11,7 @@ export default function ExperienceSection() {
         <div className="grid gap-12 md:grid-cols-2 md:items-center md:gap-16">
           <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-stone-800">
             <Image
-              src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80"
+              src="/home/Ingredients.jpg"
               alt="Fresh ingredients and Asian dishes"
               fill
               className="object-cover"

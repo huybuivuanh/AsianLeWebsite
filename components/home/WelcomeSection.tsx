@@ -40,7 +40,7 @@ export default function WelcomeSection() {
           {/* Replace src with your restaurant image (e.g. from /public/restaurant.jpg) */}
           <div className="relative order-1 aspect-[4/3] overflow-hidden rounded-lg bg-stone-200 shadow-lg md:order-2">
             <Image
-              src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80"
+              src="/home/Welcome.jpg"
               alt="Asian Le Restaurant"
               fill
               className="object-cover"

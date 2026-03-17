@@ -3,9 +3,6 @@ import { STORE } from "@/lib/store";
 import PageContainer from "../PageContainer";
 import StoreHours from "../contact/StoreHours";
 
-const PLACEHOLDER_IMAGE =
-  "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80";
-
 export default function OpenHoursSection() {
   return (
     <section
@@ -27,7 +24,7 @@ export default function OpenHoursSection() {
           </div>
           <div className="relative order-1 aspect-[4/3] overflow-hidden rounded-xl bg-stone-200 shadow-md md:order-2">
             <Image
-              src={PLACEHOLDER_IMAGE}
+              src="/home/Opening Hours.jpg"
               alt="Asian Le Restaurant"
               fill
               className="object-cover"

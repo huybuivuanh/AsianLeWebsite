@@ -8,25 +8,36 @@ const slides = [
   {
     title: "Welcome",
     subtitle:
-      "Discover and experience our finest selection of Vietnamese Beef Noodle Soup",
-    image:
-      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+      "A place where family, tradition, and great food come together in Prince Albert.",
+    image: "/home/hero carousel/1.jpg",
     cta: "See Our Menu",
   },
   {
-    title: "Welcome",
+    title: "Chào mừng",
     subtitle:
-      "Come and taste for yourself our Grilled roasted pork — Bánh mì heo quay",
-    image:
-      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+      "Đến với Asian Le — nơi ẩm thực Việt Nam và Trung Hoa gặp gỡ sự ấm áp và thân thiện.",
+    image: "/home/hero carousel/2.jpg",
+    cta: "Xem Thực Đơn",
+  },
+  {
+    title: "Our Story",
+    subtitle:
+      "From our kitchen to your table. Authentic flavours and a warm welcome, every time.",
+    image: "/home/hero carousel/3.jpg",
     cta: "See Our Menu",
   },
   {
-    title: "Welcome",
+    title: "Trải nghiệm ẩm thực",
     subtitle:
-      "Traditional dishes with local products of the highest quality — Chicken Noodle Soup",
-    image:
-      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80",
+      "Khám phá hương vị truyền thống trong không gian ấm cúng. Chúng tôi mong được phục vụ bạn.",
+    image: "/home/hero carousel/4.jpg",
+    cta: "Xem Thực Đơn",
+  },
+  {
+    title: "Visit Us",
+    subtitle:
+      "We look forward to sharing a meal with you. Dine in or order for pickup and delivery.",
+    image: "/home/hero carousel/5.jpg",
     cta: "See Our Menu",
   },
 ];
@@ -74,7 +85,10 @@ export default function HeroCarousel() {
           <div
             key={i}
             className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-            style={{ opacity: i === index ? 1 : 0, zIndex: i === index ? 1 : 0 }}
+            style={{
+              opacity: i === index ? 1 : 0,
+              zIndex: i === index ? 1 : 0,
+            }}
             aria-hidden={i !== index}
           >
             <Image
@@ -111,8 +125,18 @@ export default function HeroCarousel() {
         className="absolute left-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900 md:left-4"
         aria-label="Previous slide"
       >
-        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        <svg
+          className="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
         </svg>
       </button>
       <button
@@ -121,8 +145,18 @@ export default function HeroCarousel() {
         className="absolute right-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900 md:right-4"
         aria-label="Next slide"
       >
-        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        <svg
+          className="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5l7 7-7 7"
+          />
         </svg>
       </button>
 

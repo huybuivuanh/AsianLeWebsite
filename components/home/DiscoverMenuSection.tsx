@@ -6,108 +6,103 @@ const MENU_INTRO =
 
 const APPETIZERS = [
   {
-    name: "Homemade Vietnamese Spring Rolls",
-    portion: "(4)",
-    price: "$7.00",
+    name: "Vietnamese Spring Rolls",
     description:
-      "Crispy, Pork and Vegetables filling. Served with Homemade fish sauce vinaigrette",
-    image:
-      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=160&q=80",
+      "Crispy rolls filled with seasoned pork and vegetables, served with our house fish-sauce dipping vinaigrette.",
+    image: "/home/discover/Spring Rolls.png",
   },
   {
-    name: "House Breaded Panko Coconut Shrimp",
-    portion: "(8)",
-    price: "$12.00",
+    name: "Vietnamese Salad Rolls",
     description:
-      "Special home-made with crispy tastes come with sweet chillies sauce",
-    image:
-      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=160&q=80",
+      "Fresh rice-paper rolls filled with rice noodles, crisp lettuce, and shrimp, served with our creamy peanut dipping sauce.",
+    image: "/home/discover/Salad Rolls.jpg",
   },
   {
-    name: "House Special Chicken Wings",
-    portion: "",
-    price: "$18.00",
+    name: "Boneless Dry Ribs",
     description:
-      "1lb of Crispy Chicken Wings. Choose your favorite flavor: Teriyaki, Honey Garlic, BBQ, Lemon Pepper, Buffalo",
-    image:
-      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=160&q=80",
+      "Tender pork bites, lightly breaded and deep-fried until golden and crisp.",
+    image: "/home/discover/Dry Ribs.jpg",
+  },
+  {
+    name: "Deep Fried Shrimps",
+    description:
+      "Lightly battered shrimp, fried to a crisp and served with sweet & sour sauce.",
+    image: "/home/discover/Shrimps.jpg",
+  },
+  {
+    name: "Chicken Balls",
+    description: "Crispy chicken balls served with classic sweet & sour sauce.",
+    image: "/home/discover/Chicken Balls.jpg",
+  },
+  {
+    name: "Deluxe Wonton Soup",
+    description:
+      "A comforting, savory broth with tender wontons, shrimp, pork, and garden vegetables.",
+    image: "/home/discover/Wonton Soup.png",
   },
 ];
 
 const MAIN_COURSES = [
   {
-    name: "Special Vietnamese Beef Noodle Soup (Phở)",
-    portion: "(M)..$12.00 ... (L)..$15.00",
-    price: "",
+    name: "Vermicelli Combo",
     description:
-      "Most famous Vietnamese soup, savoury, rich, aromatic. GLUTEN FREE",
-    image:
-      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=160&q=80",
+      "Rice vermicelli with lettuce, cucumber, and bean sprouts, topped with a mix of chicken, beef, pork, shrimp, plus a spring roll. Finished with fish sauce and crushed peanuts.",
+    image: "/home/discover/Vermicelli Combo.jpg",
   },
   {
-    name: "Banh Mi (Sub)",
-    portion: "",
-    price: "From $10.00",
+    name: "Special Bird Nest",
     description:
-      "Grilled Chicken / Beef / Pork / Fried Tofu & Vegetables Banh Mi",
-    image:
-      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=160&q=80",
+      "Crispy egg noodles topped with a savory mix of chicken, beef, pork, and shrimp.",
+    image: "/home/discover/Special Bnest.jpg",
   },
   {
-    name: "Chicken Pad Thai",
-    portion: "",
-    price: "From $15.00",
+    name: "Dinner For One",
     description:
-      "Chicken / Shrimp / Vegetable / Chicken & Shrimp. Add Fried Tofu for $3",
-    image:
-      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=160&q=80",
+      "A satisfying combo of an egg roll or spring roll, chicken fried rice, and boneless dry ribs.",
+    image: "/home/discover/DN1B.png",
   },
   {
-    name: "Mango Salad",
-    portion: "",
-    price: "$17.00",
+    name: "Butter Garlic Fried Shrimps",
     description:
-      "Shredded mango, pickled carrots & Daikon, mint, onion, toasted peanut. GLUTEN FREE.",
-    image:
-      "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=160&q=80",
+      "Lightly battered shrimp, fried crisp and tossed in rich butter-garlic sauce.",
+    image: "/home/discover/Butter Shrimps.jpg",
+  },
+  {
+    name: "Chicken Fried Rice",
+    description:
+      "Our signature fried rice, wok-tossed with eggs, carrots, and tender chicken.",
+    image: "/home/discover/Fried Rice.png",
+  },
+  {
+    name: "Singapore Noodles",
+    description:
+      "Stir-fried noodles tossed with curry seasoning, mixed vegetables, bean sprouts, and a combination of chicken, beef, pork, and shrimp.",
+    image: "/home/discover/Singapore Noodles.jpg",
   },
 ];
 
 function MenuItemRow({
   name,
-  portion,
-  price,
   description,
   image,
 }: {
   name: string;
-  portion: string;
-  price: string;
   description: string;
   image: string;
 }) {
-  const priceText =
-    portion && price
-      ? ` ${portion}..${price}`
-      : portion
-        ? ` ${portion}`
-        : price
-          ? ` ${price}`
-          : "";
   return (
     <div className="flex gap-4 rounded-xl border border-stone-200/80 bg-white p-4 shadow-sm transition hover:border-amber-200 hover:shadow-md">
-      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-stone-200">
-        <Image src={image} alt="" fill className="object-cover" sizes="80px" />
+      <div className="relative h-20 w-25 shrink-0 overflow-hidden rounded-lg bg-stone-200">
+        <Image
+          src={image}
+          alt={name}
+          fill
+          className="object-cover"
+          sizes="80px"
+        />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-semibold text-stone-900">
-          {name}
-          {priceText && (
-            <span className="mt-1 block font-medium text-amber-700">
-              {priceText.trim().replace(/^\.\./, "").replace(/\.\./g, " · ")}
-            </span>
-          )}
-        </p>
+        <p className="text-lg font-semibold text-stone-900">{name}</p>
         <p className="mt-1.5 text-sm leading-relaxed text-stone-600">
           {description}
         </p>
@@ -150,8 +145,8 @@ export default function DiscoverMenuSection() {
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-stone-200 shadow-md">
                   <Image
-                    src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80"
-                    alt="Vietnamese spring rolls"
+                    src="/home/discover/Ingredients 2.jpg"
+                    alt="Ingredients"
                     fill
                     className="object-cover"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
@@ -159,8 +154,8 @@ export default function DiscoverMenuSection() {
                 </div>
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-stone-200 shadow-md">
                   <Image
-                    src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80"
-                    alt="Chicken wings"
+                    src="/home/discover/Ingredients 3.jpg"
+                    alt="Ingredients"
                     fill
                     className="object-cover"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
@@ -179,8 +174,8 @@ export default function DiscoverMenuSection() {
               <div className="order-1 grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-stone-200 shadow-md">
                   <Image
-                    src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80"
-                    alt="Vietnamese Pho"
+                    src="/home/discover/Fried Rice.png"
+                    alt="Chicken Fried Rice"
                     fill
                     className="object-cover"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
@@ -188,8 +183,8 @@ export default function DiscoverMenuSection() {
                 </div>
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-stone-200 shadow-md">
                   <Image
-                    src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&q=80"
-                    alt="Banh Mi"
+                    src="/home/discover/Chow Mein.png"
+                    alt="Chow Mein"
                     fill
                     className="object-cover"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"

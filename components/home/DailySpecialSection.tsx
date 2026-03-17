@@ -11,7 +11,7 @@ export default function DailySpecialSection() {
       {/* Background image with dark overlay */}
       <div className="absolute inset-0">
         <Image
-          src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=1600&q=80"
+          src="/home/Daily Special.jpg"
           alt=""
           fill
           className="object-cover"

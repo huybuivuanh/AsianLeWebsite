@@ -69,86 +69,88 @@ export default function UpdatesSection() {
         )}
 
         {!loading && items.length > 0 && (
-          <div className="relative mt-10 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-lg">
+          <div className="relative mt-10 overflow-hidden rounded-2xl border-2 border-stone-300 bg-stone-100 p-3 shadow-lg sm:p-4 md:p-5">
             <div
-              className="relative aspect-[2/1] w-full min-h-[280px] sm:min-h-[320px] md:aspect-[5/2] md:min-h-[560px] touch-pan-y"
+              className="relative aspect-[16/10] w-full min-h-[240px] touch-pan-y sm:min-h-[280px] md:aspect-[2/1] md:min-h-[320px]"
               onTouchStart={onTouchStart}
               onTouchEnd={onTouchEnd}
             >
               {items.map((item, i) => (
                 <div
                   key={item.id}
-                  className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+                  className="absolute inset-0 flex items-center justify-center transition-opacity duration-700 ease-in-out"
                   style={{
                     opacity: i === safeIndex ? 1 : 0,
                     zIndex: i === safeIndex ? 1 : 0,
                   }}
                   aria-hidden={i !== safeIndex}
                 >
-                  <Image
-                    src={item.url}
-                    alt={item.name}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 768px) 100vw, 1200px"
-                    priority={i === 0}
-                  />
+                  <div className="relative h-full w-full bg-stone-100">
+                    <Image
+                      src={item.url}
+                      alt={item.name}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 768px) 100vw, 1200px"
+                      priority={i === 0}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
-          {/* Arrows */}
-          <button
-            type="button"
-            onClick={goToPrev}
-            className="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-stone-900/30 text-white backdrop-blur-sm transition hover:bg-stone-900/50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 md:left-4"
-            aria-label="Previous slide"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            {/* Arrows */}
+            <button
+              type="button"
+              onClick={goToPrev}
+              className="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-stone-900/30 text-white backdrop-blur-sm transition hover:bg-stone-900/50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 md:left-4"
+              aria-label="Previous slide"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={goToNext}
-            className="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-stone-900/30 text-white backdrop-blur-sm transition hover:bg-stone-900/50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 md:right-4"
-            aria-label="Next slide"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={goToNext}
+              className="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-stone-900/30 text-white backdrop-blur-sm transition hover:bg-stone-900/50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 md:right-4"
+              aria-label="Next slide"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
-          {/* Dots */}
-          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-            {items.map((item, i) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setIndex(i)}
-                className={`h-2 rounded-full transition ${i === safeIndex ? "w-6 bg-amber-500" : "w-2 bg-white/60 hover:bg-white/90"}`}
-                aria-label={`Go to slide ${i + 1}`}
-              />
-            ))}
-          </div>
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+            {/* Dots */}
+            <div className="absolute bottom-4 z-10 left-1/2 flex -translate-x-1/2 gap-2">
+              {items.map((item, i) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setIndex(i)}
+                  className={`h-2 rounded-full transition ${i === safeIndex ? "w-6 bg-amber-500" : "w-2 bg-white/60 hover:bg-white/90"}`}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>

@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { useCategoriesStore } from "@/stores/categoriesStore";
 
 function scrollToSection(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
   e.preventDefault();
@@ -10,23 +9,23 @@ function scrollToSection(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
   el?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-export default function MenuCategoryNav() {
+export type CategoryLink = { id: string; label: string };
+
+type MenuCategoryNavProps = {
+  /** Category links from the server (menu page fetches and passes these). */
+  serverCategoryLinks: CategoryLink[];
+};
+
+export default function MenuCategoryNav({
+  serverCategoryLinks,
+}: MenuCategoryNavProps) {
   const pathname = usePathname();
-  const categories = useCategoriesStore((s) => s.categories);
   const [open, setOpen] = useState(false);
 
-  const categoryLinks = useMemo(() => {
-    const sorted = [...categories].sort(
-      (a, b) => (a.order ?? 0) - (b.order ?? 0),
-    );
-    return [
-      { id: "daily-special", label: "Daily Special" },
-      ...sorted.map((c) => ({ id: `category-${c.id}`, label: c.name })),
-    ];
-  }, [categories]);
-
   if (pathname !== "/menu") return null;
-  if (categoryLinks.length <= 1) return null;
+  if (serverCategoryLinks.length <= 1) return null;
+
+  const categoryLinks = serverCategoryLinks;
 
   const linkBase =
     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-stone-600 transition hover:bg-amber-50 hover:text-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-inset";

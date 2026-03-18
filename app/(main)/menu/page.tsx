@@ -1,35 +1,40 @@
-"use client";
-
 import Image from "next/image";
-import { useMemo } from "react";
-import PageContainer from "../../../components/PageContainer";
-import DailySpecialsGrid from "../../../components/daily-specials/DailySpecialsGrid";
-import MenuCategoryNav from "../../../components/menu/MenuCategoryNav";
-import MenuItemRow from "../../../components/menu/MenuItemRow";
+import Link from "next/link";
+import PageContainer from "@/components/PageContainer";
+import DailySpecialsGrid from "@/components/daily-specials/DailySpecialsGrid";
+import MenuCategoryNav from "@/components/menu/MenuCategoryNav";
+import MenuItemRow from "@/components/menu/MenuItemRow";
 import { STORE } from "@/lib/store";
-import { useCategoriesStore } from "@/stores/categoriesStore";
-import { useMenuItemsStore } from "@/stores/menuItemsStore";
+import { fetchMenuDataForServer } from "@/lib/menuData";
 
-export default function Menu() {
-  const categories = useCategoriesStore((s) => s.categories);
-  const categoriesLoading = useCategoriesStore((s) => s.loading);
-  const categoriesError = useCategoriesStore((s) => s.error);
+export default async function MenuPage() {
+  let categories: FoodCategory[];
+  let menuItems: MenuItem[];
+  let error: string | null = null;
 
-  const menuItems = useMenuItemsStore((s) => s.menuItems);
-  const itemsLoading = useMenuItemsStore((s) => s.loading);
-  const itemsError = useMenuItemsStore((s) => s.error);
+  try {
+    const data = await fetchMenuDataForServer();
+    categories = data.categories;
+    menuItems = data.menuItems;
+  } catch (err) {
+    error =
+      err instanceof Error ? err.message : "Failed to load menu";
+    categories = [];
+    menuItems = [];
+  }
 
-  const loading = categoriesLoading || itemsLoading;
-  const error = categoriesError ?? itemsError;
-
-  const categoriesSorted = useMemo(
-    () => [...categories].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
-    [categories],
+  const categoriesSorted = [...categories].sort(
+    (a, b) => (a.order ?? 0) - (b.order ?? 0),
   );
+
+  const serverCategoryLinks: { id: string; label: string }[] = [
+    { id: "daily-special", label: "Daily Special" },
+    ...categoriesSorted.map((c) => ({ id: `category-${c.id}`, label: c.name })),
+  ];
 
   return (
     <>
-      <MenuCategoryNav />
+      <MenuCategoryNav serverCategoryLinks={serverCategoryLinks} />
       {/* Hero */}
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image
@@ -85,12 +90,13 @@ export default function Menu() {
                 Lunch specials, takeout, and more in Prince Albert
               </h2>
               <p className="mt-4 text-base leading-relaxed text-stone-600">
-                Explore the full menu at our Chinese and Vietnamese restaurant in Prince Albert,
-                with comforting classics, flavourful lunch specials, and convenient takeout options.
+                Explore the full menu at our Chinese and Vietnamese restaurant
+                in Prince Albert, with comforting classics, flavourful lunch
+                specials, and convenient takeout options.
               </p>
             </div>
 
-            {/* Daily Specials */}
+            {/* Daily Specials - still client-fetched for now */}
             <div id="daily-special" className="scroll-mt-28 text-center">
               <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 px-6 py-10 shadow-lg shadow-amber-900/5 sm:px-8 sm:py-12">
                 <div
@@ -111,30 +117,19 @@ export default function Menu() {
               </div>
             </div>
 
-            {/* Categories */}
-            {loading ? (
-              <div className="mx-auto mt-20 max-w-3xl text-center">
-                <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
-                  Loading menu
-                </p>
-                <p className="mt-3 text-stone-600">Please wait a moment.</p>
-              </div>
-            ) : error ? (
+            {/* Categories + menu items - server-rendered for SEO and fast first paint */}
+            {error ? (
               <div className="mx-auto mt-20 max-w-3xl rounded-xl border border-stone-200 bg-stone-50/50 p-6 text-center">
                 <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
                   Couldn&apos;t load menu
                 </p>
                 <p className="mt-3 text-stone-700">{error}</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    useCategoriesStore.getState().fetchCategories();
-                    useMenuItemsStore.getState().fetchMenuItems();
-                  }}
+                <Link
+                  href="/menu"
                   className="mt-6 inline-flex items-center justify-center rounded-lg bg-amber-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
                 >
-                  Retry
-                </button>
+                  Try again
+                </Link>
               </div>
             ) : (
               <div className="mt-24 space-y-28">

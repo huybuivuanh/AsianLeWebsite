@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { formatPriceCAD } from "@/lib/utils";
 import { useState, useCallback, useEffect } from "react";

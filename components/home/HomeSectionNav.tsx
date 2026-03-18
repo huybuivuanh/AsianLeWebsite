@@ -37,24 +37,29 @@ export default function HomeSectionNav() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex h-12 w-12 items-center justify-center rounded-xl border border-stone-200/80 bg-white/95 shadow-lg backdrop-blur-md transition hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 sm:h-14 sm:w-14 sm:rounded-2xl"
+        className="flex items-center gap-2 rounded-full border-2 border-amber-400 bg-amber-50 px-4 py-3 shadow-lg shadow-amber-900/15 ring-2 ring-amber-400/30 transition hover:bg-amber-100 hover:shadow-xl hover:shadow-amber-900/20 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 sm:gap-2.5 sm:px-5 sm:py-3"
         aria-expanded={open}
         aria-haspopup="true"
       >
-        <svg
-          className={`h-5 w-5 text-amber-600 transition-transform sm:h-6 sm:w-6 ${open ? "rotate-90" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 6h16M4 12h16M4 18h16"
-          />
-        </svg>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white sm:h-10 sm:w-10">
+          <svg
+            className={`h-5 w-5 transition-transform sm:h-5 sm:w-5 ${open ? "rotate-90" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </span>
+        <span className="text-sm font-semibold text-amber-900 sm:text-base">
+          Jump to section
+        </span>
       </button>
 
       {open && (

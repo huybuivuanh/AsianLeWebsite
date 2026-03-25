@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Menu",
+  title: "Menu & daily lunch specials",
   description:
-    "Browse the Asian Le Restaurant menu featuring Chinese and Vietnamese dishes, lunch specials, and takeout options in Prince Albert.",
+    "Full food menu at Asian Le Restaurant, Prince Albert — Chinese and Vietnamese appetizers, noodles, fried rice, combos, and weekday lunch specials (11am–2pm). Takeout and Skip the Dishes available.",
+  openGraph: {
+    title: "Menu | Asian Le Restaurant",
+    description:
+      "Chinese & Vietnamese dishes, daily specials, and takeout in Prince Albert, SK.",
+  },
 };
 
 export default function MenuLayout({

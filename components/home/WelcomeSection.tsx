@@ -45,7 +45,7 @@ export default function WelcomeSection() {
           <div className="relative order-1 aspect-[4/3] overflow-hidden rounded-lg bg-stone-200 shadow-lg md:order-2">
             <Image
               src="/home/Welcome.JPG"
-              alt="Asian Le Restaurant"
+              alt="Dining room interior at Asian Le Restaurant, Prince Albert SK"
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"

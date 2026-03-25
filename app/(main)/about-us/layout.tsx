@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About Us",
+  title: "About our restaurant",
   description:
-    "Learn about Asian Le Restaurant in Prince Albert, our story, and our commitment to fresh Chinese and Vietnamese cuisine.",
+    "Our story: Asian Le Restaurant serves fresh Chinese and Vietnamese food in Prince Albert with a family-friendly atmosphere and portions that keep guests coming back.",
+  openGraph: {
+    title: "About Asian Le Restaurant",
+    description:
+      "Fresh ingredients, authentic flavours, and hospitality in Prince Albert, Saskatchewan.",
+  },
 };
 
 export default function AboutLayout({

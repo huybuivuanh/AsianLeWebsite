@@ -11,7 +11,7 @@ export default function ContactUs() {
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image
           src="/home/hero carousel/3.jpg"
-          alt="background image"
+          alt="Asian Le Restaurant — Chinese and Vietnamese food in Prince Albert"
           fill
           className="object-cover"
           sizes="100vw"

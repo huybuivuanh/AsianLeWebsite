@@ -19,7 +19,7 @@ export default async function GalleryPage() {
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image
           src="/home/hero carousel/2.jpg"
-          alt="background image"
+          alt="Interior and dishes at Asian Le Restaurant, Prince Albert"
           fill
           className="object-cover"
           sizes="100vw"

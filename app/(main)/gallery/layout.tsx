@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Gallery",
+  title: "Photo gallery",
   description:
-    "Photos and moments from Asian Le Restaurant in Prince Albert — our Chinese and Vietnamese restaurant, dishes, and dining experience.",
+    "Photos from Asian Le Restaurant in Prince Albert — dining room, signature Chinese and Vietnamese dishes, and community events.",
+  openGraph: {
+    title: "Gallery | Asian Le Restaurant",
+    description:
+      "See our Prince Albert restaurant, plates, and gatherings.",
+  },
 };
 
 export default function GalleryLayout({

@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Contact Us",
+  title: "Visit, hours & contact",
   description:
-    "Visit or get in touch with Asian Le Restaurant in Prince Albert. Find our address, hours, and contact details for your Chinese and Vietnamese dining or takeout.",
+    "Find Asian Le Restaurant at Unit #3, 1400 6 Ave E, Prince Albert, SK — phone (306) 764-7799, email, opening hours, map, and dine-in or takeout reservations.",
+  openGraph: {
+    title: "Contact Asian Le Restaurant | Prince Albert",
+    description:
+      "Address, hours, phone, and map for our Chinese & Vietnamese restaurant on 6 Ave E.",
+  },
 };
 
 export default function ContactLayout({

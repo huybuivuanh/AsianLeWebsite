@@ -8,9 +8,11 @@ import { STORE } from "@/lib/store";
 
 const siteName = "Asian Le Restaurant";
 const siteUrl = "https://asianle.ca";
-const siteDescription = "Chinese & Vietnamese restaurant in Prince Albert.";
+const siteDescription =
+  "Chinese and Vietnamese restaurant in Prince Albert, SK — dine-in, takeout, daily lunch specials, and Skip the Dishes delivery.";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: siteName,
     template: `%s | ${siteName}`,
@@ -19,7 +21,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: siteName,
     description: siteDescription,
+    url: siteUrl,
     siteName,
+    locale: "en_CA",
     type: "website",
   },
   twitter: {
@@ -38,8 +42,7 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "Restaurant",
     name: STORE.name,
-    description:
-      "Chinese & Vietnamese restaurant offering dine-in and takeout in Prince Albert.",
+    description: siteDescription,
     url: siteUrl,
     telephone: "+1-306-764-7799",
     email: STORE.email,

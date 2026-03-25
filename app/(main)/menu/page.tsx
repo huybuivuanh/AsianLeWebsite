@@ -70,7 +70,7 @@ export default async function MenuPage() {
             Restaurant Menu
           </h1>
           <p className="mt-4 text-lg text-stone-200 sm:text-xl">
-            Enjoy one of our delicious plates
+            Chinese &amp; Vietnamese favorites — lunch specials to dinner
           </p>
           <a
             href={STORE.socialLinks.skipthedishes}

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { skipNextImageOptimization } from "@/lib/imagePolicy";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const SWIPE_THRESHOLD = 50;
@@ -93,6 +94,7 @@ export default function UpdatesSection({ items, error }: UpdatesSectionProps) {
                       className="object-contain object-center"
                       sizes="(max-width: 768px) 100vw, 1200px"
                       priority={i === 0}
+                      unoptimized={skipNextImageOptimization(item.url)}
                     />
                   </div>
                 </div>

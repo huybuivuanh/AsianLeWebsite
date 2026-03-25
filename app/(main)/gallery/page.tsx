@@ -1,5 +1,6 @@
 import Image from "next/image";
 import PageContainer from "@/components/PageContainer";
+import { skipNextImageOptimization } from "@/lib/imagePolicy";
 import { fetchGalleryForServer } from "@/lib/siteData.server";
 
 export const revalidate = 900;
@@ -10,8 +11,7 @@ export default async function GalleryPage() {
   try {
     items = await fetchGalleryForServer();
   } catch (err) {
-    error =
-      err instanceof Error ? err.message : "Failed to load gallery";
+    error = err instanceof Error ? err.message : "Failed to load gallery";
   }
 
   return (
@@ -49,10 +49,7 @@ export default async function GalleryPage() {
           {!error && items.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((item) => (
-                <figure
-                  key={item.id ?? item.url}
-                  className="group"
-                >
+                <figure key={item.id ?? item.url} className="group">
                   <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-stone-200">
                     <Image
                       src={item.url}
@@ -60,6 +57,7 @@ export default async function GalleryPage() {
                       fill
                       className="object-cover transition duration-300 group-hover:scale-105"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      unoptimized={skipNextImageOptimization(item.url)}
                     />
                   </div>
                   <figcaption className="mt-3 text-center font-medium text-stone-700">

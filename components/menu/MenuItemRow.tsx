@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { skipNextImageOptimization } from "@/lib/imagePolicy";
 import { formatPriceCAD } from "@/lib/utils";
 import { useState, useCallback, useEffect } from "react";
 
@@ -38,6 +39,9 @@ export default function MenuItemRow({ item }: MenuItemRowProps) {
           fill
           className="object-cover"
           sizes="100px"
+          unoptimized={skipNextImageOptimization(
+            item.image?.url || "/Soup Bowl Icon.jpg",
+          )}
         />
       </button>
 
@@ -69,6 +73,9 @@ export default function MenuItemRow({ item }: MenuItemRowProps) {
                 className="object-contain"
                 sizes="(max-width: 1024px) 100vw, 1024px"
                 priority
+                unoptimized={skipNextImageOptimization(
+                  item.image?.url || "/Soup Bowl Icon.jpg",
+                )}
               />
             </div>
           </div>

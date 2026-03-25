@@ -100,7 +100,7 @@ export default function HeroCarousel() {
               sizes="100vw"
             />
             <div className="absolute inset-0 bg-stone-900/50" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white">
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-4 pb-24 pt-8 text-center text-white sm:px-6 sm:pb-28 md:px-8">
               <p className="text-3xl font-bold uppercase tracking-widest text-amber-200">
                 {slide.title}
               </p>
@@ -118,59 +118,66 @@ export default function HeroCarousel() {
         ))}
       </div>
 
-      {/* Arrows */}
-      <button
-        type="button"
-        onClick={goToPrev}
-        className="absolute left-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900 md:left-4"
-        aria-label="Previous slide"
+      {/* Bottom controls: prev, dots (always visible), next */}
+      <div
+        className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-center bg-gradient-to-t from-stone-950/85 via-stone-950/45 to-transparent px-4 pb-5 pt-14 sm:pb-6 sm:pt-16"
+        role="group"
+        aria-label="Carousel controls"
       >
-        <svg
-          className="h-6 w-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-      </button>
-      <button
-        type="button"
-        onClick={goToNext}
-        className="absolute right-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900 md:right-4"
-        aria-label="Next slide"
-      >
-        <svg
-          className="h-6 w-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
-      </button>
-
-      {/* Dots */}
-      <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 gap-2">
-        {slides.map((_, i) => (
+        <div className="flex w-full max-w-md shrink-0 items-center justify-center gap-3 sm:max-w-lg sm:gap-4">
           <button
-            key={i}
             type="button"
-            onClick={() => setIndex(i)}
-            className={`h-2 w-2 rounded-full transition ${i === index ? "bg-amber-400 w-6" : "bg-white/50 hover:bg-white/80"}`}
-            aria-label={`Go to slide ${i + 1}`}
-          />
-        ))}
+            onClick={goToPrev}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900"
+            aria-label="Previous slide"
+          >
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          <div className="flex min-w-0 flex-1 items-center justify-center gap-2 px-1">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setIndex(i)}
+                className={`h-2 shrink-0 rounded-full transition ${i === index ? "w-6 bg-amber-400" : "w-2 bg-white/55 hover:bg-white/85"}`}
+                aria-label={`Go to slide ${i + 1}`}
+                aria-current={i === index}
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={goToNext}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900"
+            aria-label="Next slide"
+          >
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
     </section>
   );

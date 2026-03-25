@@ -85,71 +85,79 @@ export default function UpdatesSection() {
                   }}
                   aria-hidden={i !== safeIndex}
                 >
-                  <div className="relative h-full w-full bg-stone-100">
+                  <div className="relative h-full w-full bg-stone-100 pb-14 sm:pb-16">
                     <Image
                       src={item.url}
                       alt={item.name}
                       fill
-                      className="object-contain"
+                      className="object-contain object-center"
                       sizes="(max-width: 768px) 100vw, 1200px"
                       priority={i === 0}
                     />
                   </div>
                 </div>
               ))}
-            </div>
-            {/* Arrows */}
-            <button
-              type="button"
-              onClick={goToPrev}
-              className="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-stone-900/30 text-white backdrop-blur-sm transition hover:bg-stone-900/50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 md:left-4"
-              aria-label="Previous slide"
-            >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              {/* Bottom controls: prev, dots (always visible), next */}
+              <div
+                className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-center bg-gradient-to-t from-stone-950/80 via-stone-950/40 to-transparent px-3 pb-4 pt-12 sm:px-4 sm:pb-5 sm:pt-14"
+                role="group"
+                aria-label="Carousel controls"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={goToNext}
-              className="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-stone-900/30 text-white backdrop-blur-sm transition hover:bg-stone-900/50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 md:right-4"
-              aria-label="Next slide"
-            >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-            {/* Dots */}
-            <div className="absolute bottom-4 z-10 left-1/2 flex -translate-x-1/2 gap-2">
-              {items.map((item, i) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setIndex(i)}
-                  className={`h-2 rounded-full transition ${i === safeIndex ? "w-6 bg-amber-500" : "w-2 bg-white/60 hover:bg-white/90"}`}
-                  aria-label={`Go to slide ${i + 1}`}
-                />
-              ))}
+                <div className="flex w-full max-w-md shrink-0 items-center justify-center gap-2 sm:max-w-lg sm:gap-3">
+                  <button
+                    type="button"
+                    onClick={goToPrev}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-stone-900/45 text-white backdrop-blur-sm transition hover:bg-stone-900/65 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 sm:h-10 sm:w-10"
+                    aria-label="Previous slide"
+                  >
+                    <svg
+                      className="h-4 w-4 sm:h-5 sm:w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 19l-7-7 7-7"
+                      />
+                    </svg>
+                  </button>
+                  <div className="flex min-w-0 flex-1 items-center justify-center gap-2 px-1">
+                    {items.map((item, i) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setIndex(i)}
+                        className={`h-2 shrink-0 rounded-full transition ${i === safeIndex ? "w-6 bg-amber-400" : "w-2 bg-white/60 hover:bg-white/90"}`}
+                        aria-label={`Go to slide ${i + 1}`}
+                        aria-current={i === safeIndex}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={goToNext}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-stone-900/45 text-white backdrop-blur-sm transition hover:bg-stone-900/65 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 sm:h-10 sm:w-10"
+                    aria-label="Next slide"
+                  >
+                    <svg
+                      className="h-4 w-4 sm:h-5 sm:w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

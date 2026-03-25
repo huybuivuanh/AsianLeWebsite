@@ -4,6 +4,7 @@ import {
   FacebookIcon,
   SkipTheDishesIcon,
   TripAdvisorIcon,
+  YelpIcon,
   RestaurantGuruIcon,
 } from "./ContactIcons";
 import StoreHours from "./StoreHours";
@@ -19,6 +20,7 @@ export type SocialLinks = {
   facebook: string;
   skipthedishes: string;
   tripadvisor: string;
+  yelp: string;
   restaurantguru: string;
 };
 
@@ -99,6 +101,15 @@ export default function ContactDetails({
           >
             <TripAdvisorIcon className="h-5 w-5 shrink-0" />
             <span className="font-medium">TripAdvisor</span>
+          </a>
+          <a
+            href={socialLinks.yelp}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 text-stone-900 hover:text-[#d32323]"
+          >
+            <YelpIcon className="h-5 w-5 shrink-0" />
+            <span className="font-medium">Yelp</span>
           </a>
           <a
             href={socialLinks.restaurantguru}

@@ -82,3 +82,18 @@ export function RestaurantGuruIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+/** Yelp mark (simplified solid shape, matches other contact icons). */
+export function YelpIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden
+    >
+      <path d="M20.16 12.594c0-.576-.516-1.002-1.062-.99-.468.012-.87.366-.978.81-.192.72-.726 1.206-1.386 1.206h-1.254c-.792 0-1.452-.612-1.542-1.392l-.402-3.522c-.06-.54.324-1.032.864-1.086h2.088c.732 0 1.326-.594 1.326-1.326 0-.732-.594-1.326-1.326-1.326H9.942c-.66 0-1.194-.486-1.386-1.206-.108-.444-.51-.798-.978-.81-.546-.012-1.062.414-1.062.99 0 .306.15.582.384.756.276.198.444.534.444.9v5.862c0 .54.438.978.978.978h7.656c.66 0 1.194-.486 1.386-1.206.108-.444.51-.798.978-.81.546-.012 1.062.414 1.062.99z" />
+    </svg>
+  );
+}

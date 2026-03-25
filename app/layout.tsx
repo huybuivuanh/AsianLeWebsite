@@ -75,6 +75,7 @@ export default function RootLayout({
       STORE.socialLinks.facebook,
       STORE.socialLinks.skipthedishes,
       STORE.socialLinks.tripadvisor,
+      STORE.socialLinks.yelp,
       STORE.socialLinks.restaurantguru,
     ],
   };

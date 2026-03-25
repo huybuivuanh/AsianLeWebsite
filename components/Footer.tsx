@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { STORE } from "@/lib/store";
-
+import Image from "next/image";
 export default function Footer() {
   const year = new Date().getFullYear();
 
@@ -11,9 +11,25 @@ export default function Footer() {
           <div>
             <Link
               href="/"
-              className="text-lg font-semibold text-white hover:text-amber-200"
+              className="group flex items-center gap-0 focus:outline-none"
+              aria-label="Asian Le Restaurant – Home"
             >
-              {STORE.name}
+              <span className="-mr-1 text-lg font-semibold font-serif uppercase tracking-tight text-white transition group-hover:text-amber-100 sm:text-xl">
+                Asian
+              </span>
+              <div className="relative -mx-1 h-11 w-11 shrink-0 overflow-hidden sm:h-12 sm:w-12">
+                <Image
+                  src="/logo.png"
+                  alt=""
+                  fill
+                  className="object-contain"
+                  sizes="60px"
+                  unoptimized
+                />
+              </div>
+              <span className="-ml-1 text-lg font-semibold font-serif uppercase tracking-tight text-white transition group-hover:text-amber-100 sm:text-xl">
+                Le
+              </span>
             </Link>
           </div>
           <div>

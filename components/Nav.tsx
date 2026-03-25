@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { STORE } from "@/lib/store";
+import Logo from "./Logo";
 
 const menuLinks = [
   { href: "/", label: "Home" },
@@ -21,30 +21,7 @@ export default function Nav() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-stone-800/80 bg-stone-900/95 text-stone-100 shadow-lg backdrop-blur-md">
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-3.5 sm:px-6 lg:px-8">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="group flex items-center gap-0 focus:outline-none"
-          aria-label="Asian Le Restaurant – Home"
-        >
-          <span className="-mr-1 text-lg font-semibold font-serif uppercase tracking-tight text-white transition group-hover:text-amber-100 sm:text-xl">
-            Asian
-          </span>
-          <div className="relative -mx-1 h-11 w-11 shrink-0 overflow-hidden sm:h-12 sm:w-12">
-            <Image
-              src="/logo.png"
-              alt=""
-              fill
-              className="object-contain"
-              sizes="60px"
-              unoptimized
-            />
-          </div>
-          <span className="-ml-1 text-lg font-semibold font-serif uppercase tracking-tight text-white transition group-hover:text-amber-100 sm:text-xl">
-            Le
-          </span>
-        </Link>
-
+        <Logo />
         {/* Desktop: links + CTA */}
         <div className="hidden items-center gap-1 md:flex">
           <ul className="flex items-center gap-0.5">

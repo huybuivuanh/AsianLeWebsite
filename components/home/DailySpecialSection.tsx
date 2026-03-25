@@ -2,7 +2,17 @@ import Image from "next/image";
 import DailySpecialsGrid from "../daily-specials/DailySpecialsGrid";
 import PageContainer from "../PageContainer";
 
-export default function DailySpecialSection() {
+type DailySpecialSectionProps = {
+  dailySpecials: DailySpecial[];
+  dailySpecialItems: DailySpecialItem[];
+  error?: string | null;
+};
+
+export default function DailySpecialSection({
+  dailySpecials,
+  dailySpecialItems,
+  error,
+}: DailySpecialSectionProps) {
   return (
     <section
       id="daily-special"
@@ -34,8 +44,17 @@ export default function DailySpecialSection() {
             </p>
           </div>
 
+          {error ? (
+            <p className="mx-auto mt-12 max-w-2xl text-center text-red-200" role="alert">
+              {error}
+            </p>
+          ) : null}
           <div className="mt-12">
-            <DailySpecialsGrid variant="dark" />
+            <DailySpecialsGrid
+              variant="dark"
+              dailySpecials={dailySpecials}
+              dailySpecialItems={dailySpecialItems}
+            />
           </div>
         </PageContainer>
       </div>

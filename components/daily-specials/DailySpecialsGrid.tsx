@@ -1,8 +1,3 @@
-"use client";
-
-import { useMemo } from "react";
-import { useDailySpecialsStore } from "@/stores/dailySpecialsStore";
-import { useDailySpecialItemsStore } from "@/stores/dailySpecialItemsStore";
 import { DAY_ORDER_MONDAY_FIRST } from "@/types/enum";
 import {
   formatDayOfWeekLabel,
@@ -41,28 +36,25 @@ const variantStyles = {
 
 type DailySpecialsGridProps = {
   variant?: DailySpecialsGridVariant;
+  dailySpecials: DailySpecial[];
+  dailySpecialItems: DailySpecialItem[];
 };
 
 export default function DailySpecialsGrid({
   variant = "dark",
+  dailySpecials,
+  dailySpecialItems,
 }: DailySpecialsGridProps) {
   const s = variantStyles[variant];
-  const dailySpecials = useDailySpecialsStore((state) => state.dailySpecials);
-  const dailySpecialItems = useDailySpecialItemsStore((state) => state.items);
+  const dailySpecialItemsById = new Map(
+    dailySpecialItems.map((item) => [item.id, item]),
+  );
 
-  const dailySpecialItemsById = useMemo(() => {
-    return new Map(dailySpecialItems.map((item) => [item.id, item]));
-  }, [dailySpecialItems]);
-
-  const sortedDailySpecials = useMemo(() => {
-    const sorted = [...dailySpecials];
-    sorted.sort((a, b) => {
-      const i = DAY_ORDER_MONDAY_FIRST.indexOf(a.dayOfWeek);
-      const j = DAY_ORDER_MONDAY_FIRST.indexOf(b.dayOfWeek);
-      return (i === -1 ? 99 : i) - (j === -1 ? 99 : j);
-    });
-    return sorted;
-  }, [dailySpecials]);
+  const sortedDailySpecials = [...dailySpecials].sort((a, b) => {
+    const i = DAY_ORDER_MONDAY_FIRST.indexOf(a.dayOfWeek);
+    const j = DAY_ORDER_MONDAY_FIRST.indexOf(b.dayOfWeek);
+    return (i === -1 ? 99 : i) - (j === -1 ? 99 : j);
+  });
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

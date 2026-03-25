@@ -4,7 +4,6 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
-import MenuDataLoader from "../components/MenuDataLoader";
 import { STORE } from "@/lib/store";
 
 const siteName = "Asian Le Restaurant";
@@ -90,7 +89,6 @@ export default function RootLayout({
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurantJsonLd) }}
         />
-        <MenuDataLoader />
         <Nav />
         <main>{children}</main>
         <Footer />

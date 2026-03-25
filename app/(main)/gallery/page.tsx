@@ -1,15 +1,21 @@
-"use client";
-
 import Image from "next/image";
 import PageContainer from "@/components/PageContainer";
-import { useGalleryStore } from "@/stores/galleryStore";
+import { fetchGalleryForServer } from "@/lib/siteData.server";
 
-export default function GalleryPage() {
-  const { items, loading, error } = useGalleryStore();
+export const revalidate = 900;
+
+export default async function GalleryPage() {
+  let items: ImageItem[] = [];
+  let error: string | null = null;
+  try {
+    items = await fetchGalleryForServer();
+  } catch (err) {
+    error =
+      err instanceof Error ? err.message : "Failed to load gallery";
+  }
 
   return (
     <>
-      {/* Title section with background image */}
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image
           src="/home/hero carousel/2.jpg"
@@ -32,21 +38,21 @@ export default function GalleryPage() {
 
       <PageContainer>
         <div className="py-12">
-          {error && (
+          {error ? (
             <p className="text-center text-red-600" role="alert">
               {error}
             </p>
-          )}
-          {loading && (
-            <p className="text-center text-stone-500">Loading gallery…</p>
-          )}
-          {!loading && !error && items.length === 0 && (
+          ) : null}
+          {!error && items.length === 0 ? (
             <p className="text-center text-stone-500">No gallery items yet.</p>
-          )}
-          {!loading && items.length > 0 && (
+          ) : null}
+          {!error && items.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((item) => (
-                <figure key={item.id} className="group">
+                <figure
+                  key={item.id ?? item.url}
+                  className="group"
+                >
                   <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-stone-200">
                     <Image
                       src={item.url}
@@ -62,7 +68,7 @@ export default function GalleryPage() {
                 </figure>
               ))}
             </div>
-          )}
+          ) : null}
         </div>
       </PageContainer>
     </>

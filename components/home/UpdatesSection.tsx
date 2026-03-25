@@ -2,12 +2,15 @@
 
 import Image from "next/image";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useUpdatesStore } from "@/stores/updatesStore";
 
 const SWIPE_THRESHOLD = 50;
 
-export default function UpdatesSection() {
-  const { items, loading, error } = useUpdatesStore();
+type UpdatesSectionProps = {
+  items: ImageItem[];
+  error?: string | null;
+};
+
+export default function UpdatesSection({ items, error }: UpdatesSectionProps) {
   const [index, setIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
@@ -56,19 +59,16 @@ export default function UpdatesSection() {
           Latest offers, events, and news — all in one place.
         </p>
 
-        {error && (
+        {error ? (
           <p className="mt-6 text-center text-red-600" role="alert">
             {error}
           </p>
-        )}
-        {loading && (
-          <p className="mt-6 text-center text-stone-500">Loading updates…</p>
-        )}
-        {!loading && !error && items.length === 0 && (
+        ) : null}
+        {!error && items.length === 0 ? (
           <p className="mt-6 text-center text-stone-500">No updates yet.</p>
-        )}
+        ) : null}
 
-        {!loading && items.length > 0 && (
+        {!error && items.length > 0 ? (
           <div className="relative mt-10 overflow-hidden rounded-2xl border-2 border-stone-300 bg-stone-100 p-3 shadow-lg sm:p-4 md:p-5">
             <div
               className="relative aspect-[16/10] w-full min-h-[240px] touch-pan-y sm:min-h-[280px] md:aspect-[2/1] md:min-h-[320px]"
@@ -160,7 +160,7 @@ export default function UpdatesSection() {
               </div>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </section>
   );

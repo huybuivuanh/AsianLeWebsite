@@ -1,3 +1,4 @@
+import { cache } from "react";
 import {
   collection,
   getDocs,
@@ -75,7 +76,7 @@ export async function fetchMenuItemsForServer(): Promise<MenuItem[]> {
   return sortAlphabetically(menuItems, (item) => item.name);
 }
 
-export async function fetchMenuDataForServer(): Promise<{
+async function loadMenuDataForServer(): Promise<{
   categories: FoodCategory[];
   menuItems: MenuItem[];
 }> {
@@ -85,3 +86,6 @@ export async function fetchMenuDataForServer(): Promise<{
   ]);
   return { categories, menuItems };
 }
+
+/** Deduped per request when referenced from multiple server components. */
+export const fetchMenuDataForServer = cache(loadMenuDataForServer);

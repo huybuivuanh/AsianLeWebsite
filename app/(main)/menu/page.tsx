@@ -6,22 +6,41 @@ import MenuCategoryNav from "@/components/menu/MenuCategoryNav";
 import MenuItemRow from "@/components/menu/MenuItemRow";
 import { STORE } from "@/lib/store";
 import { fetchMenuDataForServer } from "@/lib/menuData";
+import { getDailySpecialsBundle } from "@/lib/siteData.server";
+
+export const revalidate = 900;
 
 export default async function MenuPage() {
   let categories: FoodCategory[];
   let menuItems: MenuItem[];
   let error: string | null = null;
+  let dailySpecials: DailySpecial[] = [];
+  let dailySpecialItems: DailySpecialItem[] = [];
+  let dailyError: string | null = null;
 
-  try {
-    const data = await fetchMenuDataForServer();
-    categories = data.categories;
-    menuItems = data.menuItems;
-  } catch (err) {
-    error =
-      err instanceof Error ? err.message : "Failed to load menu";
+  const [menuRes, daily] = await Promise.all([
+    fetchMenuDataForServer()
+      .then((data) => ({ ok: true as const, data }))
+      .catch((err) => ({
+        ok: false as const,
+        message:
+          err instanceof Error ? err.message : "Failed to load menu",
+      })),
+    getDailySpecialsBundle(),
+  ]);
+
+  if (menuRes.ok) {
+    categories = menuRes.data.categories;
+    menuItems = menuRes.data.menuItems;
+  } else {
+    error = menuRes.message;
     categories = [];
     menuItems = [];
   }
+
+  dailySpecials = daily.dailySpecials;
+  dailySpecialItems = daily.dailySpecialItems;
+  dailyError = daily.error;
 
   const categoriesSorted = [...categories].sort(
     (a, b) => (a.order ?? 0) - (b.order ?? 0),
@@ -96,7 +115,6 @@ export default async function MenuPage() {
               </p>
             </div>
 
-            {/* Daily Specials - still client-fetched for now */}
             <div id="daily-special" className="scroll-mt-28 text-center">
               <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 px-6 py-10 shadow-lg shadow-amber-900/5 sm:px-8 sm:py-12">
                 <div
@@ -110,8 +128,17 @@ export default async function MenuPage() {
                   <p className="mt-3 text-sm leading-relaxed text-stone-600">
                     Great value specials by day. Available at the times shown.
                   </p>
+                  {dailyError ? (
+                    <p className="mt-6 text-center text-red-600" role="alert">
+                      {dailyError}
+                    </p>
+                  ) : null}
                   <div className="mt-8">
-                    <DailySpecialsGrid variant="light" />
+                    <DailySpecialsGrid
+                      variant="light"
+                      dailySpecials={dailySpecials}
+                      dailySpecialItems={dailySpecialItems}
+                    />
                   </div>
                 </div>
               </div>

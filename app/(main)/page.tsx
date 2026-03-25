@@ -8,15 +8,25 @@ import OpenHoursSection from "../../components/home/OpenHoursSection";
 import OurLocationSection from "../../components/home/OurLocationSection";
 import TestimonialsSection from "../../components/home/TestimonialsSection";
 import WelcomeSection from "../../components/home/WelcomeSection";
+import { getPublicSiteData } from "@/lib/siteData.server";
 
-export default function Home() {
+/** Revalidate public Firestore-backed sections periodically (~15 min). */
+export const revalidate = 900;
+
+export default async function Home() {
+  const site = await getPublicSiteData();
+
   return (
     <>
       <HeroCarousel />
       <HomeSectionNav />
       <WelcomeSection />
-      <DailySpecialSection />
-      <UpdatesSection />
+      <DailySpecialSection
+        dailySpecials={site.dailySpecials}
+        dailySpecialItems={site.dailySpecialItems}
+        error={site.dailySpecialsError}
+      />
+      <UpdatesSection items={site.updates} error={site.updatesError} />
       <OpenHoursSection />
       <ExperienceSection />
       <DiscoverMenuSection />

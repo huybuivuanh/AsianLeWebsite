@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Asian Le Website
+
+Marketing website for **Asian Le**, a Vietnamese restaurant. Built with Next.js 16 (App Router), TypeScript, Tailwind CSS v4, and Firebase.
+
+## Pages
+
+| Route | Description |
+|---|---|
+| `/` | Home / landing page |
+| `/menu` | Full menu with daily specials |
+| `/gallery` | Photo gallery |
+| `/about-us` | About the restaurant |
+| `/contact-us` | Contact form and location info |
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router, server-side fetching)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **Backend / CMS**: Firebase (Firestore)
+- **Analytics**: Vercel Analytics + Speed Insights
+- **Deployment**: Vercel
+
+## Project Structure
+
+```
+app/
+  (main)/          # Route group for all public pages
+  layout.tsx       # Root layout (fonts, analytics)
+  sitemap.ts       # Dynamic sitemap for SEO
+  robots.ts        # robots.txt
+
+components/
+  Nav.tsx          # Top navigation
+  Footer.tsx       # Site footer
+  Logo.tsx         # Shared logo component
+  PageContainer.tsx
+  home/            # Home page sections
+  menu/            # Menu components
+  daily-specials/  # Daily specials section
+  contact/         # Contact form components
+
+lib/
+  firebase.ts      # Firebase client config
+  siteData.server.ts  # Server-side data fetching
+  menuData.ts      # Menu data helpers
+  store.ts         # Client state
+  imagePolicy.ts   # Next.js image domain policy
+  utils.ts
+
+types/
+  enum.ts
+  global.d.ts
+```
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` with your Firebase project credentials:
 
-## Learn More
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command | Description |
+|---|---|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import DailySpecialsGrid from "../daily-specials/DailySpecialsGrid";
 import PageContainer from "../PageContainer";
 
@@ -55,6 +56,15 @@ export default function DailySpecialSection({
               dailySpecials={dailySpecials}
               dailySpecialItems={dailySpecialItems}
             />
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              href="/menu"
+              className="inline-block rounded-md bg-amber-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900"
+            >
+              See Our Menu
+            </Link>
           </div>
         </PageContainer>
       </div>

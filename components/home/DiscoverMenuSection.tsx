@@ -1,6 +1,7 @@
- "use client";
+"use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import PageContainer from "../PageContainer";
 import { useCallback, useEffect, useState } from "react";
 
@@ -258,6 +259,15 @@ export default function DiscoverMenuSection() {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-16 text-center">
+          <Link
+            href="/menu"
+            className="inline-block rounded-md bg-amber-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
+          >
+            See Our Full Menu
+          </Link>
         </div>
       </PageContainer>
     </section>

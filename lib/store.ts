@@ -16,6 +16,7 @@ export const STORE = {
 
   hours: [
     { days: "Monday – Saturday", time: "11:00 AM – 8:00 PM" },
+    { days: "Everyday 3:00 PM – 4:00 PM", time: "Closed" },
     { days: "Sunday", time: "Closed" },
     { days: "Holidays", time: "Closed" },
   ],

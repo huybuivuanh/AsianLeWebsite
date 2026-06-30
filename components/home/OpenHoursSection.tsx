@@ -1,9 +1,12 @@
 import Image from "next/image";
-import { STORE } from "@/lib/store";
 import PageContainer from "../PageContainer";
 import StoreHours from "../contact/StoreHours";
 
-export default function OpenHoursSection() {
+type OpenHoursSectionProps = {
+  hours: readonly { days: string; time: string }[];
+};
+
+export default function OpenHoursSection({ hours }: OpenHoursSectionProps) {
   return (
     <section
       id="open-hours"
@@ -19,7 +22,7 @@ export default function OpenHoursSection() {
               Join us for lunch or dinner. We look forward to serving you.
             </p>
             <div className="mt-8 rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
-              <StoreHours hours={STORE.hours} bordered className="space-y-4" />
+              <StoreHours hours={hours} bordered className="space-y-4" />
             </div>
           </div>
           <div className="relative order-1 aspect-[4/3] overflow-hidden rounded-xl bg-stone-200 shadow-md md:order-2">

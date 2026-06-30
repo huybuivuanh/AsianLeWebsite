@@ -30,6 +30,24 @@ export async function fetchGalleryForServer(): Promise<ImageItem[]> {
   });
 }
 
+export async function fetchStoreHoursForServer(): Promise<StoreHour[]> {
+  const snapshot = await getDocs(collection(db, "hours"));
+  return snapshot.docs
+    .map((doc) => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        days: typeof d.days === "string" ? d.days : "",
+        time: typeof d.time === "string" ? d.time : "",
+        order: typeof d.order === "number" ? d.order : 0,
+      };
+    })
+    .sort((a, b) => a.order - b.order);
+}
+
+/** Cached store hours (dedupes within one request across home + contact pages). */
+export const getStoreHours = cache(fetchStoreHoursForServer);
+
 export async function fetchDailySpecialsForServer(): Promise<DailySpecial[]> {
   const snapshot = await getDocs(collection(db, "dailySpecials"));
   return snapshot.docs.map((doc) => {
@@ -97,6 +115,8 @@ export type PublicSiteData = {
   dailySpecials: DailySpecial[];
   dailySpecialItems: DailySpecialItem[];
   dailySpecialsError: string | null;
+  storeHours: StoreHour[];
+  storeHoursError: string | null;
 };
 
 async function loadDailySpecialsBundle(): Promise<{
@@ -134,7 +154,7 @@ async function loadDailySpecialsBundle(): Promise<{
 export const getDailySpecialsBundle = cache(loadDailySpecialsBundle);
 
 async function loadPublicSiteData(): Promise<PublicSiteData> {
-  const [updatesResult, daily] = await Promise.all([
+  const [updatesResult, daily, hoursResult] = await Promise.all([
     fetchUpdatesForServer()
       .then((updates) => ({ updates, error: null as string | null }))
       .catch((err) => ({
@@ -143,6 +163,12 @@ async function loadPublicSiteData(): Promise<PublicSiteData> {
           err instanceof Error ? err.message : "Failed to load news & updates",
       })),
     getDailySpecialsBundle(),
+    getStoreHours()
+      .then((storeHours) => ({ storeHours, error: null as string | null }))
+      .catch((err) => ({
+        storeHours: [] as StoreHour[],
+        error: err instanceof Error ? err.message : "Failed to load store hours",
+      })),
   ]);
 
   return {
@@ -151,6 +177,8 @@ async function loadPublicSiteData(): Promise<PublicSiteData> {
     dailySpecials: daily.dailySpecials,
     dailySpecialItems: daily.dailySpecialItems,
     dailySpecialsError: daily.error,
+    storeHours: hoursResult.storeHours,
+    storeHoursError: hoursResult.error,
   };
 }
 

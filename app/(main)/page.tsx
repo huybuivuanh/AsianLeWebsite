@@ -39,7 +39,7 @@ export default async function Home() {
         error={site.dailySpecialsError}
       />
       <UpdatesSection items={site.updates} error={site.updatesError} />
-      <OpenHoursSection />
+      <OpenHoursSection hours={site.storeHours} />
       <ExperienceSection />
       <DiscoverMenuSection />
       <TestimonialsSection />

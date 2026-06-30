@@ -1,11 +1,17 @@
 import Image from "next/image";
 import { STORE } from "@/lib/store";
+import { getStoreHours } from "@/lib/siteData.server";
 import PageContainer from "../../../components/PageContainer";
 import ContactDetails from "../../../components/contact/ContactDetails";
 import ContactForm from "../../../components/contact/ContactForm";
 import StoreMap from "../../../components/contact/StoreMap";
 
-export default function ContactUs() {
+/** Revalidate store hours periodically (~15 min). */
+export const revalidate = 900;
+
+export default async function ContactUs() {
+  const hours = await getStoreHours();
+
   return (
     <>
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
@@ -51,7 +57,7 @@ export default function ContactUs() {
                     address: STORE.address,
                     phone: STORE.phone,
                     email: STORE.email,
-                    hours: STORE.hours,
+                    hours,
                   }}
                   socialLinks={STORE.socialLinks}
                   googleMapsLink={STORE.googleMapsLink}

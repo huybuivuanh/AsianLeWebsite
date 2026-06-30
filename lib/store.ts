@@ -14,13 +14,6 @@ export const STORE = {
   phone: "(306) 764-7799",
   email: "asianlepa@gmail.com",
 
-  hours: [
-    { days: "Monday – Saturday", time: "11:00 AM – 8:00 PM" },
-    { days: "Everyday 3:00 PM – 4:00 PM", time: "Closed" },
-    { days: "Sunday", time: "Closed" },
-    { days: "Holidays", time: "Closed" },
-  ],
-
   googleMapsLink:
     "https://www.google.com/maps?cid=11746207782635991944&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAEYASAB&hl=en&gl=CA&source=embed",
 

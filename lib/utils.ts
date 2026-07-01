@@ -1,3 +1,12 @@
+/** Maps a Firestore `{name, url}`-shaped field to ImageItem, or undefined if malformed. */
+export function mapImageItemField(raw: unknown): ImageItem | undefined {
+  if (!raw || typeof raw !== "object" || !("url" in raw)) return undefined;
+  const url = (raw as { url: unknown }).url;
+  if (typeof url !== "string") return undefined;
+  const name = (raw as { name?: unknown }).name;
+  return { name: typeof name === "string" ? name : "", url };
+}
+
 export function formatPriceCAD(price: number) {
   return new Intl.NumberFormat("en-CA", {
     style: "currency",

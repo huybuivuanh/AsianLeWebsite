@@ -1,4 +1,4 @@
-import type { DayOfWeek } from "@/types/enum";
+import type { DayOfWeek, KitchenType } from "@/types/enum";
 
 declare global {
   interface FoodCategory {
@@ -50,6 +50,101 @@ declare global {
     days: string;
     time: string;
     order: number;
+  }
+
+  // --- Ordering data model (demoCategories / demoMenuItems), see ecommerce.md ---
+
+  interface MenuItemAvailability {
+    start: string;
+    end: string;
+  }
+
+  interface MenuItemSoldOut {
+    since: Date;
+    hours?: number;
+    indefinite: boolean;
+  }
+
+  interface OptionGroupId {
+    optionGroupId: string;
+    order: number;
+  }
+
+  interface DemoCategory {
+    id: string;
+    name: string;
+    description?: string;
+    itemIds?: string[];
+    order: number;
+    createdAt: Date;
+  }
+
+  interface DemoMenuItem {
+    id: string;
+    name: string;
+    description?: string;
+    price: number;
+    image?: ImageItem;
+    optionGroupIds?: OptionGroupId[];
+    categoryIds?: string[];
+    kitchenType: KitchenType;
+    availability?: MenuItemAvailability;
+    soldOut?: MenuItemSoldOut;
+    createdAt: Date;
+  }
+
+  interface OptionGroup {
+    id: string;
+    name: string;
+    minSelection: number;
+    maxSelection: number;
+    multipleOptionQuantity: boolean;
+    optionIds?: string[];
+    itemIds?: string[];
+    defaultOptionId?: string;
+    createdAt: Date;
+  }
+
+  interface ItemOption {
+    id: string;
+    name: string;
+    price: number;
+    groupIds?: string[];
+    availability?: MenuItemAvailability;
+    soldOut?: MenuItemSoldOut;
+    createdAt: Date;
+  }
+
+  interface MenuVersion {
+    version: number;
+    lastUpdated: Date | null;
+  }
+
+  interface DayHours {
+    isOpen: boolean;
+    open: string;
+    close: string;
+  }
+
+  interface Holiday {
+    id: string;
+    from: string;
+    to?: string;
+  }
+
+  interface StoreSettings {
+    pauseOrdering: boolean;
+    timezone: string;
+    hours: {
+      mon: DayHours;
+      tue: DayHours;
+      wed: DayHours;
+      thu: DayHours;
+      fri: DayHours;
+      sat: DayHours;
+      sun: DayHours;
+    };
+    holidays: Holiday[];
   }
 }
 

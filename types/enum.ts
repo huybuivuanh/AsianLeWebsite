@@ -29,3 +29,11 @@ export const DAY_ORDER_MONDAY_FIRST: DayOfWeek[] = [
   DayOfWeek.SATURDAY,
   DayOfWeek.SUNDAY,
 ];
+
+export enum KitchenType {
+  DEEP_FRY = "Deep Fry",
+  STIR_FRY = "Stir Fry",
+  OTHER = "Other",
+  BOTH = "Both",
+  DRINK = "Drink",
+}

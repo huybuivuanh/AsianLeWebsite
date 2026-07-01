@@ -1,7 +1,11 @@
+import { formatTimeHHmmTo12h } from "@/lib/utils";
+
 /**
  * Pure availability/hours logic for the ordering data model (see ecommerce.md).
  * No Firestore access here — see lib/orderMenuData.ts and lib/storeSettings.ts for fetching.
  */
+
+export type AvailabilityStatus = { available: boolean; label?: string };
 
 type StoreDayKey = keyof StoreSettings["hours"];
 
@@ -66,6 +70,22 @@ export function isAvailableNow(
 ): boolean {
   if (isSoldOut(entity.soldOut, now)) return false;
   return isWithinAvailabilityWindow(entity.availability, timezone, now);
+}
+
+/** Availability as a display-ready status: whether to show it, and what label to show if not. */
+export function getAvailabilityStatus(
+  entity: { availability?: MenuItemAvailability; soldOut?: MenuItemSoldOut },
+  timezone: string,
+  now: Date = new Date(),
+): AvailabilityStatus {
+  if (isSoldOut(entity.soldOut, now)) return { available: false, label: "Sold out" };
+  if (entity.availability && !isWithinAvailabilityWindow(entity.availability, timezone, now)) {
+    return {
+      available: false,
+      label: `Available ${formatTimeHHmmTo12h(entity.availability.start)} – ${formatTimeHHmmTo12h(entity.availability.end)}`,
+    };
+  }
+  return { available: true };
 }
 
 /** True if the store is currently open for ordering per StoreSettings. */

@@ -3,23 +3,25 @@ import Link from "next/link";
 import PageContainer from "@/components/PageContainer";
 import DailySpecialsGrid from "@/components/daily-specials/DailySpecialsGrid";
 import MenuCategoryNav from "@/components/menu/MenuCategoryNav";
-import MenuItemRow from "@/components/menu/MenuItemRow";
+import OrderMenuItemCard from "@/components/menu/OrderMenuItemCard";
 import { STORE } from "@/lib/store";
-import { fetchMenuDataForServer } from "@/lib/menuData";
+import { fetchOrderMenuDataForServer } from "@/lib/orderMenuData";
+import { getStoreSettings } from "@/lib/storeSettings";
+import { buildMenuItemViewModel, type MenuItemViewModel } from "@/lib/menuOptions";
 import { getDailySpecialsBundle } from "@/lib/siteData.server";
 
 export const revalidate = 900;
 
 export default async function MenuPage() {
-  let categories: FoodCategory[];
-  let menuItems: MenuItem[];
+  let categories: DemoCategory[];
+  let itemViewModels: MenuItemViewModel[];
   let error: string | null = null;
   let dailySpecials: DailySpecial[] = [];
   let dailySpecialItems: DailySpecialItem[] = [];
   let dailyError: string | null = null;
 
-  const [menuRes, daily] = await Promise.all([
-    fetchMenuDataForServer()
+  const [menuRes, daily, storeSettings] = await Promise.all([
+    fetchOrderMenuDataForServer()
       .then((data) => ({ ok: true as const, data }))
       .catch((err) => ({
         ok: false as const,
@@ -27,15 +29,29 @@ export default async function MenuPage() {
           err instanceof Error ? err.message : "Failed to load menu",
       })),
     getDailySpecialsBundle(),
+    getStoreSettings(),
   ]);
 
   if (menuRes.ok) {
     categories = menuRes.data.categories;
-    menuItems = menuRes.data.menuItems;
+    const optionGroupsById = new Map(
+      menuRes.data.optionGroups.map((g) => [g.id, g]),
+    );
+    const optionsById = new Map(menuRes.data.options.map((o) => [o.id, o]));
+    const now = new Date();
+    itemViewModels = menuRes.data.menuItems.map((item) =>
+      buildMenuItemViewModel(
+        item,
+        optionGroupsById,
+        optionsById,
+        storeSettings.timezone,
+        now,
+      ),
+    );
   } else {
     error = menuRes.message;
     categories = [];
-    menuItems = [];
+    itemViewModels = [];
   }
 
   dailySpecials = daily.dailySpecials;
@@ -161,13 +177,9 @@ export default async function MenuPage() {
             ) : (
               <div className="mt-24 space-y-28">
                 {categoriesSorted.map((category) => {
-                  const itemsInCategory = menuItems.filter((item) => {
-                    const byCategoryItemIds =
-                      category.itemIds?.includes(item.id ?? "") ?? false;
-                    const byItemCategoryIds =
-                      item.categoryIds?.includes(category.id ?? "") ?? false;
-                    return byCategoryItemIds || byItemCategoryIds;
-                  });
+                  const itemsInCategory = itemViewModels.filter((vm) =>
+                    vm.item.categoryIds?.includes(category.id) ?? false,
+                  );
                   return (
                     <div
                       key={category.id}
@@ -189,12 +201,8 @@ export default async function MenuPage() {
                         </p>
                       ) : null}
                       <ul className="grid grid-cols-1 gap-x-10 gap-y-6 lg:grid-cols-2">
-                        {itemsInCategory.map((item, itemIndex) => (
-                          <MenuItemRow
-                            key={item.id ?? itemIndex}
-                            item={item}
-                            index={itemIndex}
-                          />
+                        {itemsInCategory.map((vm) => (
+                          <OrderMenuItemCard key={vm.item.id} {...vm} />
                         ))}
                       </ul>
                     </div>

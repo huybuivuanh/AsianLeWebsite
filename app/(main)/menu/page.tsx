@@ -4,6 +4,7 @@ import PageContainer from "@/components/PageContainer";
 import DailySpecialsGrid from "@/components/daily-specials/DailySpecialsGrid";
 import MenuCategoryNav from "@/components/menu/MenuCategoryNav";
 import OrderMenuItemCard from "@/components/menu/OrderMenuItemCard";
+import CartDrawer from "@/components/cart/CartDrawer";
 import { STORE } from "@/lib/store";
 import { fetchOrderMenuDataForServer } from "@/lib/orderMenuData";
 import { getStoreSettings } from "@/lib/storeSettings";
@@ -70,6 +71,7 @@ export default async function MenuPage() {
   return (
     <>
       <MenuCategoryNav serverCategoryLinks={serverCategoryLinks} />
+      <CartDrawer />
       {/* Hero */}
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image

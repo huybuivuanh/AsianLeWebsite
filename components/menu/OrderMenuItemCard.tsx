@@ -5,8 +5,30 @@ import { useCallback, useEffect, useState } from "react";
 import { skipNextImageOptimization } from "@/lib/imagePolicy";
 import { formatPriceCAD } from "@/lib/utils";
 import { selectionRuleLabel, type MenuItemViewModel } from "@/lib/menuOptions";
+import {
+  useCartStore,
+  type CartOptionGroupSelection,
+} from "@/lib/cartStore";
 
 type OrderMenuItemCardProps = MenuItemViewModel;
+
+/** groupId -> selected {optionId, quantity}[] */
+type SelectionState = Record<string, { optionId: string; quantity: number }[]>;
+
+function buildDefaultSelections(
+  optionGroups: MenuItemViewModel["optionGroups"],
+): SelectionState {
+  const state: SelectionState = {};
+  for (const { group, options } of optionGroups) {
+    const defaultOption = options.find(
+      (o) => o.id === group.defaultOptionId && o.availability.available,
+    );
+    state[group.id] = defaultOption
+      ? [{ optionId: defaultOption.id, quantity: 1 }]
+      : [];
+  }
+  return state;
+}
 
 export default function OrderMenuItemCard({
   item,
@@ -14,8 +36,15 @@ export default function OrderMenuItemCard({
   optionGroups,
 }: OrderMenuItemCardProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [itemQuantity, setItemQuantity] = useState(1);
+  const [selections, setSelections] = useState<SelectionState>({});
+  const addLine = useCartStore((s) => s.addLine);
 
-  const open = useCallback(() => setIsOpen(true), []);
+  const open = useCallback(() => {
+    setItemQuantity(1);
+    setSelections(buildDefaultSelections(optionGroups));
+    setIsOpen(true);
+  }, [optionGroups]);
   const close = useCallback(() => setIsOpen(false), []);
 
   useEffect(() => {
@@ -28,6 +57,87 @@ export default function OrderMenuItemCard({
   }, [isOpen, close]);
 
   const imageSrc = item.image?.url || "/Soup Bowl Icon.jpg";
+
+  function selectSingle(groupId: string, optionId: string, optional: boolean) {
+    setSelections((prev) => {
+      const current = prev[groupId] ?? [];
+      const alreadySelected = current[0]?.optionId === optionId;
+      if (alreadySelected && optional) {
+        return { ...prev, [groupId]: [] };
+      }
+      return { ...prev, [groupId]: [{ optionId, quantity: 1 }] };
+    });
+  }
+
+  function toggleMulti(groupId: string, optionId: string, maxSelection: number) {
+    setSelections((prev) => {
+      const current = prev[groupId] ?? [];
+      const isSelected = current.some((s) => s.optionId === optionId);
+      if (isSelected) {
+        return { ...prev, [groupId]: current.filter((s) => s.optionId !== optionId) };
+      }
+      if (current.length >= maxSelection) return prev;
+      return { ...prev, [groupId]: [...current, { optionId, quantity: 1 }] };
+    });
+  }
+
+  function setOptionQuantity(groupId: string, optionId: string, quantity: number) {
+    setSelections((prev) => ({
+      ...prev,
+      [groupId]: (prev[groupId] ?? []).map((s) =>
+        s.optionId === optionId ? { ...s, quantity: Math.max(1, quantity) } : s,
+      ),
+    }));
+  }
+
+  const allGroupsValid = optionGroups.every(({ group }) => {
+    const count = (selections[group.id] ?? []).length;
+    return count >= group.minSelection && count <= group.maxSelection;
+  });
+
+  const optionsTotal = optionGroups.reduce((sum, { group, options }) => {
+    const selected = selections[group.id] ?? [];
+    return (
+      sum +
+      selected.reduce((s, sel) => {
+        const opt = options.find((o) => o.id === sel.optionId);
+        return s + (opt ? opt.price * sel.quantity : 0);
+      }, 0)
+    );
+  }, 0);
+
+  const total = (item.price + optionsTotal) * itemQuantity;
+  const canAddToCart = availability.available && allGroupsValid;
+
+  function handleAddToCart() {
+    if (!canAddToCart) return;
+
+    const cartOptionGroups: CartOptionGroupSelection[] = optionGroups
+      .filter(({ group }) => (selections[group.id] ?? []).length > 0)
+      .map(({ group, options }) => ({
+        optionGroupId: group.id,
+        optionGroupName: group.name,
+        selections: (selections[group.id] ?? []).map((sel) => {
+          const opt = options.find((o) => o.id === sel.optionId)!;
+          return {
+            optionId: opt.id,
+            name: opt.name,
+            price: opt.price,
+            quantity: sel.quantity,
+          };
+        }),
+      }));
+
+    addLine({
+      menuItemId: item.id,
+      name: item.name,
+      unitPrice: item.price,
+      imageUrl: item.image?.url,
+      optionGroups: cartOptionGroups,
+      quantity: itemQuantity,
+    });
+    close();
+  }
 
   return (
     <li className="flex items-start gap-4">
@@ -96,38 +206,152 @@ export default function OrderMenuItemCard({
 
               {optionGroups.length > 0 ? (
                 <div className="mt-6 space-y-5">
-                  {optionGroups.map(({ group, options }) => (
-                    <div key={group.id}>
-                      <div className="flex items-baseline justify-between gap-2">
-                        <p className="font-semibold text-stone-900">{group.name}</p>
-                        <span className="text-xs font-medium uppercase tracking-wide text-amber-700">
-                          {selectionRuleLabel(group)}
-                        </span>
-                      </div>
-                      <ul className="mt-2 space-y-1">
-                        {options.map((option) => (
-                          <li
-                            key={option.id}
-                            className={`flex items-center justify-between gap-3 text-sm ${
-                              option.availability.available
-                                ? "text-stone-700"
-                                : "text-stone-400 line-through"
-                            }`}
-                          >
-                            <span>
-                              {option.name}
-                              {option.id === group.defaultOptionId ? " (default)" : ""}
-                            </span>
-                            <span className="tabular-nums">
-                              {option.price > 0 ? `+${formatPriceCAD(option.price)}` : ""}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+                  {optionGroups.map(({ group, options }) => {
+                    const selected = selections[group.id] ?? [];
+                    const isSingle = group.maxSelection <= 1;
+                    const atMax = selected.length >= group.maxSelection;
+                    return (
+                      <fieldset key={group.id}>
+                        <div className="flex items-baseline justify-between gap-2">
+                          <legend className="font-semibold text-stone-900">
+                            {group.name}
+                          </legend>
+                          <span className="text-xs font-medium uppercase tracking-wide text-amber-700">
+                            {selectionRuleLabel(group)}
+                          </span>
+                        </div>
+                        <ul className="mt-2 space-y-1.5">
+                          {options.map((option) => {
+                            const isSelected = selected.some(
+                              (s) => s.optionId === option.id,
+                            );
+                            const selectedQty =
+                              selected.find((s) => s.optionId === option.id)
+                                ?.quantity ?? 1;
+                            const disabled =
+                              !option.availability.available ||
+                              (!isSingle && !isSelected && atMax);
+                            return (
+                              <li
+                                key={option.id}
+                                className={`flex items-center justify-between gap-3 text-sm ${
+                                  option.availability.available
+                                    ? "text-stone-700"
+                                    : "text-stone-400"
+                                }`}
+                              >
+                                <label className="flex flex-1 items-center gap-2">
+                                  <input
+                                    type={isSingle ? "radio" : "checkbox"}
+                                    name={`group-${group.id}`}
+                                    checked={isSelected}
+                                    disabled={disabled}
+                                    onChange={() =>
+                                      isSingle
+                                        ? selectSingle(
+                                            group.id,
+                                            option.id,
+                                            group.minSelection === 0,
+                                          )
+                                        : toggleMulti(
+                                            group.id,
+                                            option.id,
+                                            group.maxSelection,
+                                          )
+                                    }
+                                    className="h-4 w-4 accent-amber-600"
+                                  />
+                                  <span className={option.availability.available ? "" : "line-through"}>
+                                    {option.name}
+                                    {!option.availability.available
+                                      ? ` (${option.availability.label})`
+                                      : ""}
+                                  </span>
+                                </label>
+                                {isSelected && group.multipleOptionQuantity ? (
+                                  <div className="flex items-center gap-1.5">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setOptionQuantity(
+                                          group.id,
+                                          option.id,
+                                          selectedQty - 1,
+                                        )
+                                      }
+                                      className="flex h-6 w-6 items-center justify-center rounded-full border border-stone-300 text-stone-600 hover:bg-stone-100"
+                                      aria-label={`Decrease ${option.name} quantity`}
+                                    >
+                                      −
+                                    </button>
+                                    <span className="w-4 text-center tabular-nums">
+                                      {selectedQty}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setOptionQuantity(
+                                          group.id,
+                                          option.id,
+                                          selectedQty + 1,
+                                        )
+                                      }
+                                      className="flex h-6 w-6 items-center justify-center rounded-full border border-stone-300 text-stone-600 hover:bg-stone-100"
+                                      aria-label={`Increase ${option.name} quantity`}
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span className="tabular-nums">
+                                    {option.price > 0
+                                      ? `+${formatPriceCAD(option.price)}`
+                                      : ""}
+                                  </span>
+                                )}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </fieldset>
+                    );
+                  })}
                 </div>
               ) : null}
+
+              <div className="mt-6 flex items-center justify-between gap-4 border-t border-stone-200 pt-5">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setItemQuantity((q) => Math.max(1, q - 1))}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-stone-300 text-stone-600 hover:bg-stone-100"
+                    aria-label="Decrease quantity"
+                  >
+                    −
+                  </button>
+                  <span className="w-6 text-center font-medium tabular-nums">
+                    {itemQuantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setItemQuantity((q) => q + 1)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-stone-300 text-stone-600 hover:bg-stone-100"
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={!canAddToCart}
+                  className="flex-1 rounded-full bg-amber-500 px-5 py-2.5 text-sm font-semibold text-stone-900 shadow-md transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-400"
+                >
+                  {availability.available
+                    ? `Add to cart — ${formatPriceCAD(total)}`
+                    : availability.label}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -1,9 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, useEffect, type FormEvent } from "react";
 import { cartSubtotal, lineTotal, useCartStore } from "@/lib/cartStore";
-import { getPickupSlotsForToday, isStoreOpenNow } from "@/lib/availability";
+import {
+  getStoreLocalNow,
+  getMaxScheduleDateStr,
+  isStoreOpenNow,
+  isValidScheduledPickup,
+} from "@/lib/availability";
 import { calculateTaxBreakdown } from "@/lib/orderPricing";
 import { formatPriceCAD, formatTimeHHmmTo12h } from "@/lib/utils";
 import { TakeOutFulfillmentKind } from "@/types/enum";
@@ -12,11 +17,11 @@ type CheckoutFormProps = {
   initialStoreSettings: StoreSettings;
 };
 
-/** Wire shape for fulfillment — same-day "HH:mm" over the wire; the persisted Order
+/** Wire shape for fulfillment — "YYYY-MM-DD" + "HH:mm" over the wire; the persisted Order
  * stores a real `scheduledAt` Date instead, computed server-side (see app/api/orders/route.ts). */
 type FulfillmentWire =
   | { kind: TakeOutFulfillmentKind.Immediate }
-  | { kind: TakeOutFulfillmentKind.Scheduled; pickupTime: string };
+  | { kind: TakeOutFulfillmentKind.Scheduled; date: string; time: string };
 
 type SubmitState =
   | { status: "idle" }
@@ -29,6 +34,25 @@ type SubmitState =
       fulfillment: FulfillmentWire;
     };
 
+/** Formats a "YYYY-MM-DD" + "HH:mm" pair for display — treats the numbers as-is (no
+ * timezone conversion), since we're just re-presenting what the customer picked. */
+function formatScheduledLabel(dateStr: string, timeStr: string): string {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const [hour, minute] = timeStr.split(":").map(Number);
+  const local = new Date(year, month - 1, day, hour, minute);
+  const datePart = local.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  const timePart = local.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${datePart} at ${timePart}`;
+}
+
 export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps) {
   const lines = useCartStore((s) => s.lines);
   const clearCart = useCartStore((s) => s.clear);
@@ -39,16 +63,25 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
 
   const now = useMemo(() => new Date(), []);
   const storeOpenNow = isStoreOpenNow(initialStoreSettings, now);
-  const slots = useMemo(
-    () => getPickupSlotsForToday(initialStoreSettings, now),
+  const canOrderAtAll = !initialStoreSettings.pauseOrdering;
+
+  const minLocal = useMemo(() => {
+    const { dateStr, hhmm } = getStoreLocalNow(initialStoreSettings, now);
+    return `${dateStr}T${hhmm}`;
+  }, [initialStoreSettings, now]);
+  const currentStoreTime = useMemo(
+    () => formatTimeHHmmTo12h(getStoreLocalNow(initialStoreSettings, now).hhmm),
     [initialStoreSettings, now],
   );
-  const canOrderAtAll = storeOpenNow || slots.length > 0;
+  const maxLocal = useMemo(
+    () => `${getMaxScheduleDateStr(initialStoreSettings, now)}T23:59`,
+    [initialStoreSettings, now],
+  );
 
   const [fulfillmentKind, setFulfillmentKind] = useState<TakeOutFulfillmentKind>(
     storeOpenNow ? TakeOutFulfillmentKind.Immediate : TakeOutFulfillmentKind.Scheduled,
   );
-  const [pickupTime, setPickupTime] = useState("");
+  const [scheduledLocal, setScheduledLocal] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -69,7 +102,7 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
         </p>
         <p className="mt-4 text-stone-700">
           {fulfillment.kind === TakeOutFulfillmentKind.Scheduled
-            ? `Pickup around ${formatTimeHHmmTo12h(fulfillment.pickupTime)}`
+            ? `Pickup ${formatScheduledLabel(fulfillment.date, fulfillment.time)}`
             : "Ready for pickup as soon as possible"}
         </p>
         <p className="mt-1 font-semibold text-stone-900">
@@ -103,7 +136,7 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
     return (
       <div className="mx-auto max-w-xl py-8 text-center">
         <p className="text-lg text-stone-600">
-          We&apos;re currently closed for ordering. Please check back during store hours.
+          We&apos;re currently closed for ordering. Please check back later.
         </p>
         <Link
           href="/menu"
@@ -117,9 +150,24 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (fulfillmentKind === TakeOutFulfillmentKind.Scheduled && !pickupTime) {
-      setSubmitState({ status: "error", message: "Please choose a pickup time" });
-      return;
+
+    let fulfillment: FulfillmentWire;
+    if (fulfillmentKind === TakeOutFulfillmentKind.Scheduled) {
+      const [date, time] = scheduledLocal.split("T");
+      if (!date || !time) {
+        setSubmitState({ status: "error", message: "Please choose a pickup date and time" });
+        return;
+      }
+      if (!isValidScheduledPickup(initialStoreSettings, date, time.slice(0, 5))) {
+        setSubmitState({
+          status: "error",
+          message: "That time is outside store hours — please choose another.",
+        });
+        return;
+      }
+      fulfillment = { kind: TakeOutFulfillmentKind.Scheduled, date, time: time.slice(0, 5) };
+    } else {
+      fulfillment = { kind: TakeOutFulfillmentKind.Immediate };
     }
 
     setSubmitState({ status: "submitting" });
@@ -133,13 +181,10 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
           quantity: s.quantity,
         })),
       })),
-      fulfillment:
-        fulfillmentKind === TakeOutFulfillmentKind.Scheduled
-          ? { kind: TakeOutFulfillmentKind.Scheduled, pickupTime }
-          : { kind: TakeOutFulfillmentKind.Immediate },
+      fulfillment,
       customerName: name.trim(),
       phoneNumber: phone.trim(),
-      customerEmail: email.trim() || undefined,
+      customerEmail: email.trim(),
     };
 
     try {
@@ -176,6 +221,7 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
       <div className="space-y-6">
         <fieldset className="rounded-xl border border-stone-200 p-5">
           <legend className="px-1 font-semibold text-stone-900">Pickup</legend>
+          <p className="text-xs text-stone-500">Current store time: {currentStoreTime}</p>
           <div className="mt-2 flex flex-wrap gap-4">
             <label className="flex items-center gap-2 text-sm text-stone-700">
               <input
@@ -195,26 +241,21 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
                 name="fulfillment"
                 checked={fulfillmentKind === TakeOutFulfillmentKind.Scheduled}
                 onChange={() => setFulfillmentKind(TakeOutFulfillmentKind.Scheduled)}
-                disabled={slots.length === 0}
                 className="accent-amber-600"
               />
-              Choose a time
+              Choose a date &amp; time
             </label>
           </div>
           {fulfillmentKind === TakeOutFulfillmentKind.Scheduled ? (
-            <select
-              value={pickupTime}
-              onChange={(e) => setPickupTime(e.target.value)}
+            <input
+              type="datetime-local"
+              value={scheduledLocal}
+              onChange={(e) => setScheduledLocal(e.target.value)}
+              min={minLocal}
+              max={maxLocal}
               required
-              className="mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
-            >
-              <option value="">Select a time</option>
-              {slots.map((slot) => (
-                <option key={slot} value={slot}>
-                  {formatTimeHHmmTo12h(slot)}
-                </option>
-              ))}
-            </select>
+              className="mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900"
+            />
           ) : null}
         </fieldset>
 
@@ -241,10 +282,11 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
               />
             </label>
             <label className="block text-sm text-stone-700 sm:col-span-2">
-              Email (optional)
+              Email
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
                 type="email"
                 className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900"
               />

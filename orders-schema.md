@@ -46,10 +46,10 @@ enum TakeOutFulfillmentKind { Immediate = "immediate", Scheduled = "scheduled" }
   status: OrderStatus;
   fulfillment:
     | { kind: TakeOutFulfillmentKind.Immediate; readyTimeMinutes?: number }  // default 15
-    | { kind: TakeOutFulfillmentKind.Scheduled; scheduledAt: Timestamp };    // same-day only, v1
+    | { kind: TakeOutFulfillmentKind.Scheduled; scheduledAt: Timestamp };    // up to 30 days out
   customerName: string;
   phoneNumber: string;
-  customerEmail?: string;      // extension
+  customerEmail: string;       // extension — mandatory (reserved for an order-confirmation email feature)
   orderItems: {
     menuItemId: string;         // extension — traces back to demoMenuItems; POS keeps no doc reference
     name: string;                // snapshot at order time
@@ -90,10 +90,9 @@ enum TakeOutFulfillmentKind { Immediate = "immediate", Scheduled = "scheduled" }
   (menu prices may have changed since); it is not a bug to reconcile.
 - **Pay-at-pickup only, no online payment yet.** There is no `paymentStatus`/`paymentIntentId`
   field — that will be added if/when online payment is integrated.
-- **`fulfillment.kind === Scheduled` is same-day only in this site's v1 UI**, unlike POS which
-  supports full multi-day scheduling via its own date picker. `scheduledAt` is still a real
-  Firestore Timestamp (not a bare time string), so it's forward-compatible if this site later
-  adds multi-day scheduling.
+- **`fulfillment.kind === Scheduled` allows any date up to `MAX_SCHEDULE_DAYS_AHEAD` (30) days
+  out** (`lib/availability.ts`), via a `datetime-local` calendar+clock input — matching POS's own
+  web scheduling UI (`WebScheduledDateTimeInput.tsx`). `scheduledAt` is a real Firestore Timestamp.
 - **No `staff` field** (present and required on POS's base `Order`) — there's no staff member
   involved in placing an online order. Omitted rather than faked.
 - **No order-level notes field.** Customers can't currently leave a general order note; only

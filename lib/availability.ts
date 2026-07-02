@@ -43,7 +43,10 @@ function getZonedParts(timeZone: string, now: Date) {
 }
 
 /** True if a sold-out flag currently makes the item/option unavailable. */
-export function isSoldOut(soldOut: MenuItemSoldOut | undefined, now: Date = new Date()): boolean {
+export function isSoldOut(
+  soldOut: MenuItemSoldOut | undefined,
+  now: Date = new Date(),
+): boolean {
   if (!soldOut) return false;
   if (soldOut.indefinite) return true;
   if (!soldOut.hours) return false;
@@ -78,8 +81,12 @@ export function getAvailabilityStatus(
   timezone: string,
   now: Date = new Date(),
 ): AvailabilityStatus {
-  if (isSoldOut(entity.soldOut, now)) return { available: false, label: "Sold out" };
-  if (entity.availability && !isWithinAvailabilityWindow(entity.availability, timezone, now)) {
+  if (isSoldOut(entity.soldOut, now))
+    return { available: false, label: "Sold out" };
+  if (
+    entity.availability &&
+    !isWithinAvailabilityWindow(entity.availability, timezone, now)
+  ) {
     return {
       available: false,
       label: `Available ${formatTimeHHmmTo12h(entity.availability.start)} – ${formatTimeHHmmTo12h(entity.availability.end)}`,
@@ -98,7 +105,10 @@ function getDayStatus(settings: StoreSettings, now: Date) {
 }
 
 /** True if the store is currently open for ordering per StoreSettings. */
-export function isStoreOpenNow(settings: StoreSettings, now: Date = new Date()): boolean {
+export function isStoreOpenNow(
+  settings: StoreSettings,
+  now: Date = new Date(),
+): boolean {
   if (settings.pauseOrdering) return false;
   const { dayHours, hhmm, onHoliday } = getDayStatus(settings, now);
   if (onHoliday || !dayHours.isOpen) return false;
@@ -110,70 +120,142 @@ function hhmmToMinutes(hhmm: string): number {
   return h * 60 + m;
 }
 
-function minutesToHHmm(totalMinutes: number): string {
-  const h = Math.floor(totalMinutes / 60) % 24;
-  const m = totalMinutes % 60;
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+const WEEKDAY_KEYS: StoreDayKey[] = [
+  "sun",
+  "mon",
+  "tue",
+  "wed",
+  "thu",
+  "fri",
+  "sat",
+];
+
+/** Which day-of-week a "YYYY-MM-DD" calendar date falls on — a pure calendar fact,
+ * independent of timezone (unlike "now", which needs one). */
+function weekdayKeyForDateStr(dateStr: string): StoreDayKey {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const weekdayIndex = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  return WEEKDAY_KEYS[weekdayIndex];
 }
 
-// V1 scope: same-day pickup scheduling only, no multi-day date picker.
-const PICKUP_LEAD_MINUTES = 20;
-const PICKUP_SLOT_INTERVAL_MINUTES = 15;
-
-/** "HH:mm" slots offered for same-day scheduled pickup, spaced 15min apart, starting ~20min out. */
-export function getPickupSlotsForToday(
-  settings: StoreSettings,
-  now: Date = new Date(),
-): string[] {
-  if (settings.pauseOrdering) return [];
-  const { dayHours, hhmm, onHoliday } = getDayStatus(settings, now);
-  if (onHoliday || !dayHours.isOpen) return [];
-
-  const nowMin = hhmmToMinutes(hhmm);
-  const openMin = hhmmToMinutes(dayHours.open);
-  const closeMin = hhmmToMinutes(dayHours.close);
-  const earliest = Math.max(nowMin + PICKUP_LEAD_MINUTES, openMin);
-  const firstSlot =
-    Math.ceil(earliest / PICKUP_SLOT_INTERVAL_MINUTES) * PICKUP_SLOT_INTERVAL_MINUTES;
-
-  const slots: string[] = [];
-  for (let t = firstSlot; t < closeMin; t += PICKUP_SLOT_INTERVAL_MINUTES) {
-    slots.push(minutesToHHmm(t));
-  }
-  return slots;
+/** Adds `days` calendar days to a "YYYY-MM-DD" string. */
+function addDaysToDateStr(dateStr: string, days: number): string {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const dt = new Date(Date.UTC(year, month - 1, day + days));
+  return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-${String(dt.getUTCDate()).padStart(2, "0")}`;
 }
 
 /**
- * True if a same-day "HH:mm" pickup time is currently valid to request. Uses a
- * shorter lead time than getPickupSlotsForToday's UI increments so a slot the
- * UI offered always still passes here (mismatched "now" between render and
- * request would otherwise cause spurious rejections).
+ * True if "YYYY-MM-DD" is a real calendar date (rejects e.g. "2026-06-31" — June has 30
+ * days). `Date.UTC` silently normalizes overflowing dates (rolls into the next month),
+ * which would otherwise let a hand-crafted request's date sort differently as a raw
+ * string than it resolves to as an actual date — e.g. bypassing a holiday-range check
+ * that compares `dateStr` lexicographically.
  */
-export function isValidScheduledPickupTime(
+function isRealDateStr(dateStr: string): boolean {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const dt = new Date(Date.UTC(year, month - 1, day));
+  return (
+    dt.getUTCFullYear() === year &&
+    dt.getUTCMonth() === month - 1 &&
+    dt.getUTCDate() === day
+  );
+}
+
+/** Current date/time in the store's timezone, exposed for UI bounds (e.g. a date/time picker's `min`). */
+export function getStoreLocalNow(
   settings: StoreSettings,
+  now: Date = new Date(),
+): { dateStr: string; hhmm: string } {
+  const { dateStr, hhmm } = getZonedParts(settings.timezone, now);
+  return { dateStr, hhmm };
+}
+
+// How far ahead customers can schedule a pickup — adjust freely, no other code depends on this value.
+export const MAX_SCHEDULE_DAYS_AHEAD = 30;
+
+/** The last "YYYY-MM-DD" a customer can schedule for, exposed for a date/time picker's `max`. */
+export function getMaxScheduleDateStr(
+  settings: StoreSettings,
+  now: Date = new Date(),
+): string {
+  return addDaysToDateStr(
+    getStoreLocalNow(settings, now).dateStr,
+    MAX_SCHEDULE_DAYS_AHEAD,
+  );
+}
+const SCHEDULE_LEAD_MINUTES = 30;
+
+/**
+ * True if a "YYYY-MM-DD" + "HH:mm" pickup request is currently valid: not in the past,
+ * not beyond MAX_SCHEDULE_DAYS_AHEAD, not a holiday, within that day's store hours, and
+ * (if today) at least SCHEDULE_LEAD_MINUTES from now.
+ */
+export function isValidScheduledPickup(
+  settings: StoreSettings,
+  dateStr: string,
   pickupTime: string,
   now: Date = new Date(),
-  leadMinutes = 15,
 ): boolean {
   if (settings.pauseOrdering) return false;
-  const { dayHours, hhmm, onHoliday } = getDayStatus(settings, now);
-  if (onHoliday || !dayHours.isOpen) return false;
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ||
+    !/^([01]\d|2[0-3]):[0-5]\d$/.test(pickupTime) ||
+    !isRealDateStr(dateStr)
+  ) {
+    return false;
+  }
+
+  const today = getStoreLocalNow(settings, now);
+  if (dateStr < today.dateStr) return false;
+  if (dateStr > addDaysToDateStr(today.dateStr, MAX_SCHEDULE_DAYS_AHEAD))
+    return false;
+
+  const onHoliday = settings.holidays.some((holiday) => {
+    const to = holiday.to ?? holiday.from;
+    return dateStr >= holiday.from && dateStr <= to;
+  });
+  if (onHoliday) return false;
+
+  const dayHours = settings.hours[weekdayKeyForDateStr(dateStr)];
+  if (!dayHours.isOpen) return false;
 
   const requestedMin = hhmmToMinutes(pickupTime);
-  const earliest = Math.max(hhmmToMinutes(hhmm) + leadMinutes, hhmmToMinutes(dayHours.open));
-  return requestedMin >= earliest && requestedMin < hhmmToMinutes(dayHours.close);
+  if (
+    requestedMin < hhmmToMinutes(dayHours.open) ||
+    requestedMin >= hhmmToMinutes(dayHours.close)
+  ) {
+    return false;
+  }
+
+  if (
+    dateStr === today.dateStr &&
+    requestedMin < hhmmToMinutes(today.hhmm) + SCHEDULE_LEAD_MINUTES
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 /**
- * Resolves a validated same-day "HH:mm" pickup time to a real instant (today, in the
- * store's timezone), for persisting as `TakeOutFulfillment`'s `scheduledAt: Date` —
+ * Resolves a validated "YYYY-MM-DD" + "HH:mm" pickup request to a real instant in the
+ * store's timezone, for persisting as `TakeOutFulfillment`'s `scheduledAt: Date` —
  * matches AsianLePOS's Timestamp-based fulfillment shape instead of a bare time string.
  */
 export function resolveScheduledPickupInstant(
   timezone: string,
+  dateStr: string,
   pickupTime: string,
-  now: Date = new Date(),
 ): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const [hour, minute] = pickupTime.split(":").map(Number);
+
+  // Probe the zone's UTC offset near the target date/time (not "now") so this stays
+  // correct even for timezones that observe DST, across a scheduling horizon of weeks.
+  const probeInstant = new Date(
+    Date.UTC(year, month - 1, day, hour, minute, 0),
+  );
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: timezone,
     year: "numeric",
@@ -183,14 +265,12 @@ export function resolveScheduledPickupInstant(
     minute: "2-digit",
     second: "2-digit",
     hourCycle: "h23",
-  }).formatToParts(now);
+  }).formatToParts(probeInstant);
 
   const byType: Record<string, string> = {};
   for (const part of parts) byType[part.type] = part.value;
 
-  // Offset between "now" and its wall-clock representation in the target timezone,
-  // then apply that same offset to today's date + the requested time.
-  const nowAsIfUtc = Date.UTC(
+  const probeAsIfUtc = Date.UTC(
     Number(byType.year),
     Number(byType.month) - 1,
     Number(byType.day),
@@ -198,16 +278,8 @@ export function resolveScheduledPickupInstant(
     Number(byType.minute),
     Number(byType.second),
   );
-  const offsetMs = nowAsIfUtc - now.getTime();
+  const offsetMs = probeAsIfUtc - probeInstant.getTime();
 
-  const [targetHour, targetMinute] = pickupTime.split(":").map(Number);
-  const targetAsIfUtc = Date.UTC(
-    Number(byType.year),
-    Number(byType.month) - 1,
-    Number(byType.day),
-    targetHour,
-    targetMinute,
-    0,
-  );
+  const targetAsIfUtc = Date.UTC(year, month - 1, day, hour, minute, 0);
   return new Date(targetAsIfUtc - offsetMs);
 }

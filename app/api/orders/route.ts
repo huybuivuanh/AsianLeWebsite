@@ -10,7 +10,7 @@ import { fetchStoreSettingsForServer } from "@/lib/storeSettings";
 import {
   isAvailableNow,
   isStoreOpenNow,
-  isValidScheduledPickupTime,
+  isValidScheduledPickup,
   resolveScheduledPickupInstant,
 } from "@/lib/availability";
 import { calculateTaxBreakdown } from "@/lib/orderPricing";
@@ -35,7 +35,7 @@ type IncomingLine = {
   quantity?: unknown;
   options?: IncomingSelection[];
 };
-type IncomingFulfillment = { kind?: unknown; pickupTime?: unknown };
+type IncomingFulfillment = { kind?: unknown; date?: unknown; time?: unknown };
 type IncomingOrder = {
   lines?: IncomingLine[];
   fulfillment?: IncomingFulfillment;
@@ -44,10 +44,10 @@ type IncomingOrder = {
   customerEmail?: unknown;
 };
 
-/** Wire shape returned to the client — same-day "HH:mm", not the persisted `scheduledAt: Date`. */
+/** Wire shape returned to the client — "YYYY-MM-DD" + "HH:mm", not the persisted `scheduledAt: Date`. */
 type FulfillmentWire =
   | { kind: TakeOutFulfillmentKind.Immediate }
-  | { kind: TakeOutFulfillmentKind.Scheduled; pickupTime: string };
+  | { kind: TakeOutFulfillmentKind.Scheduled; date: string; time: string };
 
 function badRequest(message: string) {
   return NextResponse.json({ error: message }, { status: 400 });
@@ -70,9 +70,9 @@ export async function POST(request: NextRequest) {
   if (!customerName) return badRequest("Name is required");
   if (!phoneNumber) return badRequest("Phone number is required");
 
-  const rawEmail = typeof body.customerEmail === "string" ? body.customerEmail.trim() : "";
-  if (rawEmail && !EMAIL_RE.test(rawEmail)) return badRequest("Invalid email address");
-  const customerEmail = rawEmail || undefined;
+  const customerEmail = typeof body.customerEmail === "string" ? body.customerEmail.trim() : "";
+  if (!customerEmail) return badRequest("Email is required");
+  if (!EMAIL_RE.test(customerEmail)) return badRequest("Invalid email address");
 
   const [menuItems, optionGroups, options, storeSettings] = await Promise.all([
     fetchDemoMenuItemsForServer(),
@@ -89,16 +89,18 @@ export async function POST(request: NextRequest) {
   let fulfillment: TakeOutFulfillment;
   let fulfillmentWire: FulfillmentWire;
   if (body.fulfillment?.kind === TakeOutFulfillmentKind.Scheduled) {
-    const pickupTime = body.fulfillment.pickupTime;
+    const date = body.fulfillment.date;
+    const time = body.fulfillment.time;
     if (
-      typeof pickupTime !== "string" ||
-      !isValidScheduledPickupTime(storeSettings, pickupTime, now)
+      typeof date !== "string" ||
+      typeof time !== "string" ||
+      !isValidScheduledPickup(storeSettings, date, time, now)
     ) {
       return badRequest("Selected pickup time is no longer available");
     }
-    const scheduledAt = resolveScheduledPickupInstant(storeSettings.timezone, pickupTime, now);
+    const scheduledAt = resolveScheduledPickupInstant(storeSettings.timezone, date, time);
     fulfillment = { kind: TakeOutFulfillmentKind.Scheduled, scheduledAt };
-    fulfillmentWire = { kind: TakeOutFulfillmentKind.Scheduled, pickupTime };
+    fulfillmentWire = { kind: TakeOutFulfillmentKind.Scheduled, date, time };
   } else {
     if (!isStoreOpenNow(storeSettings, now)) {
       return badRequest("We're currently closed for ordering");
@@ -195,7 +197,7 @@ export async function POST(request: NextRequest) {
     fulfillment,
     customerName,
     phoneNumber,
-    ...(customerEmail ? { customerEmail } : {}),
+    customerEmail,
     orderItems,
     taxBreakDown,
     createdAt: FieldValue.serverTimestamp(),

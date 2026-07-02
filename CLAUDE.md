@@ -67,7 +67,7 @@ All wrap their loaders in React's `cache()` to deduplicate within a single reque
 
 The `/menu` page doubles as the ordering UI (see `ecommerce.md` for the full Firestore data-model contract this reads). Key pieces:
 
-- `lib/availability.ts` — pure logic (no Firestore): sold-out/time-window availability for items & options, store open/closed decision tree, same-day pickup-slot generation. All timezone math uses `Intl.DateTimeFormat` with the store's IANA timezone — no date library dependency.
+- `lib/availability.ts` — pure logic (no Firestore): sold-out/time-window availability for items & options, store open/closed decision tree, and scheduled-pickup validation up to `MAX_SCHEDULE_DAYS_AHEAD` (30 days) via a `datetime-local` calendar+clock input. All timezone math uses `Intl.DateTimeFormat` with the store's IANA timezone — no date library dependency.
 - `lib/menuOptions.ts` — resolves a menu item's option groups/options into a display-ready view model with availability computed.
 - `lib/cartStore.ts` — client-side cart, Zustand + `persist` (localStorage). Snapshots name/price at add-to-cart time so the cart renders without the full menu loaded; **never trusted for money** — `/api/orders` re-derives every price from live Firestore data. Uses `skipHydration: true` + manual `rehydrate()` (in `CartDrawer`) to avoid an SSR/client hydration mismatch.
 - `lib/orderPricing.ts` — GST (5%) + PST (6%) computation, Saskatchewan restaurant meal rates confirmed with the business owner.

@@ -192,7 +192,7 @@ declare global {
     fulfillment: TakeOutFulfillment;
     customerName: string;
     phoneNumber: string;
-    customerEmail?: string; // extension
+    customerEmail: string;
     orderItems: OrderItem[];
     taxBreakDown: TaxBreakDown;
     createdAt: Date;

@@ -88,19 +88,126 @@ export function getAvailabilityStatus(
   return { available: true };
 }
 
-/** True if the store is currently open for ordering per StoreSettings. */
-export function isStoreOpenNow(settings: StoreSettings, now: Date = new Date()): boolean {
-  if (settings.pauseOrdering) return false;
-
+function getDayStatus(settings: StoreSettings, now: Date) {
   const { dayKey, hhmm, dateStr } = getZonedParts(settings.timezone, now);
-
   const onHoliday = settings.holidays.some((holiday) => {
     const to = holiday.to ?? holiday.from;
     return dateStr >= holiday.from && dateStr <= to;
   });
-  if (onHoliday) return false;
+  return { dayHours: settings.hours[dayKey], hhmm, onHoliday };
+}
 
-  const dayHours = settings.hours[dayKey];
-  if (!dayHours.isOpen) return false;
+/** True if the store is currently open for ordering per StoreSettings. */
+export function isStoreOpenNow(settings: StoreSettings, now: Date = new Date()): boolean {
+  if (settings.pauseOrdering) return false;
+  const { dayHours, hhmm, onHoliday } = getDayStatus(settings, now);
+  if (onHoliday || !dayHours.isOpen) return false;
   return hhmm >= dayHours.open && hhmm < dayHours.close;
+}
+
+function hhmmToMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function minutesToHHmm(totalMinutes: number): string {
+  const h = Math.floor(totalMinutes / 60) % 24;
+  const m = totalMinutes % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+// V1 scope: same-day pickup scheduling only, no multi-day date picker.
+const PICKUP_LEAD_MINUTES = 20;
+const PICKUP_SLOT_INTERVAL_MINUTES = 15;
+
+/** "HH:mm" slots offered for same-day scheduled pickup, spaced 15min apart, starting ~20min out. */
+export function getPickupSlotsForToday(
+  settings: StoreSettings,
+  now: Date = new Date(),
+): string[] {
+  if (settings.pauseOrdering) return [];
+  const { dayHours, hhmm, onHoliday } = getDayStatus(settings, now);
+  if (onHoliday || !dayHours.isOpen) return [];
+
+  const nowMin = hhmmToMinutes(hhmm);
+  const openMin = hhmmToMinutes(dayHours.open);
+  const closeMin = hhmmToMinutes(dayHours.close);
+  const earliest = Math.max(nowMin + PICKUP_LEAD_MINUTES, openMin);
+  const firstSlot =
+    Math.ceil(earliest / PICKUP_SLOT_INTERVAL_MINUTES) * PICKUP_SLOT_INTERVAL_MINUTES;
+
+  const slots: string[] = [];
+  for (let t = firstSlot; t < closeMin; t += PICKUP_SLOT_INTERVAL_MINUTES) {
+    slots.push(minutesToHHmm(t));
+  }
+  return slots;
+}
+
+/**
+ * True if a same-day "HH:mm" pickup time is currently valid to request. Uses a
+ * shorter lead time than getPickupSlotsForToday's UI increments so a slot the
+ * UI offered always still passes here (mismatched "now" between render and
+ * request would otherwise cause spurious rejections).
+ */
+export function isValidScheduledPickupTime(
+  settings: StoreSettings,
+  pickupTime: string,
+  now: Date = new Date(),
+  leadMinutes = 15,
+): boolean {
+  if (settings.pauseOrdering) return false;
+  const { dayHours, hhmm, onHoliday } = getDayStatus(settings, now);
+  if (onHoliday || !dayHours.isOpen) return false;
+
+  const requestedMin = hhmmToMinutes(pickupTime);
+  const earliest = Math.max(hhmmToMinutes(hhmm) + leadMinutes, hhmmToMinutes(dayHours.open));
+  return requestedMin >= earliest && requestedMin < hhmmToMinutes(dayHours.close);
+}
+
+/**
+ * Resolves a validated same-day "HH:mm" pickup time to a real instant (today, in the
+ * store's timezone), for persisting as `TakeOutFulfillment`'s `scheduledAt: Date` —
+ * matches AsianLePOS's Timestamp-based fulfillment shape instead of a bare time string.
+ */
+export function resolveScheduledPickupInstant(
+  timezone: string,
+  pickupTime: string,
+  now: Date = new Date(),
+): Date {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+
+  const byType: Record<string, string> = {};
+  for (const part of parts) byType[part.type] = part.value;
+
+  // Offset between "now" and its wall-clock representation in the target timezone,
+  // then apply that same offset to today's date + the requested time.
+  const nowAsIfUtc = Date.UTC(
+    Number(byType.year),
+    Number(byType.month) - 1,
+    Number(byType.day),
+    Number(byType.hour),
+    Number(byType.minute),
+    Number(byType.second),
+  );
+  const offsetMs = nowAsIfUtc - now.getTime();
+
+  const [targetHour, targetMinute] = pickupTime.split(":").map(Number);
+  const targetAsIfUtc = Date.UTC(
+    Number(byType.year),
+    Number(byType.month) - 1,
+    Number(byType.day),
+    targetHour,
+    targetMinute,
+    0,
+  );
+  return new Date(targetAsIfUtc - offsetMs);
 }

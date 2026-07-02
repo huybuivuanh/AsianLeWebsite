@@ -1,4 +1,9 @@
-import type { DayOfWeek, KitchenType } from "@/types/enum";
+import type {
+  DayOfWeek,
+  KitchenType,
+  OrderStatus,
+  TakeOutFulfillmentKind,
+} from "@/types/enum";
 
 declare global {
   interface FoodCategory {
@@ -145,6 +150,52 @@ declare global {
       sun: DayHours;
     };
     holidays: Holiday[];
+  }
+
+  // --- Orders (written by this site, read by the separate admin app — see orders-schema.md).
+  // Field names/enum values mirror the AsianLePOS app's Order model (a different Firebase
+  // project — no shared data, just a consistent vocabulary), with a few extensions specific
+  // to an unauthenticated online-ordering flow: `orderNumber`, `customerEmail`, and
+  // `menuItemId` traceability back to demoMenuItems. ---
+
+  interface OrderItemOption {
+    name: string;
+    price: number;
+    quantity: number;
+  }
+
+  interface OrderItem {
+    menuItemId: string; // extension — traces back to demoMenuItems; POS keeps no doc reference
+    name: string;
+    price: number; // per-unit price INCLUDING selected options — matches POS's convention
+    quantity: number;
+    options?: OrderItemOption[];
+    instructions?: string;
+    kitchenType: KitchenType;
+  }
+
+  interface TaxBreakDown {
+    subTotal: number;
+    pst: number;
+    gst: number;
+    total: number;
+  }
+
+  type TakeOutFulfillment =
+    | { kind: TakeOutFulfillmentKind.Immediate; readyTimeMinutes?: number }
+    | { kind: TakeOutFulfillmentKind.Scheduled; scheduledAt: Date };
+
+  interface Order {
+    id?: string;
+    orderNumber: string; // extension — short pickup code, POS has no analog (staff see the ticket directly)
+    status: OrderStatus;
+    fulfillment: TakeOutFulfillment;
+    customerName: string;
+    phoneNumber: string;
+    customerEmail?: string; // extension
+    orderItems: OrderItem[];
+    taxBreakDown: TaxBreakDown;
+    createdAt: Date;
   }
 }
 

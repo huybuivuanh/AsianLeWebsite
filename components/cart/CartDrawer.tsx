@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { skipNextImageOptimization } from "@/lib/imagePolicy";
 import { formatPriceCAD } from "@/lib/utils";
@@ -102,7 +103,7 @@ export default function CartDrawer() {
                 <ul className="space-y-4">
                   {lines.map((line) => (
                     <li
-                      key={line.lineId}
+                      key={line.id}
                       className="flex gap-3 border-b border-stone-100 pb-4"
                     >
                       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-stone-100">
@@ -124,16 +125,14 @@ export default function CartDrawer() {
                             {formatPriceCAD(lineTotal(line))}
                           </p>
                         </div>
-                        {line.optionGroups.length > 0 ? (
+                        {line.options.length > 0 ? (
                           <ul className="mt-1 space-y-0.5 text-xs text-stone-500">
-                            {line.optionGroups.flatMap((g) =>
-                              g.selections.map((s) => (
-                                <li key={`${g.optionGroupId}-${s.optionId}`}>
-                                  {s.name}
-                                  {s.quantity > 1 ? ` x${s.quantity}` : ""}
-                                </li>
-                              )),
-                            )}
+                            {line.options.map((s) => (
+                              <li key={s.optionId}>
+                                {s.name}
+                                {s.quantity > 1 ? ` x${s.quantity}` : ""}
+                              </li>
+                            ))}
                           </ul>
                         ) : null}
                         <div className="mt-2 flex items-center justify-between">
@@ -141,7 +140,7 @@ export default function CartDrawer() {
                             <button
                               type="button"
                               onClick={() =>
-                                updateQuantity(line.lineId, line.quantity - 1)
+                                updateQuantity(line.id, line.quantity - 1)
                               }
                               className="flex h-6 w-6 items-center justify-center rounded-full border border-stone-300 text-stone-600 hover:bg-stone-100"
                               aria-label={`Decrease ${line.name} quantity`}
@@ -154,7 +153,7 @@ export default function CartDrawer() {
                             <button
                               type="button"
                               onClick={() =>
-                                updateQuantity(line.lineId, line.quantity + 1)
+                                updateQuantity(line.id, line.quantity + 1)
                               }
                               className="flex h-6 w-6 items-center justify-center rounded-full border border-stone-300 text-stone-600 hover:bg-stone-100"
                               aria-label={`Increase ${line.name} quantity`}
@@ -164,7 +163,7 @@ export default function CartDrawer() {
                           </div>
                           <button
                             type="button"
-                            onClick={() => removeLine(line.lineId)}
+                            onClick={() => removeLine(line.id)}
                             className="text-xs font-medium text-stone-400 hover:text-red-600"
                           >
                             Remove
@@ -183,16 +182,14 @@ export default function CartDrawer() {
                   <span>Subtotal</span>
                   <span className="tabular-nums">{formatPriceCAD(subtotal)}</span>
                 </div>
-                <p className="mt-1 text-xs text-stone-500">
-                  Pay at pickup — online checkout coming soon.
-                </p>
-                <button
-                  type="button"
-                  disabled
-                  className="mt-3 w-full cursor-not-allowed rounded-full bg-stone-200 px-5 py-3 text-sm font-semibold text-stone-400"
+                <p className="mt-1 text-xs text-stone-500">Pay at pickup.</p>
+                <Link
+                  href="/checkout"
+                  onClick={() => setOpen(false)}
+                  className="mt-3 block w-full rounded-full bg-amber-500 px-5 py-3 text-center text-sm font-semibold text-stone-900 shadow-md transition hover:bg-amber-400"
                 >
-                  Checkout coming soon
-                </button>
+                  Checkout
+                </Link>
               </div>
             ) : null}
           </div>

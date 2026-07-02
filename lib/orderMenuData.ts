@@ -79,7 +79,7 @@ function mapDocToDemoMenuItem(doc: QueryDocumentSnapshot<DocumentData>): DemoMen
   const price = typeof d.price === "number" && Number.isFinite(d.price) ? d.price : 0;
   const kitchenType = KITCHEN_TYPES.includes(d.kitchenType)
     ? (d.kitchenType as KitchenType)
-    : KitchenType.OTHER;
+    : KitchenType.Other;
   return {
     id: doc.id,
     name: (d.name as string) ?? "",

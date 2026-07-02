@@ -31,9 +31,25 @@ export const DAY_ORDER_MONDAY_FIRST: DayOfWeek[] = [
 ];
 
 export enum KitchenType {
-  DEEP_FRY = "Deep Fry",
-  STIR_FRY = "Stir Fry",
-  OTHER = "Other",
-  BOTH = "Both",
-  DRINK = "Drink",
+  DeepFry = "Deep Fry",
+  StirFry = "Stir Fry",
+  Other = "Other",
+  Both = "Both",
+  Drink = "Drink",
+}
+
+// --- Order enums below mirror the AsianLePOS app's src/types/enums.ts naming/values
+// (different Firebase project — no shared data, just a consistent vocabulary). ---
+
+/** Extends POS's InProgress/Completed/Cancelled with New, for orders not yet acknowledged by staff. */
+export enum OrderStatus {
+  New = "New",
+  InProgress = "InProgress",
+  Completed = "Completed",
+  Cancelled = "Cancelled",
+}
+
+export enum TakeOutFulfillmentKind {
+  Immediate = "immediate",
+  Scheduled = "scheduled",
 }

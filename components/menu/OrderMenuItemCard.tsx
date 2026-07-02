@@ -5,10 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { skipNextImageOptimization } from "@/lib/imagePolicy";
 import { formatPriceCAD } from "@/lib/utils";
 import { selectionRuleLabel, type MenuItemViewModel } from "@/lib/menuOptions";
-import {
-  useCartStore,
-  type CartOptionGroupSelection,
-} from "@/lib/cartStore";
+import { useCartStore, type CartOptionSelection } from "@/lib/cartStore";
 
 type OrderMenuItemCardProps = MenuItemViewModel;
 
@@ -112,28 +109,25 @@ export default function OrderMenuItemCard({
   function handleAddToCart() {
     if (!canAddToCart) return;
 
-    const cartOptionGroups: CartOptionGroupSelection[] = optionGroups
-      .filter(({ group }) => (selections[group.id] ?? []).length > 0)
-      .map(({ group, options }) => ({
-        optionGroupId: group.id,
-        optionGroupName: group.name,
-        selections: (selections[group.id] ?? []).map((sel) => {
-          const opt = options.find((o) => o.id === sel.optionId)!;
-          return {
-            optionId: opt.id,
-            name: opt.name,
-            price: opt.price,
-            quantity: sel.quantity,
-          };
-        }),
-      }));
+    const cartOptions: CartOptionSelection[] = optionGroups.flatMap(({ group, options }) =>
+      (selections[group.id] ?? []).map((sel) => {
+        const opt = options.find((o) => o.id === sel.optionId)!;
+        return {
+          optionId: opt.id,
+          name: opt.name,
+          price: opt.price,
+          quantity: sel.quantity,
+        };
+      }),
+    );
 
     addLine({
       menuItemId: item.id,
       name: item.name,
-      unitPrice: item.price,
+      // Per-unit price INCLUDING selected options — matches POS's OrderItem.price convention.
+      price: item.price + optionsTotal,
       imageUrl: item.image?.url,
-      optionGroups: cartOptionGroups,
+      options: cartOptions,
       quantity: itemQuantity,
     });
     close();

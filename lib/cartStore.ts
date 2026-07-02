@@ -4,69 +4,53 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 /**
- * Client-side cart, persisted to localStorage. Snapshots name/price at add-to-cart
- * time so the cart renders anywhere without needing the full menu loaded — the
- * checkout API (Phase 4) re-derives the authoritative price from Firestore, it
- * never trusts these stored numbers.
+ * Client-side cart, persisted to localStorage. Mirrors AsianLePOS's cart pattern
+ * (a different Firebase project — no shared data, just a consistent shape): each
+ * line is snapshotted at add-to-cart time, `price` is the per-unit price INCLUDING
+ * selected options (matching POS's OrderItem convention), and `options` is kept
+ * alongside only for itemized display. The checkout API re-derives the
+ * authoritative price from Firestore — these stored numbers are never trusted.
  */
 
-export type CartOptionSelection = {
-  optionId: string;
-  name: string;
-  price: number;
-  quantity: number;
-};
-
-export type CartOptionGroupSelection = {
-  optionGroupId: string;
-  optionGroupName: string;
-  selections: CartOptionSelection[];
-};
+// Cart-only: OrderItemOption plus optionId, needed here for cart-stacking keys, React
+// keys, and telling the server which option was picked — stripped before persisting
+// (the stored OrderItemOption matches POS's exact name/price/quantity shape).
+export type CartOptionSelection = OrderItemOption & { optionId: string };
 
 export type CartLine = {
-  lineId: string;
+  id: string;
   menuItemId: string;
   name: string;
-  unitPrice: number;
+  price: number;
   imageUrl?: string;
   quantity: number;
-  optionGroups: CartOptionGroupSelection[];
+  options: CartOptionSelection[];
 };
 
 type AddLineInput = {
   menuItemId: string;
   name: string;
-  unitPrice: number;
+  price: number;
   imageUrl?: string;
-  optionGroups: CartOptionGroupSelection[];
+  options: CartOptionSelection[];
   quantity?: number;
 };
 
 type CartState = {
   lines: CartLine[];
   addLine: (input: AddLineInput) => void;
-  updateQuantity: (lineId: string, quantity: number) => void;
-  removeLine: (lineId: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  removeLine: (id: string) => void;
   clear: () => void;
 };
 
 /** Two lines are "the same" (and should stack quantity) if the item + exact option selections match. */
-function lineConfigKey(
-  menuItemId: string,
-  optionGroups: CartOptionGroupSelection[],
-): string {
-  const groupsKey = optionGroups
-    .map((g) =>
-      [
-        g.optionGroupId,
-        ...g.selections
-          .map((s) => `${s.optionId}x${s.quantity}`)
-          .sort(),
-      ].join(":"),
-    )
+function lineConfigKey(menuItemId: string, options: CartOptionSelection[]): string {
+  const optionsKey = options
+    .map((o) => `${o.optionId}x${o.quantity}`)
     .sort()
     .join("|");
-  return `${menuItemId}::${groupsKey}`;
+  return `${menuItemId}::${optionsKey}`;
 }
 
 export const useCartStore = create<CartState>()(
@@ -76,15 +60,15 @@ export const useCartStore = create<CartState>()(
 
       addLine: (input) => {
         const quantity = input.quantity ?? 1;
-        const key = lineConfigKey(input.menuItemId, input.optionGroups);
+        const key = lineConfigKey(input.menuItemId, input.options);
         const existing = get().lines.find(
-          (line) => lineConfigKey(line.menuItemId, line.optionGroups) === key,
+          (line) => lineConfigKey(line.menuItemId, line.options) === key,
         );
 
         if (existing) {
           set({
             lines: get().lines.map((line) =>
-              line.lineId === existing.lineId
+              line.id === existing.id
                 ? { ...line, quantity: line.quantity + quantity }
                 : line,
             ),
@@ -96,32 +80,29 @@ export const useCartStore = create<CartState>()(
           lines: [
             ...get().lines,
             {
-              lineId: crypto.randomUUID(),
+              id: crypto.randomUUID(),
               menuItemId: input.menuItemId,
               name: input.name,
-              unitPrice: input.unitPrice,
+              price: input.price,
               imageUrl: input.imageUrl,
               quantity,
-              optionGroups: input.optionGroups,
+              options: input.options,
             },
           ],
         });
       },
 
-      updateQuantity: (lineId, quantity) => {
+      updateQuantity: (id, quantity) => {
         if (quantity <= 0) {
-          set({ lines: get().lines.filter((l) => l.lineId !== lineId) });
+          set({ lines: get().lines.filter((l) => l.id !== id) });
           return;
         }
         set({
-          lines: get().lines.map((l) =>
-            l.lineId === lineId ? { ...l, quantity } : l,
-          ),
+          lines: get().lines.map((l) => (l.id === id ? { ...l, quantity } : l)),
         });
       },
 
-      removeLine: (lineId) =>
-        set({ lines: get().lines.filter((l) => l.lineId !== lineId) }),
+      removeLine: (id) => set({ lines: get().lines.filter((l) => l.id !== id) }),
 
       clear: () => set({ lines: [] }),
     }),
@@ -132,13 +113,9 @@ export const useCartStore = create<CartState>()(
   ),
 );
 
+/** price already includes selected options — matches POS's orderItemsSubtotal (price * quantity). */
 export function lineTotal(line: CartLine): number {
-  const optionsTotal = line.optionGroups.reduce(
-    (sum, group) =>
-      sum + group.selections.reduce((s, sel) => s + sel.price * sel.quantity, 0),
-    0,
-  );
-  return (line.unitPrice + optionsTotal) * line.quantity;
+  return line.price * line.quantity;
 }
 
 export function cartSubtotal(lines: CartLine[]): number {

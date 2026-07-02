@@ -26,12 +26,10 @@ NEXT_PUBLIC_APP_ID
 NEXT_PUBLIC_MEASUREMENT_ID
 ```
 
-Placing an order additionally requires a Firebase Admin service account (server-only, **not** prefixed `NEXT_PUBLIC_` — never exposed to the client). Generate one via Firebase Console → Project Settings → Service Accounts → Generate new private key:
+Placing an order additionally requires a Firebase Admin service account (server-only, **not** prefixed `NEXT_PUBLIC_` — never exposed to the client). Generate one via Firebase Console → Project Settings → Service Accounts → Generate new private key, then paste the entire downloaded JSON as one line:
 
 ```
-FIREBASE_PROJECT_ID
-FIREBASE_CLIENT_EMAIL
-FIREBASE_PRIVATE_KEY      # keep the \n-escaped PEM as one line in .env.local
+SERVICE_ACCOUNT_KEY      # the full service-account JSON, as a single-line string
 ```
 
 Without these, `/api/orders` fails cleanly (checkout UI shows "Network error", nothing crashes) — everything else in the app works fine without them.
@@ -73,7 +71,7 @@ The `/menu` page doubles as the ordering UI (see `ecommerce.md` for the full Fir
 - `lib/menuOptions.ts` — resolves a menu item's option groups/options into a display-ready view model with availability computed.
 - `lib/cartStore.ts` — client-side cart, Zustand + `persist` (localStorage). Snapshots name/price at add-to-cart time so the cart renders without the full menu loaded; **never trusted for money** — `/api/orders` re-derives every price from live Firestore data. Uses `skipHydration: true` + manual `rehydrate()` (in `CartDrawer`) to avoid an SSR/client hydration mismatch.
 - `lib/orderPricing.ts` — GST (5%) + PST (6%) computation, Saskatchewan restaurant meal rates confirmed with the business owner.
-- `lib/firebaseAdmin.ts` — trusted server-only Firestore (bypasses security rules) for the one write path that must not be reachable via the public client SDK: `orders`. Requires the `FIREBASE_*` env vars above; never import from a Client Component.
+- `lib/firebaseAdmin.ts` — trusted server-only Firestore (bypasses security rules) for the one write path that must not be reachable via the public client SDK: `orders`. Requires `SERVICE_ACCOUNT_KEY` above; never import from a Client Component.
 - `app/api/orders/route.ts` — validates the cart against live Firestore data (availability, min/max option selection, pickup-time validity) and writes to `orders` via `firebaseAdmin`. See `orders-schema.md` for the Firestore shape, written for the separate admin app to read — **this repo has no admin/order-management UI**, by design (see that doc).
 
 ### Firebase collections

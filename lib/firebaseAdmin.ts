@@ -12,17 +12,22 @@ function getAdminApp() {
   const existing = getApps();
   if (existing.length > 0) return existing[0];
 
-  const projectId = process.env.FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
-
-  if (!projectId || !clientEmail || !privateKey) {
+  const raw = process.env.SERVICE_ACCOUNT_KEY;
+  if (!raw) {
     throw new Error(
-      "Missing Firebase Admin credentials — set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY.",
+      "Missing Firebase Admin credentials — set SERVICE_ACCOUNT_KEY to the service account JSON (Firebase Console → Project Settings → Service Accounts → Generate new private key).",
     );
   }
 
-  return initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) });
+  let serviceAccount: object;
+  try {
+    serviceAccount = JSON.parse(raw);
+  } catch {
+    throw new Error("SERVICE_ACCOUNT_KEY is not valid JSON.");
+  }
+
+  // cert() accepts either snake_case (raw downloaded JSON) or camelCase keys — no remapping needed.
+  return initializeApp({ credential: cert(serviceAccount) });
 }
 
 export const adminDb = getFirestore(getAdminApp());

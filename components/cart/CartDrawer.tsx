@@ -114,18 +114,22 @@ export default function CartDrawer() {
                             fill
                             className="object-cover"
                             sizes="64px"
-                            unoptimized={skipNextImageOptimization(line.imageUrl)}
+                            unoptimized={skipNextImageOptimization(
+                              line.imageUrl,
+                            )}
                           />
                         ) : null}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
-                          <p className="font-semibold text-stone-900">{line.name}</p>
+                          <p className="font-semibold text-stone-900">
+                            {line.name}
+                          </p>
                           <p className="shrink-0 font-semibold tabular-nums text-amber-700">
                             {formatPriceCAD(lineTotal(line))}
                           </p>
                         </div>
-                        {line.options.length > 0 ? (
+                        {line.options && line.options.length > 0 ? (
                           <ul className="mt-1 space-y-0.5 text-xs text-stone-500">
                             {line.options.map((s) => (
                               <li key={s.optionId}>
@@ -180,7 +184,9 @@ export default function CartDrawer() {
               <div className="border-t border-stone-200 px-5 py-4">
                 <div className="flex items-center justify-between text-base font-semibold text-stone-900">
                   <span>Subtotal</span>
-                  <span className="tabular-nums">{formatPriceCAD(subtotal)}</span>
+                  <span className="tabular-nums">
+                    {formatPriceCAD(subtotal)}
+                  </span>
                 </div>
                 <p className="mt-1 text-xs text-stone-500">Pay at pickup.</p>
                 <Link

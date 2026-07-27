@@ -6,6 +6,7 @@ import { skipNextImageOptimization } from "@/lib/imagePolicy";
 import { formatPriceCAD } from "@/lib/utils";
 import { selectionRuleLabel, type MenuItemViewModel } from "@/lib/menuOptions";
 import { useCartStore, type CartOptionSelection } from "@/lib/cartStore";
+import { useLiveMenuAvailability } from "@/components/menu/LiveMenuAvailabilityProvider";
 
 type OrderMenuItemCardProps = MenuItemViewModel;
 
@@ -29,13 +30,23 @@ function buildDefaultSelections(
 
 export default function OrderMenuItemCard({
   item,
-  availability,
-  optionGroups,
+  availability: initialAvailability,
+  optionGroups: initialOptionGroups,
 }: OrderMenuItemCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [itemQuantity, setItemQuantity] = useState(1);
   const [selections, setSelections] = useState<SelectionState>({});
   const addLine = useCartStore((s) => s.addLine);
+
+  const { getItemAvailability, getOptionAvailability } = useLiveMenuAvailability();
+  const availability = getItemAvailability(item.id, initialAvailability);
+  const optionGroups = initialOptionGroups.map((og) => ({
+    ...og,
+    options: og.options.map((option) => ({
+      ...option,
+      availability: getOptionAvailability(option.id, option.availability),
+    })),
+  }));
 
   const open = useCallback(() => {
     setItemQuantity(1);

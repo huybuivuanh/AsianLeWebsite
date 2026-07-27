@@ -18,7 +18,7 @@ import { KitchenType } from "@/types/enum";
 
 const KITCHEN_TYPES: KitchenType[] = Object.values(KitchenType);
 
-function mapAvailability(raw: unknown): MenuItemAvailability | undefined {
+export function mapAvailability(raw: unknown): MenuItemAvailability | undefined {
   if (!raw || typeof raw !== "object") return undefined;
   const start = (raw as { start?: unknown }).start;
   const end = (raw as { end?: unknown }).end;
@@ -26,7 +26,7 @@ function mapAvailability(raw: unknown): MenuItemAvailability | undefined {
   return { start, end };
 }
 
-function mapSoldOut(raw: unknown): MenuItemSoldOut | undefined {
+export function mapSoldOut(raw: unknown): MenuItemSoldOut | undefined {
   if (!raw || typeof raw !== "object") return undefined;
   const r = raw as { since?: { toDate?: () => Date }; hours?: unknown; indefinite?: unknown };
   return {

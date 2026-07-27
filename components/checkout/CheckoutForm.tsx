@@ -70,13 +70,61 @@ const SCHEDULED_PICKUP_INVALID_MESSAGES: Record<
   "lead-time": `Please choose a time at least ${SCHEDULE_LEAD_MINUTES} minutes from now.`,
 };
 
+type LineAvailabilityResult = {
+  itemAvailable: boolean;
+  unavailableOptionIds: string[];
+  currentPrice: number | null;
+};
+
 export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps) {
   const lines = useCartStore((s) => s.lines);
   const clearCart = useCartStore((s) => s.clear);
+  const removeLine = useCartStore((s) => s.removeLine);
 
   useEffect(() => {
     useCartStore.persist.rehydrate();
   }, []);
+
+  const [unavailableLineIds, setUnavailableLineIds] = useState<Set<string>>(new Set());
+  const [priceUpdates, setPriceUpdates] = useState<Map<string, number>>(new Map());
+
+  useEffect(() => {
+    if (lines.length === 0) return;
+    let cancelled = false;
+    fetch("/api/cart/availability", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        lines: lines.map((line) => ({
+          menuItemId: line.menuItemId,
+          options: line.options.map((s) => ({ optionId: s.optionId, quantity: s.quantity })),
+        })),
+      }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { results: LineAvailabilityResult[] } | null) => {
+        if (cancelled || !data) return;
+        const unavailable = new Set<string>();
+        const priceChanges = new Map<string, number>();
+        lines.forEach((line, i) => {
+          const result = data.results[i];
+          if (!result) return;
+          if (!result.itemAvailable || result.unavailableOptionIds.length > 0) {
+            unavailable.add(line.id);
+          } else if (result.currentPrice !== null && result.currentPrice !== line.price) {
+            priceChanges.set(line.id, result.currentPrice);
+          }
+        });
+        setUnavailableLineIds(unavailable);
+        setPriceUpdates(priceChanges);
+      })
+      .catch(() => {
+        // Best-effort UX nudge only — /api/orders re-validates authoritatively at submit time.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [lines]);
 
   const now = useMemo(() => new Date(), []);
   const storeOpenNow = isStoreOpenNow(initialStoreSettings, now);
@@ -167,6 +215,14 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+
+    if (unavailableLineIds.size > 0) {
+      setSubmitState({
+        status: "error",
+        message: "Some items in your cart are no longer available — remove them to continue.",
+      });
+      return;
+    }
 
     let fulfillment: FulfillmentWire;
     if (fulfillmentKind === TakeOutFulfillmentKind.Scheduled) {
@@ -329,14 +385,37 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
       <div className="h-fit rounded-xl border border-stone-200 p-5">
         <h2 className="font-semibold text-stone-900">Order summary</h2>
         <ul className="mt-3 space-y-3">
-          {lines.map((line) => (
-            <li key={line.id} className="flex justify-between gap-3 text-sm text-stone-700">
-              <span>
-                {line.quantity}x {line.name}
-              </span>
-              <span className="shrink-0 tabular-nums">{formatPriceCAD(lineTotal(line))}</span>
-            </li>
-          ))}
+          {lines.map((line) => {
+            const unavailable = unavailableLineIds.has(line.id);
+            const updatedPrice = priceUpdates.get(line.id);
+            return (
+              <li key={line.id} className="text-sm text-stone-700">
+                <div className="flex justify-between gap-3">
+                  <span className={unavailable ? "text-stone-400 line-through" : undefined}>
+                    {line.quantity}x {line.name}
+                  </span>
+                  <span className="shrink-0 tabular-nums">{formatPriceCAD(lineTotal(line))}</span>
+                </div>
+                {unavailable ? (
+                  <div className="mt-1 flex items-center justify-between gap-3 text-xs text-red-600">
+                    <span>No longer available</span>
+                    <button
+                      type="button"
+                      onClick={() => removeLine(line.id)}
+                      className="font-semibold underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : updatedPrice !== undefined ? (
+                  <p className="mt-1 text-xs text-amber-700">
+                    Price updated to {formatPriceCAD(updatedPrice)} — you&apos;ll be charged the
+                    current price.
+                  </p>
+                ) : null}
+              </li>
+            );
+          })}
         </ul>
         <div className="mt-4 space-y-1 border-t border-stone-200 pt-3 text-sm text-stone-600">
           <div className="flex justify-between">
@@ -359,7 +438,7 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
         <p className="mt-3 text-xs text-stone-500">Pay at pickup.</p>
         <button
           type="submit"
-          disabled={submitState.status === "submitting"}
+          disabled={submitState.status === "submitting" || unavailableLineIds.size > 0}
           className="mt-4 w-full rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-stone-900 shadow-md transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-400"
         >
           {submitState.status === "submitting"

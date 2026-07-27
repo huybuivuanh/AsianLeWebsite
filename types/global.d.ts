@@ -166,9 +166,9 @@ declare global {
   }
 
   interface OrderItem {
-    menuItemId: string; // extension — traces back to demoMenuItems; POS keeps no doc reference
+    menuItemId: string;
     name: string;
-    price: number; // per-unit price INCLUDING selected options — matches POS's convention
+    price: number;
     quantity: number;
     options?: OrderItemOption[];
     instructions?: string;

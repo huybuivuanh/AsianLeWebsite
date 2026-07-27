@@ -4,6 +4,7 @@ import PageContainer from "@/components/PageContainer";
 import DailySpecialsGrid from "@/components/daily-specials/DailySpecialsGrid";
 import MenuCategoryNav from "@/components/menu/MenuCategoryNav";
 import OrderMenuItemCard from "@/components/menu/OrderMenuItemCard";
+import { LiveMenuAvailabilityProvider } from "@/components/menu/LiveMenuAvailabilityProvider";
 import CartDrawer from "@/components/cart/CartDrawer";
 import { STORE } from "@/lib/store";
 import { fetchOrderMenuDataForServer } from "@/lib/orderMenuData";
@@ -177,40 +178,42 @@ export default async function MenuPage() {
                 </Link>
               </div>
             ) : (
-              <div className="mt-24 space-y-28">
-                {categoriesSorted.map((category) => {
-                  const itemsInCategory = itemViewModels.filter((vm) =>
-                    vm.item.categoryIds?.includes(category.id) ?? false,
-                  );
-                  return (
-                    <div
-                      key={category.id}
-                      id={`category-${category.id}`}
-                      className="scroll-mt-28 mx-auto w-full max-w-5xl"
-                    >
-                      <div className="mb-8 text-center">
-                        <h3 className="text-4xl font-bold tracking-tight text-stone-900 sm:text-4xl">
-                          {category.name}
-                        </h3>
-                        <div
-                          className="mx-auto mt-3 h-1 w-20 rounded-full bg-amber-500/90"
-                          aria-hidden
-                        />
+              <LiveMenuAvailabilityProvider timezone={storeSettings.timezone}>
+                <div className="mt-24 space-y-28">
+                  {categoriesSorted.map((category) => {
+                    const itemsInCategory = itemViewModels.filter((vm) =>
+                      vm.item.categoryIds?.includes(category.id) ?? false,
+                    );
+                    return (
+                      <div
+                        key={category.id}
+                        id={`category-${category.id}`}
+                        className="scroll-mt-28 mx-auto w-full max-w-5xl"
+                      >
+                        <div className="mb-8 text-center">
+                          <h3 className="text-4xl font-bold tracking-tight text-stone-900 sm:text-4xl">
+                            {category.name}
+                          </h3>
+                          <div
+                            className="mx-auto mt-3 h-1 w-20 rounded-full bg-amber-500/90"
+                            aria-hidden
+                          />
+                        </div>
+                        {category.description ? (
+                          <p className="mx-auto mb-8 max-w-2xl text-center text-stone-600">
+                            {category.description}
+                          </p>
+                        ) : null}
+                        <ul className="grid grid-cols-1 gap-x-10 gap-y-6 lg:grid-cols-2">
+                          {itemsInCategory.map((vm) => (
+                            <OrderMenuItemCard key={vm.item.id} {...vm} />
+                          ))}
+                        </ul>
                       </div>
-                      {category.description ? (
-                        <p className="mx-auto mb-8 max-w-2xl text-center text-stone-600">
-                          {category.description}
-                        </p>
-                      ) : null}
-                      <ul className="grid grid-cols-1 gap-x-10 gap-y-6 lg:grid-cols-2">
-                        {itemsInCategory.map((vm) => (
-                          <OrderMenuItemCard key={vm.item.id} {...vm} />
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              </LiveMenuAvailabilityProvider>
             )}
 
             {/* Order online CTA */}

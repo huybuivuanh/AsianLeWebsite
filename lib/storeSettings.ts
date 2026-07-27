@@ -16,6 +16,7 @@ const DEFAULT_TIMEZONE = "America/Regina";
 const DEFAULT_STORE_SETTINGS: StoreSettings = {
   pauseOrdering: true,
   timezone: DEFAULT_TIMEZONE,
+  waitTime: 0,
   hours: {
     mon: DEFAULT_DAY_HOURS,
     tue: DEFAULT_DAY_HOURS,
@@ -70,6 +71,7 @@ export async function fetchStoreSettingsForServer(): Promise<StoreSettings> {
   return {
     pauseOrdering: d.pauseOrdering === true,
     timezone: typeof d.timezone === "string" ? d.timezone : DEFAULT_TIMEZONE,
+    waitTime: typeof d.waitTime === "number" ? d.waitTime : DEFAULT_STORE_SETTINGS.waitTime,
     hours: mapWeeklyHours(d.hours),
     holidays: mapHolidays(d.holidays),
   };

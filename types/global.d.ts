@@ -140,6 +140,7 @@ declare global {
   interface StoreSettings {
     pauseOrdering: boolean;
     timezone: string;
+    waitTime: number;
     hours: {
       mon: DayHours;
       tue: DayHours;

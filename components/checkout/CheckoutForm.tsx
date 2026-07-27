@@ -243,7 +243,10 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
       <div className="space-y-6">
         <fieldset className="rounded-xl border border-stone-200 p-5">
           <legend className="px-1 font-semibold text-stone-900">Pickup</legend>
-          <p className="text-xs text-stone-500">Current store time: {currentStoreTime}</p>
+          <p className="text-xs text-stone-500">
+            Current store time: {currentStoreTime}
+            {storeOpenNow && ` · Estimated wait: ${initialStoreSettings.waitTime} min`}
+          </p>
           <div className="mt-2 flex flex-wrap gap-4">
             <label className="flex items-center gap-2 text-sm text-stone-700">
               <input

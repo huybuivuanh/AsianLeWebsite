@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState, useEffect, type FormEvent } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { cartSubtotal, lineTotal, useCartStore } from "@/lib/cartStore";
 import {
   getStoreLocalNow,
@@ -76,7 +78,9 @@ type LineAvailabilityResult = {
   currentPrice: number | null;
 };
 
-export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps) {
+export default function CheckoutForm({
+  initialStoreSettings,
+}: CheckoutFormProps) {
   const lines = useCartStore((s) => s.lines);
   const clearCart = useCartStore((s) => s.clear);
   const removeLine = useCartStore((s) => s.removeLine);
@@ -85,8 +89,12 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
     useCartStore.persist.rehydrate();
   }, []);
 
-  const [unavailableLineIds, setUnavailableLineIds] = useState<Set<string>>(new Set());
-  const [priceUpdates, setPriceUpdates] = useState<Map<string, number>>(new Map());
+  const [unavailableLineIds, setUnavailableLineIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [priceUpdates, setPriceUpdates] = useState<Map<string, number>>(
+    new Map(),
+  );
 
   useEffect(() => {
     if (lines.length === 0) return;
@@ -97,7 +105,10 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
       body: JSON.stringify({
         lines: lines.map((line) => ({
           menuItemId: line.menuItemId,
-          options: line.options.map((s) => ({ optionId: s.optionId, quantity: s.quantity })),
+          options: line.options.map((s) => ({
+            optionId: s.optionId,
+            quantity: s.quantity,
+          })),
         })),
       }),
     })
@@ -111,7 +122,10 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
           if (!result) return;
           if (!result.itemAvailable || result.unavailableOptionIds.length > 0) {
             unavailable.add(line.id);
-          } else if (result.currentPrice !== null && result.currentPrice !== line.price) {
+          } else if (
+            result.currentPrice !== null &&
+            result.currentPrice !== line.price
+          ) {
             priceChanges.set(line.id, result.currentPrice);
           }
         });
@@ -125,6 +139,17 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
       cancelled = true;
     };
   }, [lines]);
+
+  // Live estimated wait time — staff can update this often while the store is busy, so
+  // patch it on top of the SSR-fetched value instead of waiting for a page reload.
+  const [waitTime, setWaitTime] = useState(initialStoreSettings.waitTime);
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, "settings", "store"), (snapshot) => {
+      const data = snapshot.data();
+      if (typeof data?.waitTime === "number") setWaitTime(data.waitTime);
+    });
+    return unsubscribe;
+  }, []);
 
   const now = useMemo(() => new Date(), []);
   const storeOpenNow = isStoreOpenNow(initialStoreSettings, now);
@@ -143,14 +168,19 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
     [initialStoreSettings, now],
   );
 
-  const [fulfillmentKind, setFulfillmentKind] = useState<TakeOutFulfillmentKind>(
-    storeOpenNow ? TakeOutFulfillmentKind.Immediate : TakeOutFulfillmentKind.Scheduled,
-  );
+  const [fulfillmentKind, setFulfillmentKind] =
+    useState<TakeOutFulfillmentKind>(
+      storeOpenNow
+        ? TakeOutFulfillmentKind.Immediate
+        : TakeOutFulfillmentKind.Scheduled,
+    );
   const [scheduledLocal, setScheduledLocal] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [submitState, setSubmitState] = useState<SubmitState>({ status: "idle" });
+  const [submitState, setSubmitState] = useState<SubmitState>({
+    status: "idle",
+  });
 
   const subTotal = cartSubtotal(lines);
   const taxBreakDown = calculateTaxBreakdown(subTotal);
@@ -219,7 +249,8 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
     if (unavailableLineIds.size > 0) {
       setSubmitState({
         status: "error",
-        message: "Some items in your cart are no longer available — remove them to continue.",
+        message:
+          "Some items in your cart are no longer available — remove them to continue.",
       });
       return;
     }
@@ -228,7 +259,10 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
     if (fulfillmentKind === TakeOutFulfillmentKind.Scheduled) {
       const [date, time] = scheduledLocal.split("T");
       if (!date || !time) {
-        setSubmitState({ status: "error", message: "Please choose a pickup date and time" });
+        setSubmitState({
+          status: "error",
+          message: "Please choose a pickup date and time",
+        });
         return;
       }
       const invalidReason = getScheduledPickupInvalidReason(
@@ -243,7 +277,11 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
         });
         return;
       }
-      fulfillment = { kind: TakeOutFulfillmentKind.Scheduled, date, time: time.slice(0, 5) };
+      fulfillment = {
+        kind: TakeOutFulfillmentKind.Scheduled,
+        date,
+        time: time.slice(0, 5),
+      };
     } else {
       fulfillment = { kind: TakeOutFulfillmentKind.Immediate };
     }
@@ -287,7 +325,10 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
         fulfillment: data.fulfillment,
       });
     } catch {
-      setSubmitState({ status: "error", message: "Network error. Please try again." });
+      setSubmitState({
+        status: "error",
+        message: "Network error. Please try again.",
+      });
     }
   }
 
@@ -301,7 +342,7 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
           <legend className="px-1 font-semibold text-stone-900">Pickup</legend>
           <p className="text-xs text-stone-500">
             Current store time: {currentStoreTime}
-            {storeOpenNow && ` · Estimated wait: ${initialStoreSettings.waitTime} min`}
+            {storeOpenNow && ` · Estimated wait: ${waitTime} min`}
           </p>
           <div className="mt-2 flex flex-wrap gap-4">
             <label className="flex items-center gap-2 text-sm text-stone-700">
@@ -309,7 +350,9 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
                 type="radio"
                 name="fulfillment"
                 checked={fulfillmentKind === TakeOutFulfillmentKind.Immediate}
-                onChange={() => setFulfillmentKind(TakeOutFulfillmentKind.Immediate)}
+                onChange={() =>
+                  setFulfillmentKind(TakeOutFulfillmentKind.Immediate)
+                }
                 disabled={!storeOpenNow}
                 className="accent-amber-600"
               />
@@ -321,7 +364,9 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
                 type="radio"
                 name="fulfillment"
                 checked={fulfillmentKind === TakeOutFulfillmentKind.Scheduled}
-                onChange={() => setFulfillmentKind(TakeOutFulfillmentKind.Scheduled)}
+                onChange={() =>
+                  setFulfillmentKind(TakeOutFulfillmentKind.Scheduled)
+                }
                 className="accent-amber-600"
               />
               Choose a date &amp; time
@@ -341,7 +386,9 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
         </fieldset>
 
         <fieldset className="rounded-xl border border-stone-200 p-5">
-          <legend className="px-1 font-semibold text-stone-900">Your info</legend>
+          <legend className="px-1 font-semibold text-stone-900">
+            Your info
+          </legend>
           <div className="mt-2 grid gap-3 sm:grid-cols-2">
             <label className="block text-sm text-stone-700 sm:col-span-1">
               Name
@@ -391,10 +438,16 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
             return (
               <li key={line.id} className="text-sm text-stone-700">
                 <div className="flex justify-between gap-3">
-                  <span className={unavailable ? "text-stone-400 line-through" : undefined}>
+                  <span
+                    className={
+                      unavailable ? "text-stone-400 line-through" : undefined
+                    }
+                  >
                     {line.quantity}x {line.name}
                   </span>
-                  <span className="shrink-0 tabular-nums">{formatPriceCAD(lineTotal(line))}</span>
+                  <span className="shrink-0 tabular-nums">
+                    {formatPriceCAD(lineTotal(line))}
+                  </span>
                 </div>
                 {unavailable ? (
                   <div className="mt-1 flex items-center justify-between gap-3 text-xs text-red-600">
@@ -409,8 +462,8 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
                   </div>
                 ) : updatedPrice !== undefined ? (
                   <p className="mt-1 text-xs text-amber-700">
-                    Price updated to {formatPriceCAD(updatedPrice)} — you&apos;ll be charged the
-                    current price.
+                    Price updated to {formatPriceCAD(updatedPrice)} —
+                    you&apos;ll be charged the current price.
                   </p>
                 ) : null}
               </li>
@@ -420,25 +473,35 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
         <div className="mt-4 space-y-1 border-t border-stone-200 pt-3 text-sm text-stone-600">
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span className="tabular-nums">{formatPriceCAD(taxBreakDown.subTotal)}</span>
+            <span className="tabular-nums">
+              {formatPriceCAD(taxBreakDown.subTotal)}
+            </span>
           </div>
           <div className="flex justify-between">
             <span>GST (5%)</span>
-            <span className="tabular-nums">{formatPriceCAD(taxBreakDown.gst)}</span>
+            <span className="tabular-nums">
+              {formatPriceCAD(taxBreakDown.gst)}
+            </span>
           </div>
           <div className="flex justify-between">
             <span>PST (6%)</span>
-            <span className="tabular-nums">{formatPriceCAD(taxBreakDown.pst)}</span>
+            <span className="tabular-nums">
+              {formatPriceCAD(taxBreakDown.pst)}
+            </span>
           </div>
           <div className="flex justify-between text-base font-bold text-stone-900">
             <span>Total</span>
-            <span className="tabular-nums">{formatPriceCAD(taxBreakDown.total)}</span>
+            <span className="tabular-nums">
+              {formatPriceCAD(taxBreakDown.total)}
+            </span>
           </div>
         </div>
         <p className="mt-3 text-xs text-stone-500">Pay at pickup.</p>
         <button
           type="submit"
-          disabled={submitState.status === "submitting" || unavailableLineIds.size > 0}
+          disabled={
+            submitState.status === "submitting" || unavailableLineIds.size > 0
+          }
           className="mt-4 w-full rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-stone-900 shadow-md transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-400"
         >
           {submitState.status === "submitting"

@@ -7,7 +7,10 @@ import {
   getStoreLocalNow,
   getMaxScheduleDateStr,
   isStoreOpenNow,
-  isValidScheduledPickup,
+  getScheduledPickupInvalidReason,
+  MAX_SCHEDULE_DAYS_AHEAD,
+  SCHEDULE_LEAD_MINUTES,
+  type ScheduledPickupInvalidReason,
 } from "@/lib/availability";
 import { calculateTaxBreakdown } from "@/lib/orderPricing";
 import { formatPriceCAD, formatTimeHHmmTo12h } from "@/lib/utils";
@@ -52,6 +55,20 @@ function formatScheduledLabel(dateStr: string, timeStr: string): string {
   });
   return `${datePart} at ${timePart}`;
 }
+
+const SCHEDULED_PICKUP_INVALID_MESSAGES: Record<
+  ScheduledPickupInvalidReason,
+  string
+> = {
+  paused: "We're not taking online orders right now.",
+  "invalid-format": "Please choose a valid pickup date and time.",
+  past: "That time has already passed — please choose another.",
+  "too-far-ahead": `Please choose a date within the next ${MAX_SCHEDULE_DAYS_AHEAD} days.`,
+  holiday: "We're closed that day — please choose another date.",
+  closed: "We're closed that day — please choose another date.",
+  "outside-hours": "That time is outside store hours — please choose another.",
+  "lead-time": `Please choose a time at least ${SCHEDULE_LEAD_MINUTES} minutes from now.`,
+};
 
 export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps) {
   const lines = useCartStore((s) => s.lines);
@@ -158,10 +175,15 @@ export default function CheckoutForm({ initialStoreSettings }: CheckoutFormProps
         setSubmitState({ status: "error", message: "Please choose a pickup date and time" });
         return;
       }
-      if (!isValidScheduledPickup(initialStoreSettings, date, time.slice(0, 5))) {
+      const invalidReason = getScheduledPickupInvalidReason(
+        initialStoreSettings,
+        date,
+        time.slice(0, 5),
+      );
+      if (invalidReason) {
         setSubmitState({
           status: "error",
-          message: "That time is outside store hours — please choose another.",
+          message: SCHEDULED_PICKUP_INVALID_MESSAGES[invalidReason],
         });
         return;
       }

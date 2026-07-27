@@ -184,12 +184,73 @@ export function getMaxScheduleDateStr(
     MAX_SCHEDULE_DAYS_AHEAD,
   );
 }
-const SCHEDULE_LEAD_MINUTES = 30;
+export const SCHEDULE_LEAD_MINUTES = 30;
+
+export type ScheduledPickupInvalidReason =
+  | "paused"
+  | "invalid-format"
+  | "past"
+  | "too-far-ahead"
+  | "holiday"
+  | "closed"
+  | "outside-hours"
+  | "lead-time";
 
 /**
- * True if a "YYYY-MM-DD" + "HH:mm" pickup request is currently valid: not in the past,
- * not beyond MAX_SCHEDULE_DAYS_AHEAD, not a holiday, within that day's store hours, and
- * (if today) at least SCHEDULE_LEAD_MINUTES from now.
+ * Why a "YYYY-MM-DD" + "HH:mm" pickup request is currently invalid, or `null` if it's
+ * valid: not in the past, not beyond MAX_SCHEDULE_DAYS_AHEAD, not a holiday, within that
+ * day's store hours, and (if today) at least SCHEDULE_LEAD_MINUTES from now.
+ */
+export function getScheduledPickupInvalidReason(
+  settings: StoreSettings,
+  dateStr: string,
+  pickupTime: string,
+  now: Date = new Date(),
+): ScheduledPickupInvalidReason | null {
+  if (settings.pauseOrdering) return "paused";
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ||
+    !/^([01]\d|2[0-3]):[0-5]\d$/.test(pickupTime) ||
+    !isRealDateStr(dateStr)
+  ) {
+    return "invalid-format";
+  }
+
+  const today = getStoreLocalNow(settings, now);
+  if (dateStr < today.dateStr) return "past";
+  if (dateStr > addDaysToDateStr(today.dateStr, MAX_SCHEDULE_DAYS_AHEAD))
+    return "too-far-ahead";
+
+  const onHoliday = settings.holidays.some((holiday) => {
+    const to = holiday.to ?? holiday.from;
+    return dateStr >= holiday.from && dateStr <= to;
+  });
+  if (onHoliday) return "holiday";
+
+  const dayHours = settings.hours[weekdayKeyForDateStr(dateStr)];
+  if (!dayHours.isOpen) return "closed";
+
+  const requestedMin = hhmmToMinutes(pickupTime);
+  if (
+    requestedMin < hhmmToMinutes(dayHours.open) ||
+    requestedMin >= hhmmToMinutes(dayHours.close)
+  ) {
+    return "outside-hours";
+  }
+
+  if (
+    dateStr === today.dateStr &&
+    requestedMin < hhmmToMinutes(today.hhmm) + SCHEDULE_LEAD_MINUTES
+  ) {
+    return "lead-time";
+  }
+
+  return null;
+}
+
+/**
+ * True if a "YYYY-MM-DD" + "HH:mm" pickup request is currently valid — see
+ * {@link getScheduledPickupInvalidReason} for the specific reason when it's not.
  */
 export function isValidScheduledPickup(
   settings: StoreSettings,
@@ -197,45 +258,10 @@ export function isValidScheduledPickup(
   pickupTime: string,
   now: Date = new Date(),
 ): boolean {
-  if (settings.pauseOrdering) return false;
-  if (
-    !/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ||
-    !/^([01]\d|2[0-3]):[0-5]\d$/.test(pickupTime) ||
-    !isRealDateStr(dateStr)
-  ) {
-    return false;
-  }
-
-  const today = getStoreLocalNow(settings, now);
-  if (dateStr < today.dateStr) return false;
-  if (dateStr > addDaysToDateStr(today.dateStr, MAX_SCHEDULE_DAYS_AHEAD))
-    return false;
-
-  const onHoliday = settings.holidays.some((holiday) => {
-    const to = holiday.to ?? holiday.from;
-    return dateStr >= holiday.from && dateStr <= to;
-  });
-  if (onHoliday) return false;
-
-  const dayHours = settings.hours[weekdayKeyForDateStr(dateStr)];
-  if (!dayHours.isOpen) return false;
-
-  const requestedMin = hhmmToMinutes(pickupTime);
-  if (
-    requestedMin < hhmmToMinutes(dayHours.open) ||
-    requestedMin >= hhmmToMinutes(dayHours.close)
-  ) {
-    return false;
-  }
-
-  if (
-    dateStr === today.dateStr &&
-    requestedMin < hhmmToMinutes(today.hhmm) + SCHEDULE_LEAD_MINUTES
-  ) {
-    return false;
-  }
-
-  return true;
+  return (
+    getScheduledPickupInvalidReason(settings, dateStr, pickupTime, now) ===
+    null
+  );
 }
 
 /**

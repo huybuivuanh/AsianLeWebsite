@@ -27,7 +27,6 @@ import { OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_LINE_QUANTITY = 20;
-const DEFAULT_READY_TIME_MINUTES = 15;
 
 // Hashes the Firestore doc id into a 6-digit number, purely for a short,
 // easy-to-call-out pickup code — not a uniqueness guarantee.
@@ -115,10 +114,7 @@ export async function POST(request: NextRequest) {
     if (!isStoreOpenNow(storeSettings, now)) {
       return badRequest("We're currently closed for ordering");
     }
-    fulfillment = {
-      kind: TakeOutFulfillmentKind.Immediate,
-      readyTimeMinutes: DEFAULT_READY_TIME_MINUTES,
-    };
+    fulfillment = { kind: TakeOutFulfillmentKind.Immediate };
     fulfillmentWire = { kind: TakeOutFulfillmentKind.Immediate };
   }
 
@@ -209,6 +205,8 @@ export async function POST(request: NextRequest) {
     phoneNumber,
     customerEmail,
     orderItems,
+    printed: false,
+    paid: false,
     taxBreakDown,
     createdAt: FieldValue.serverTimestamp(),
   });

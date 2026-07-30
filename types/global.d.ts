@@ -195,6 +195,8 @@ declare global {
     phoneNumber: string;
     customerEmail: string;
     orderItems: OrderItem[];
+    printed: boolean;
+    paid: boolean;
     taxBreakDown: TaxBreakDown;
     createdAt: Date;
   }

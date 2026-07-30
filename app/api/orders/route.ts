@@ -29,6 +29,16 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_LINE_QUANTITY = 20;
 const DEFAULT_READY_TIME_MINUTES = 15;
 
+// Hashes the Firestore doc id into a 6-digit number, purely for a short,
+// easy-to-call-out pickup code — not a uniqueness guarantee.
+function orderNumberFromId(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) % 1_000_000;
+  }
+  return hash.toString().padStart(6, "0");
+}
+
 type IncomingSelection = { optionId?: unknown; quantity?: unknown };
 type IncomingLine = {
   menuItemId?: unknown;
@@ -189,7 +199,7 @@ export async function POST(request: NextRequest) {
   const taxBreakDown = calculateTaxBreakdown(subTotal);
 
   const ref = adminDb.collection("orders").doc();
-  const orderNumber = ref.id.slice(-6).toUpperCase();
+  const orderNumber = orderNumberFromId(ref.id);
 
   await ref.set({
     orderNumber,

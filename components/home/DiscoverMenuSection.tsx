@@ -1,174 +1,8 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import PageContainer from "../PageContainer";
-import { useCallback, useEffect, useState } from "react";
-
-const MENU_INTRO =
-  "Whether you’re stopping in for lunch or sharing dinner with friends, explore a menu full of comforting favorites and fresh flavors—crafted to satisfy every craving.";
-
-const APPETIZERS = [
-  {
-    name: "Vietnamese Spring Rolls",
-    description:
-      "Crispy rolls filled with seasoned pork and vegetables, served with our house fish-sauce dipping vinaigrette.",
-    image: "/home/discover/Spring Rolls.png",
-  },
-  {
-    name: "Vietnamese Salad Rolls",
-    description:
-      "Fresh rice-paper rolls filled with rice noodles, crisp lettuce, and shrimp, served with our creamy peanut dipping sauce.",
-    image: "/home/discover/Salad Rolls.jpg",
-  },
-  {
-    name: "Boneless Dry Ribs",
-    description:
-      "Tender pork bites, lightly breaded and deep-fried until golden and crisp.",
-    image: "/home/discover/Dry Ribs.jpg",
-  },
-  {
-    name: "Deep Fried Shrimps",
-    description:
-      "Lightly battered shrimp, fried to a crisp and served with sweet & sour sauce.",
-    image: "/home/discover/Shrimps.jpg",
-  },
-  {
-    name: "Chicken Balls",
-    description: "Crispy chicken balls served with classic sweet & sour sauce.",
-    image: "/home/discover/Chicken Balls.jpg",
-  },
-  {
-    name: "Deluxe Wonton Soup",
-    description:
-      "A comforting, savory broth with tender wontons, shrimp, pork, and garden vegetables.",
-    image: "/home/discover/Wonton Soup.png",
-  },
-];
-
-const MAIN_COURSES = [
-  {
-    name: "Vermicelli Combo",
-    description:
-      "Rice vermicelli with lettuce, cucumber, and bean sprouts, topped with a mix of chicken, beef, pork, shrimp, plus a spring roll. Finished with fish sauce and crushed peanuts.",
-    image: "/home/discover/Vermicelli Combo.jpg",
-  },
-  {
-    name: "Special Bird Nest",
-    description:
-      "Crispy egg noodles topped with a savory mix of chicken, beef, pork, and shrimp.",
-    image: "/home/discover/Special Bnest.jpg",
-  },
-  {
-    name: "Dinner For One",
-    description:
-      "A satisfying combo of an egg roll or spring roll, chicken fried rice, and boneless dry ribs.",
-    image: "/home/discover/DN1B.png",
-  },
-  {
-    name: "Butter Garlic Fried Shrimps",
-    description:
-      "Lightly battered shrimp, fried crisp and tossed in rich butter-garlic sauce.",
-    image: "/home/discover/Butter Shrimps.jpg",
-  },
-  {
-    name: "Chicken Fried Rice",
-    description:
-      "Our signature fried rice, wok-tossed with eggs, carrots, and tender chicken.",
-    image: "/home/discover/Fried Rice.png",
-  },
-  {
-    name: "Singapore Noodles",
-    description:
-      "Stir-fried noodles tossed with curry seasoning, mixed vegetables, bean sprouts, and a combination of chicken, beef, pork, and shrimp.",
-    image: "/home/discover/Singapore Noodles.jpg",
-  },
-];
-
-function MenuItemRow({
-  name,
-  description,
-  image,
-}: {
-  name: string;
-  description: string;
-  image: string;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const open = useCallback(() => setIsOpen(true), []);
-  const close = useCallback(() => setIsOpen(false), []);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isOpen, close]);
-
-  return (
-    <>
-      <div className="flex gap-4 rounded-xl border border-stone-200/80 bg-white p-4 shadow-sm transition hover:border-amber-200 hover:shadow-md">
-        <button
-          type="button"
-          onClick={open}
-          className="relative h-20 w-25 shrink-0 overflow-hidden rounded-lg bg-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
-          aria-label={`View larger image of ${name}`}
-        >
-          <Image
-            src={image}
-            alt={name}
-            fill
-            className="object-cover"
-            sizes="100px"
-          />
-        </button>
-        <div className="min-w-0 flex-1">
-          <p className="text-lg font-semibold text-stone-900">{name}</p>
-          <p className="mt-1.5 text-sm leading-relaxed text-stone-600">
-            {description}
-          </p>
-        </div>
-      </div>
-
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label={`${name} image preview`}
-          onClick={close}
-        >
-          <div
-            className="relative w-full max-w-4xl overflow-hidden rounded-2xl bg-stone-900 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={close}
-              className="absolute right-3 top-3 z-10 rounded-full bg-black/50 px-3 py-1 text-sm font-semibold text-white backdrop-blur hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white/80"
-              aria-label="Close image preview"
-            >
-              Close
-            </button>
-            <div className="relative aspect-[4/3] w-full bg-stone-800">
-              <Image
-                src={image}
-                alt={name}
-                fill
-                className="object-contain"
-                sizes="(max-width: 1024px) 100vw, 1024px"
-                priority
-              />
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
+import DiscoverMenuItemRow from "@/components/home/DiscoverMenuItemRow";
+import { MENU_INTRO, APPETIZERS, MAIN_COURSES } from "@/components/home/discoverMenuData";
 
 export default function DiscoverMenuSection() {
   return (
@@ -197,7 +31,7 @@ export default function DiscoverMenuSection() {
               <div className="flex flex-col">
                 <div className="space-y-4">
                   {APPETIZERS.map((item, i) => (
-                    <MenuItemRow key={i} {...item} />
+                    <DiscoverMenuItemRow key={i} {...item} />
                   ))}
                 </div>
               </div>
@@ -253,7 +87,7 @@ export default function DiscoverMenuSection() {
               <div className="order-2 flex flex-col">
                 <div className="space-y-4">
                   {MAIN_COURSES.map((item, i) => (
-                    <MenuItemRow key={i} {...item} />
+                    <DiscoverMenuItemRow key={i} {...item} />
                   ))}
                 </div>
               </div>

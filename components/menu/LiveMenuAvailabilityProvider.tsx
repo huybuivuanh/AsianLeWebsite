@@ -1,10 +1,11 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { mapAvailability, mapSoldOut } from "@/lib/orderMenuData";
-import { getAvailabilityStatus, type AvailabilityStatus } from "@/lib/availability";
+import { mapWeeklyHours, mapHolidays } from "@/lib/storeSettings";
+import { getAvailabilityStatus, isStoreOpenNow, type AvailabilityStatus } from "@/lib/availability";
 
 /**
  * Live-patches item/option availability on top of the SSR-rendered `/menu` page —
@@ -12,7 +13,9 @@ import { getAvailabilityStatus, type AvailabilityStatus } from "@/lib/availabili
  * real-time sold-out/availability-window state from two collection-level Firestore
  * listeners, so staff toggling sold-out reflects immediately instead of waiting up to
  * `revalidate`'s 15-minute window. Falls back to the SSR-computed status passed in by
- * each card until the first snapshot arrives.
+ * each card until the first snapshot arrives. Also mirrors settings/store (pauseOrdering
+ * + hours) so the pause-ordering kill switch takes effect immediately rather than at the
+ * next ISR revalidation.
  */
 
 type RawEntity = { availability?: MenuItemAvailability; soldOut?: MenuItemSoldOut };
@@ -20,6 +23,7 @@ type RawEntity = { availability?: MenuItemAvailability; soldOut?: MenuItemSoldOu
 type LiveMenuAvailabilityContextValue = {
   getItemAvailability: (itemId: string, fallback: AvailabilityStatus) => AvailabilityStatus;
   getOptionAvailability: (optionId: string, fallback: AvailabilityStatus) => AvailabilityStatus;
+  isOrderingAvailable: boolean;
 };
 
 const LiveMenuAvailabilityContext = createContext<LiveMenuAvailabilityContextValue | null>(null);
@@ -29,14 +33,15 @@ const LiveMenuAvailabilityContext = createContext<LiveMenuAvailabilityContextVal
 const TIME_RECHECK_INTERVAL_MS = 60_000;
 
 export function LiveMenuAvailabilityProvider({
-  timezone,
+  storeSettings: initialStoreSettings,
   children,
 }: {
-  timezone: string;
+  storeSettings: StoreSettings;
   children: ReactNode;
 }) {
   const [itemsById, setItemsById] = useState<Map<string, RawEntity> | null>(null);
   const [optionsById, setOptionsById] = useState<Map<string, RawEntity> | null>(null);
+  const [storeSettings, setStoreSettings] = useState(initialStoreSettings);
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -56,23 +61,36 @@ export function LiveMenuAvailabilityProvider({
       }
       setOptionsById(map);
     });
+    const unsubStoreSettings = onSnapshot(doc(db, "settings", "store"), (snapshot) => {
+      const d = snapshot.data();
+      if (!d) return;
+      setStoreSettings({
+        pauseOrdering: d.pauseOrdering === true,
+        timezone: typeof d.timezone === "string" ? d.timezone : initialStoreSettings.timezone,
+        waitTime: typeof d.waitTime === "number" ? d.waitTime : initialStoreSettings.waitTime,
+        hours: mapWeeklyHours(d.hours),
+        holidays: mapHolidays(d.holidays),
+      });
+    });
     const interval = setInterval(() => setNow(new Date()), TIME_RECHECK_INTERVAL_MS);
     return () => {
       unsubItems();
       unsubOptions();
+      unsubStoreSettings();
       clearInterval(interval);
     };
-  }, []);
+  }, [initialStoreSettings.timezone, initialStoreSettings.waitTime]);
 
   const value: LiveMenuAvailabilityContextValue = {
     getItemAvailability: (itemId, fallback) => {
       const entity = itemsById?.get(itemId);
-      return entity ? getAvailabilityStatus(entity, timezone, now) : fallback;
+      return entity ? getAvailabilityStatus(entity, storeSettings.timezone, now) : fallback;
     },
     getOptionAvailability: (optionId, fallback) => {
       const entity = optionsById?.get(optionId);
-      return entity ? getAvailabilityStatus(entity, timezone, now) : fallback;
+      return entity ? getAvailabilityStatus(entity, storeSettings.timezone, now) : fallback;
     },
+    isOrderingAvailable: isStoreOpenNow(storeSettings, now),
   };
 
   return (
@@ -89,6 +107,7 @@ export function useLiveMenuAvailability(): LiveMenuAvailabilityContextValue {
     ctx ?? {
       getItemAvailability: (_itemId, fallback) => fallback,
       getOptionAvailability: (_optionId, fallback) => fallback,
+      isOrderingAvailable: true,
     }
   );
 }

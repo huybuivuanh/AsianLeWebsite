@@ -178,7 +178,7 @@ export default async function MenuPage() {
                 </Link>
               </div>
             ) : (
-              <LiveMenuAvailabilityProvider timezone={storeSettings.timezone}>
+              <LiveMenuAvailabilityProvider storeSettings={storeSettings}>
                 <div className="mt-24 space-y-28">
                   {categoriesSorted.map((category) => {
                     const itemsInCategory = itemViewModels.filter((vm) =>

@@ -39,7 +39,7 @@ function mapDayHours(raw: unknown): DayHours {
   };
 }
 
-function mapWeeklyHours(raw: unknown): StoreSettings["hours"] {
+export function mapWeeklyHours(raw: unknown): StoreSettings["hours"] {
   const r = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   return {
     mon: mapDayHours(r.mon),
@@ -52,7 +52,7 @@ function mapWeeklyHours(raw: unknown): StoreSettings["hours"] {
   };
 }
 
-function mapHolidays(raw: unknown): Holiday[] {
+export function mapHolidays(raw: unknown): Holiday[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .map((entry): Holiday | null => {

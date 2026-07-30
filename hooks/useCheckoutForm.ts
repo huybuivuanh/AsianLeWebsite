@@ -175,6 +175,14 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
       return;
     }
 
+    if (phone.length !== 10) {
+      setSubmitState({
+        status: "error",
+        message: "Please enter a valid 10-digit phone number.",
+      });
+      return;
+    }
+
     let fulfillment: FulfillmentWire;
     if (fulfillmentKind === TakeOutFulfillmentKind.Scheduled) {
       const [date, time] = scheduledLocal.split("T");
@@ -219,7 +227,8 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
       })),
       fulfillment,
       customerName: name.trim(),
-      phoneNumber: phone.trim(),
+      // 11 digits: leading "1" country code + the 10 entered digits.
+      phoneNumber: `1${phone}`,
       customerEmail: email.trim(),
     };
 

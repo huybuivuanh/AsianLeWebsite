@@ -1,3 +1,9 @@
+import {
+  extractTenDigitPhone,
+  extractTenDigitPhoneFromPaste,
+  formatPhoneInput,
+} from "@/lib/utils";
+
 type CustomerInfoSectionProps = {
   name: string;
   setName: (value: string) => void;
@@ -31,10 +37,15 @@ export default function CustomerInfoSection({
         <label className="block text-sm text-stone-700 sm:col-span-1">
           Phone
           <input
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            required
+            value={formatPhoneInput(phone)}
+            onChange={(e) => setPhone(extractTenDigitPhone(e.target.value))}
+            onPaste={(e) => {
+              e.preventDefault();
+              setPhone(extractTenDigitPhoneFromPaste(e.clipboardData.getData("text")));
+            }}
             type="tel"
+            inputMode="numeric"
+            placeholder="+1 (000) 000-0000"
             className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900"
           />
         </label>

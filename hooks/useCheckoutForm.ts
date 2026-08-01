@@ -6,6 +6,7 @@ import {
   getStoreLocalNow,
   getMaxScheduleDateStr,
   isStoreOpenNow,
+  isStorePaused,
   getScheduledPickupInvalidReason,
   MAX_SCHEDULE_DAYS_AHEAD,
   SCHEDULE_LEAD_MINUTES,
@@ -131,7 +132,7 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
 
   const now = useMemo(() => new Date(), []);
   const storeOpenNow = isStoreOpenNow(initialStoreSettings, now);
-  const canOrderAtAll = !initialStoreSettings.pauseOrdering;
+  const canOrderAtAll = !isStorePaused(initialStoreSettings.pausedUntil, now);
 
   const minLocal = useMemo(() => {
     const { dateStr, hhmm } = getStoreLocalNow(initialStoreSettings, now);

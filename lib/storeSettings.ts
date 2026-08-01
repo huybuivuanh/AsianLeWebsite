@@ -1,6 +1,7 @@
 import { cache } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { INDEFINITE_PAUSE } from "@/lib/availability";
 
 /**
  * Server-side fetchers for settings/store and menuVersion, per ecommerce.md.
@@ -14,7 +15,7 @@ const DEFAULT_DAY_HOURS: DayHours = { isOpen: false, open: "00:00", close: "00:0
 const DEFAULT_TIMEZONE = "America/Regina";
 
 const DEFAULT_STORE_SETTINGS: StoreSettings = {
-  pauseOrdering: true,
+  pausedUntil: INDEFINITE_PAUSE,
   timezone: DEFAULT_TIMEZONE,
   waitTime: 0,
   hours: {
@@ -69,7 +70,12 @@ export async function fetchStoreSettingsForServer(): Promise<StoreSettings> {
   if (!snapshot.exists()) return DEFAULT_STORE_SETTINGS;
   const d = snapshot.data();
   return {
-    pauseOrdering: d.pauseOrdering === true,
+    pausedUntil:
+      d.pausedUntil === null
+        ? null
+        : d.pausedUntil instanceof Timestamp
+          ? d.pausedUntil.toDate()
+          : INDEFINITE_PAUSE,
     timezone: typeof d.timezone === "string" ? d.timezone : DEFAULT_TIMEZONE,
     waitTime: typeof d.waitTime === "number" ? d.waitTime : DEFAULT_STORE_SETTINGS.waitTime,
     hours: mapWeeklyHours(d.hours),

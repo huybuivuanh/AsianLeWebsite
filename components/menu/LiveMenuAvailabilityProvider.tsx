@@ -1,11 +1,16 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { collection, doc, onSnapshot } from "firebase/firestore";
+import { collection, doc, onSnapshot, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { mapAvailability, mapSoldOut } from "@/lib/orderMenuData";
 import { mapWeeklyHours, mapHolidays } from "@/lib/storeSettings";
-import { getAvailabilityStatus, isStoreOpenNow, type AvailabilityStatus } from "@/lib/availability";
+import {
+  getAvailabilityStatus,
+  isStoreOpenNow,
+  INDEFINITE_PAUSE,
+  type AvailabilityStatus,
+} from "@/lib/availability";
 
 /**
  * Live-patches item/option availability on top of the SSR-rendered `/menu` page —
@@ -13,7 +18,7 @@ import { getAvailabilityStatus, isStoreOpenNow, type AvailabilityStatus } from "
  * real-time sold-out/availability-window state from two collection-level Firestore
  * listeners, so staff toggling sold-out reflects immediately instead of waiting up to
  * `revalidate`'s 15-minute window. Falls back to the SSR-computed status passed in by
- * each card until the first snapshot arrives. Also mirrors settings/store (pauseOrdering
+ * each card until the first snapshot arrives. Also mirrors settings/store (pausedUntil
  * + hours) so the pause-ordering kill switch takes effect immediately rather than at the
  * next ISR revalidation.
  */
@@ -65,7 +70,12 @@ export function LiveMenuAvailabilityProvider({
       const d = snapshot.data();
       if (!d) return;
       setStoreSettings({
-        pauseOrdering: d.pauseOrdering === true,
+        pausedUntil:
+          d.pausedUntil === null
+            ? null
+            : d.pausedUntil instanceof Timestamp
+              ? d.pausedUntil.toDate()
+              : INDEFINITE_PAUSE,
         timezone: typeof d.timezone === "string" ? d.timezone : initialStoreSettings.timezone,
         waitTime: typeof d.waitTime === "number" ? d.waitTime : initialStoreSettings.waitTime,
         hours: mapWeeklyHours(d.hours),

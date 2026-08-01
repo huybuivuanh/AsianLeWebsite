@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import PageContainer from "@/components/PageContainer";
-import DailySpecialsGrid from "@/components/daily-specials/DailySpecialsGrid";
 import MenuCategoryNav from "@/components/menu/MenuCategoryNav";
 import OrderMenuItemCard from "@/components/menu/OrderMenuItemCard";
 import { LiveMenuAvailabilityProvider } from "@/components/menu/LiveMenuAvailabilityProvider";
@@ -9,7 +8,10 @@ import CartDrawer from "@/components/cart/CartDrawer";
 import { STORE } from "@/lib/store";
 import { fetchOrderMenuDataForServer } from "@/lib/orderMenuData";
 import { getStoreSettings } from "@/lib/storeSettings";
-import { buildMenuItemViewModel, type MenuItemViewModel } from "@/lib/menuOptions";
+import {
+  buildMenuItemViewModel,
+  type MenuItemViewModel,
+} from "@/lib/menuOptions";
 import { getDailySpecialsBundle } from "@/lib/siteData.server";
 
 export const revalidate = 900;
@@ -18,8 +20,6 @@ export default async function MenuPage() {
   let categories: DemoCategory[];
   let itemViewModels: MenuItemViewModel[];
   let error: string | null = null;
-  let dailySpecials: DailySpecial[] = [];
-  let dailySpecialItems: DailySpecialItem[] = [];
   let dailyError: string | null = null;
 
   const [menuRes, daily, storeSettings] = await Promise.all([
@@ -27,8 +27,7 @@ export default async function MenuPage() {
       .then((data) => ({ ok: true as const, data }))
       .catch((err) => ({
         ok: false as const,
-        message:
-          err instanceof Error ? err.message : "Failed to load menu",
+        message: err instanceof Error ? err.message : "Failed to load menu",
       })),
     getDailySpecialsBundle(),
     getStoreSettings(),
@@ -56,8 +55,6 @@ export default async function MenuPage() {
     itemViewModels = [];
   }
 
-  dailySpecials = daily.dailySpecials;
-  dailySpecialItems = daily.dailySpecialItems;
   dailyError = daily.error;
 
   const categoriesSorted = [...categories].sort(
@@ -152,13 +149,6 @@ export default async function MenuPage() {
                       {dailyError}
                     </p>
                   ) : null}
-                  <div className="mt-8">
-                    <DailySpecialsGrid
-                      variant="light"
-                      dailySpecials={dailySpecials}
-                      dailySpecialItems={dailySpecialItems}
-                    />
-                  </div>
                 </div>
               </div>
             </div>
@@ -181,8 +171,9 @@ export default async function MenuPage() {
               <LiveMenuAvailabilityProvider storeSettings={storeSettings}>
                 <div className="mt-24 space-y-28">
                   {categoriesSorted.map((category) => {
-                    const itemsInCategory = itemViewModels.filter((vm) =>
-                      vm.item.categoryIds?.includes(category.id) ?? false,
+                    const itemsInCategory = itemViewModels.filter(
+                      (vm) =>
+                        vm.item.categoryIds?.includes(category.id) ?? false,
                     );
                     return (
                       <div

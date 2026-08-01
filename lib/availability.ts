@@ -95,6 +95,20 @@ export function getAvailabilityStatus(
   return { available: true };
 }
 
+// Sentinel for "paused indefinitely, until a human manually resumes it" — a far-future
+// timestamp rather than a distinct type/flag, so all repos sharing this schema agree on
+// the same value (see instruction.md).
+export const INDEFINITE_PAUSE = new Date("2099-01-01T00:00:00Z");
+
+/** True if `pausedUntil` currently blocks ordering — `null` means not paused. */
+export function isStorePaused(
+  pausedUntil: Date | null,
+  now: Date = new Date(),
+): boolean {
+  if (pausedUntil == null) return false;
+  return pausedUntil.getTime() > now.getTime();
+}
+
 function getDayStatus(settings: StoreSettings, now: Date) {
   const { dayKey, hhmm, dateStr } = getZonedParts(settings.timezone, now);
   const onHoliday = settings.holidays.some((holiday) => {
@@ -109,7 +123,7 @@ export function isStoreOpenNow(
   settings: StoreSettings,
   now: Date = new Date(),
 ): boolean {
-  if (settings.pauseOrdering) return false;
+  if (isStorePaused(settings.pausedUntil, now)) return false;
   const { dayHours, hhmm, onHoliday } = getDayStatus(settings, now);
   if (onHoliday || !dayHours.isOpen) return false;
   return hhmm >= dayHours.open && hhmm < dayHours.close;
@@ -207,7 +221,7 @@ export function getScheduledPickupInvalidReason(
   pickupTime: string,
   now: Date = new Date(),
 ): ScheduledPickupInvalidReason | null {
-  if (settings.pauseOrdering) return "paused";
+  if (isStorePaused(settings.pausedUntil, now)) return "paused";
   if (
     !/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ||
     !/^([01]\d|2[0-3]):[0-5]\d$/.test(pickupTime) ||

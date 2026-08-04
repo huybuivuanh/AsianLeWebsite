@@ -64,12 +64,6 @@ declare global {
     end: string;
   }
 
-  interface MenuItemSoldOut {
-    since: Date;
-    hours?: number;
-    indefinite: boolean;
-  }
-
   interface OptionGroupId {
     optionGroupId: string;
     order: number;
@@ -94,7 +88,7 @@ declare global {
     categoryIds?: string[];
     kitchenType: KitchenType;
     availability?: MenuItemAvailability;
-    soldOut?: MenuItemSoldOut;
+    soldOutUntil?: Date;
     createdAt: Date;
   }
 
@@ -116,7 +110,7 @@ declare global {
     price: number;
     groupIds?: string[];
     availability?: MenuItemAvailability;
-    soldOut?: MenuItemSoldOut;
+    soldOutUntil?: Date;
     createdAt: Date;
   }
 

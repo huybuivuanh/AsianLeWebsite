@@ -8,8 +8,6 @@ import {
 } from "@/lib/orderMenuData";
 import { fetchStoreSettingsForServer } from "@/lib/storeSettings";
 import {
-  isAvailableNow,
-  isStoreOpenNow,
   isValidScheduledPickup,
   resolveScheduledPickupInstant,
 } from "@/lib/availability";
@@ -19,7 +17,14 @@ import { OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
 /**
  * Places a pay-at-pickup order. Never trusts client-submitted prices — only
  * item/option ids and quantities are read from the request body; every price
- * and availability check is re-derived from live Firestore data here.
+ * is re-derived from live Firestore data here.
+ *
+ * Deliberately does NOT block on sold-out/availability-window state, store hours,
+ * or pause-ordering — those are surfaced to the customer as UX nudges earlier in the
+ * flow (menu page badges, /api/cart/availability at checkout), but honoring an order
+ * placed during a pause or outside hours is the restaurant's call, not this site's.
+ * Scheduled-pickup requests still get a data-sanity check (real date, not in the past,
+ * within the scheduling horizon, minimum lead time) — see getScheduledPickupInvalidReason.
  *
  * Field names/shapes mirror the AsianLePOS app's Order model (a different Firebase
  * project — see orders-schema.md).
@@ -103,17 +108,16 @@ export async function POST(request: NextRequest) {
     if (
       typeof date !== "string" ||
       typeof time !== "string" ||
-      !isValidScheduledPickup(storeSettings, date, time, now)
+      // Sanity only (format/past/too-far-ahead/lead-time) — not store hours/pause,
+      // see the file-level comment above.
+      !isValidScheduledPickup(storeSettings, date, time, now, { checkBusinessHours: false })
     ) {
-      return badRequest("Selected pickup time is no longer available");
+      return badRequest("Selected pickup time is invalid");
     }
     const scheduledAt = resolveScheduledPickupInstant(storeSettings.timezone, date, time);
     fulfillment = { kind: TakeOutFulfillmentKind.Scheduled, scheduledAt };
     fulfillmentWire = { kind: TakeOutFulfillmentKind.Scheduled, date, time };
   } else {
-    if (!isStoreOpenNow(storeSettings, now)) {
-      return badRequest("We're currently closed for ordering");
-    }
     fulfillment = { kind: TakeOutFulfillmentKind.Immediate };
     fulfillmentWire = { kind: TakeOutFulfillmentKind.Immediate };
   }
@@ -129,9 +133,6 @@ export async function POST(request: NextRequest) {
 
     const item = menuItemsById.get(menuItemId);
     if (!item) return badRequest("One of the items in your cart no longer exists");
-    if (!isAvailableNow(item, storeSettings.timezone, now)) {
-      return badRequest(`${item.name} is no longer available`);
-    }
 
     const itemGroups = (item.optionGroupIds ?? [])
       .map((ref) => optionGroupsById.get(ref.optionGroupId))
@@ -154,9 +155,6 @@ export async function POST(request: NextRequest) {
 
       const option = optionsById.get(optionId);
       if (!option) return badRequest(`Invalid option for ${item.name}`);
-      if (!isAvailableNow(option, storeSettings.timezone, now)) {
-        return badRequest(`${option.name} is no longer available`);
-      }
 
       const rawQty = typeof sel.quantity === "number" ? Math.floor(sel.quantity) : 1;
       const optionQuantity = group.multipleOptionQuantity

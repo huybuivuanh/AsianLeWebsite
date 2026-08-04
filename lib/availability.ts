@@ -42,16 +42,14 @@ function getZonedParts(timeZone: string, now: Date) {
   };
 }
 
-/** True if a sold-out flag currently makes the item/option unavailable. */
+/** True if `soldOutUntil` currently makes the item/option unavailable — same
+ * future-timestamp semantics as settings/store's pausedUntil (including the shared
+ * INDEFINITE_PAUSE sentinel), just on a sparse per-item field instead of a singleton doc. */
 export function isSoldOut(
-  soldOut: MenuItemSoldOut | undefined,
+  soldOutUntil: Date | undefined,
   now: Date = new Date(),
 ): boolean {
-  if (!soldOut) return false;
-  if (soldOut.indefinite) return true;
-  if (!soldOut.hours) return false;
-  const expiresAt = soldOut.since.getTime() + soldOut.hours * 3600_000;
-  return now.getTime() < expiresAt;
+  return isStorePaused(soldOutUntil ?? null, now);
 }
 
 /** True if the current store-local time falls within an item's/option's availability window. */
@@ -67,21 +65,21 @@ export function isWithinAvailabilityWindow(
 
 /** Combined availability check shared by DemoMenuItem and ItemOption. */
 export function isAvailableNow(
-  entity: { availability?: MenuItemAvailability; soldOut?: MenuItemSoldOut },
+  entity: { availability?: MenuItemAvailability; soldOutUntil?: Date },
   timezone: string,
   now: Date = new Date(),
 ): boolean {
-  if (isSoldOut(entity.soldOut, now)) return false;
+  if (isSoldOut(entity.soldOutUntil, now)) return false;
   return isWithinAvailabilityWindow(entity.availability, timezone, now);
 }
 
 /** Availability as a display-ready status: whether to show it, and what label to show if not. */
 export function getAvailabilityStatus(
-  entity: { availability?: MenuItemAvailability; soldOut?: MenuItemSoldOut },
+  entity: { availability?: MenuItemAvailability; soldOutUntil?: Date },
   timezone: string,
   now: Date = new Date(),
 ): AvailabilityStatus {
-  if (isSoldOut(entity.soldOut, now))
+  if (isSoldOut(entity.soldOutUntil, now))
     return { available: false, label: "Sold out" };
   if (
     entity.availability &&
@@ -212,16 +210,24 @@ export type ScheduledPickupInvalidReason =
 
 /**
  * Why a "YYYY-MM-DD" + "HH:mm" pickup request is currently invalid, or `null` if it's
- * valid: not in the past, not beyond MAX_SCHEDULE_DAYS_AHEAD, not a holiday, within that
- * day's store hours, and (if today) at least SCHEDULE_LEAD_MINUTES from now.
+ * valid: not in the past, not beyond MAX_SCHEDULE_DAYS_AHEAD, and (if today) at least
+ * SCHEDULE_LEAD_MINUTES from now — these are checked unconditionally, since they're data
+ * sanity rather than a business-availability judgment call.
+ *
+ * `checkBusinessHours` (default `true`) additionally gates on paused/holiday/closed/
+ * outside-hours — the client uses the default to nudge the customer with a specific
+ * reason before they submit, but the order-placement API intentionally opts out
+ * (`checkBusinessHours: false`): whether to honor a pickup request during a pause or
+ * outside posted hours is the restaurant's call, not something the site should block.
  */
 export function getScheduledPickupInvalidReason(
   settings: StoreSettings,
   dateStr: string,
   pickupTime: string,
   now: Date = new Date(),
+  { checkBusinessHours = true }: { checkBusinessHours?: boolean } = {},
 ): ScheduledPickupInvalidReason | null {
-  if (isStorePaused(settings.pausedUntil, now)) return "paused";
+  if (checkBusinessHours && isStorePaused(settings.pausedUntil, now)) return "paused";
   if (
     !/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ||
     !/^([01]\d|2[0-3]):[0-5]\d$/.test(pickupTime) ||
@@ -235,21 +241,24 @@ export function getScheduledPickupInvalidReason(
   if (dateStr > addDaysToDateStr(today.dateStr, MAX_SCHEDULE_DAYS_AHEAD))
     return "too-far-ahead";
 
-  const onHoliday = settings.holidays.some((holiday) => {
-    const to = holiday.to ?? holiday.from;
-    return dateStr >= holiday.from && dateStr <= to;
-  });
-  if (onHoliday) return "holiday";
-
-  const dayHours = settings.hours[weekdayKeyForDateStr(dateStr)];
-  if (!dayHours.isOpen) return "closed";
-
   const requestedMin = hhmmToMinutes(pickupTime);
-  if (
-    requestedMin < hhmmToMinutes(dayHours.open) ||
-    requestedMin >= hhmmToMinutes(dayHours.close)
-  ) {
-    return "outside-hours";
+
+  if (checkBusinessHours) {
+    const onHoliday = settings.holidays.some((holiday) => {
+      const to = holiday.to ?? holiday.from;
+      return dateStr >= holiday.from && dateStr <= to;
+    });
+    if (onHoliday) return "holiday";
+
+    const dayHours = settings.hours[weekdayKeyForDateStr(dateStr)];
+    if (!dayHours.isOpen) return "closed";
+
+    if (
+      requestedMin < hhmmToMinutes(dayHours.open) ||
+      requestedMin >= hhmmToMinutes(dayHours.close)
+    ) {
+      return "outside-hours";
+    }
   }
 
   if (
@@ -271,9 +280,10 @@ export function isValidScheduledPickup(
   dateStr: string,
   pickupTime: string,
   now: Date = new Date(),
+  options?: { checkBusinessHours?: boolean },
 ): boolean {
   return (
-    getScheduledPickupInvalidReason(settings, dateStr, pickupTime, now) ===
+    getScheduledPickupInvalidReason(settings, dateStr, pickupTime, now, options) ===
     null
   );
 }

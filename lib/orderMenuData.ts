@@ -4,6 +4,7 @@ import {
   getDocs,
   orderBy,
   query,
+  Timestamp,
   type DocumentData,
   type QueryDocumentSnapshot,
 } from "firebase/firestore";
@@ -26,14 +27,10 @@ export function mapAvailability(raw: unknown): MenuItemAvailability | undefined 
   return { start, end };
 }
 
-export function mapSoldOut(raw: unknown): MenuItemSoldOut | undefined {
-  if (!raw || typeof raw !== "object") return undefined;
-  const r = raw as { since?: { toDate?: () => Date }; hours?: unknown; indefinite?: unknown };
-  return {
-    since: r.since?.toDate?.() ?? new Date(),
-    hours: typeof r.hours === "number" ? r.hours : undefined,
-    indefinite: r.indefinite === true,
-  };
+/** Absent/malformed both mean "not sold out" — unlike settings/store's pausedUntil,
+ * this is a sparse per-item field where the safe default is available, not paused. */
+export function mapSoldOutUntil(raw: unknown): Date | undefined {
+  return raw instanceof Timestamp ? raw.toDate() : undefined;
 }
 
 function mapStringArray(raw: unknown): string[] | undefined {
@@ -90,7 +87,7 @@ function mapDocToDemoMenuItem(doc: QueryDocumentSnapshot<DocumentData>): DemoMen
     categoryIds: mapStringArray(d.categoryIds),
     kitchenType,
     availability: mapAvailability(d.availability),
-    soldOut: mapSoldOut(d.soldOut),
+    soldOutUntil: mapSoldOutUntil(d.soldOutUntil),
     createdAt: (d.createdAt?.toDate?.() ?? new Date()) as Date,
   };
 }
@@ -119,7 +116,7 @@ function mapDocToItemOption(doc: QueryDocumentSnapshot<DocumentData>): ItemOptio
     price,
     groupIds: mapStringArray(d.groupIds),
     availability: mapAvailability(d.availability),
-    soldOut: mapSoldOut(d.soldOut),
+    soldOutUntil: mapSoldOutUntil(d.soldOutUntil),
     createdAt: (d.createdAt?.toDate?.() ?? new Date()) as Date,
   };
 }

@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { collection, doc, onSnapshot, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { mapAvailability, mapSoldOut } from "@/lib/orderMenuData";
+import { mapAvailability, mapSoldOutUntil } from "@/lib/orderMenuData";
 import { mapWeeklyHours, mapHolidays } from "@/lib/storeSettings";
 import {
   getAvailabilityStatus,
@@ -23,7 +23,7 @@ import {
  * next ISR revalidation.
  */
 
-type RawEntity = { availability?: MenuItemAvailability; soldOut?: MenuItemSoldOut };
+type RawEntity = { availability?: MenuItemAvailability; soldOutUntil?: Date };
 
 type LiveMenuAvailabilityContextValue = {
   getItemAvailability: (itemId: string, fallback: AvailabilityStatus) => AvailabilityStatus;
@@ -54,7 +54,7 @@ export function LiveMenuAvailabilityProvider({
       const map = new Map<string, RawEntity>();
       for (const doc of snapshot.docs) {
         const d = doc.data();
-        map.set(doc.id, { availability: mapAvailability(d.availability), soldOut: mapSoldOut(d.soldOut) });
+        map.set(doc.id, { availability: mapAvailability(d.availability), soldOutUntil: mapSoldOutUntil(d.soldOutUntil) });
       }
       setItemsById(map);
     });
@@ -62,7 +62,7 @@ export function LiveMenuAvailabilityProvider({
       const map = new Map<string, RawEntity>();
       for (const doc of snapshot.docs) {
         const d = doc.data();
-        map.set(doc.id, { availability: mapAvailability(d.availability), soldOut: mapSoldOut(d.soldOut) });
+        map.set(doc.id, { availability: mapAvailability(d.availability), soldOutUntil: mapSoldOutUntil(d.soldOutUntil) });
       }
       setOptionsById(map);
     });

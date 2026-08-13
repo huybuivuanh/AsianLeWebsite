@@ -14,7 +14,10 @@ import { KitchenType } from "@/types/enum";
 
 /**
  * Server-side fetchers for the ordering data model (demoCategories / demoMenuItems /
- * optionGroups / options), per ecommerce.md. Use from Server Components only.
+ * optionGroups / options), per ecommerce.md. The fetch*ForServer functions are for Server
+ * Components only, but the exported mapDocTo* mappers are pure (no server-only deps) and
+ * are also reused client-side by components/order/LiveOrderMenu.tsx to map onSnapshot
+ * documents identically to how the SSR fetch maps them.
  */
 
 const KITCHEN_TYPES: KitchenType[] = Object.values(KitchenType);
@@ -59,7 +62,7 @@ function normalizeOptionGroupRefs(raw: unknown): OptionGroupId[] | undefined {
   return refs.length > 0 ? refs.sort((a, b) => a.order - b.order) : undefined;
 }
 
-function mapDocToDemoCategory(doc: QueryDocumentSnapshot<DocumentData>): DemoCategory {
+export function mapDocToDemoCategory(doc: QueryDocumentSnapshot<DocumentData>): DemoCategory {
   const d = doc.data();
   return {
     id: doc.id,
@@ -71,7 +74,7 @@ function mapDocToDemoCategory(doc: QueryDocumentSnapshot<DocumentData>): DemoCat
   };
 }
 
-function mapDocToDemoMenuItem(doc: QueryDocumentSnapshot<DocumentData>): DemoMenuItem {
+export function mapDocToDemoMenuItem(doc: QueryDocumentSnapshot<DocumentData>): DemoMenuItem {
   const d = doc.data();
   const price = typeof d.price === "number" && Number.isFinite(d.price) ? d.price : 0;
   const kitchenType = KITCHEN_TYPES.includes(d.kitchenType)
@@ -92,7 +95,7 @@ function mapDocToDemoMenuItem(doc: QueryDocumentSnapshot<DocumentData>): DemoMen
   };
 }
 
-function mapDocToOptionGroup(doc: QueryDocumentSnapshot<DocumentData>): OptionGroup {
+export function mapDocToOptionGroup(doc: QueryDocumentSnapshot<DocumentData>): OptionGroup {
   const d = doc.data();
   return {
     id: doc.id,
@@ -107,7 +110,7 @@ function mapDocToOptionGroup(doc: QueryDocumentSnapshot<DocumentData>): OptionGr
   };
 }
 
-function mapDocToItemOption(doc: QueryDocumentSnapshot<DocumentData>): ItemOption {
+export function mapDocToItemOption(doc: QueryDocumentSnapshot<DocumentData>): ItemOption {
   const d = doc.data();
   const price = typeof d.price === "number" && Number.isFinite(d.price) ? d.price : 0;
   return {

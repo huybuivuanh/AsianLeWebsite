@@ -5,25 +5,24 @@ import { useCallback, useState } from "react";
 import { skipNextImageOptimization } from "@/lib/imagePolicy";
 import { formatPriceCAD } from "@/lib/utils";
 import type { MenuItemViewModel } from "@/lib/menuOptions";
-import { useLiveMenuAvailability } from "@/components/menu/LiveMenuAvailabilityProvider";
 import { useMenuItemSelection } from "@/hooks/useMenuItemSelection";
 import ItemDetailModal from "@/components/menu/ItemDetailModal";
 import OrderingUnavailableModal from "@/components/menu/OrderingUnavailableModal";
 
 type OrderMenuItemCardProps = MenuItemViewModel & {
+  /** Whether the store is currently accepting orders at all (live, from the parent). */
+  isOrderingAvailable: boolean;
   /** Auto-opens this item's modal on mount — used for deep links from /menu (?item=<id>). */
   autoOpen?: boolean;
 };
 
 export default function OrderMenuItemCard({
   item,
-  availability: initialAvailability,
-  optionGroups: initialOptionGroups,
+  availability,
+  optionGroups,
+  isOrderingAvailable,
   autoOpen = false,
 }: OrderMenuItemCardProps) {
-  const { getItemAvailability, getOptionAvailability, isOrderingAvailable } =
-    useLiveMenuAvailability();
-
   // Mirrors the open() handler below (gate on isOrderingAvailable, else show the
   // unavailable modal) — evaluated once on mount instead of on click. Safe as a lazy
   // initializer since isOrderingAvailable is derived synchronously from the SSR-fetched
@@ -32,15 +31,6 @@ export default function OrderMenuItemCard({
   const [showOrderingUnavailable, setShowOrderingUnavailable] = useState(
     () => autoOpen && !isOrderingAvailable,
   );
-
-  const availability = getItemAvailability(item.id, initialAvailability);
-  const optionGroups = initialOptionGroups.map((og) => ({
-    ...og,
-    options: og.options.map((option) => ({
-      ...option,
-      availability: getOptionAvailability(option.id, option.availability),
-    })),
-  }));
 
   const selection = useMenuItemSelection(item, optionGroups, availability);
 

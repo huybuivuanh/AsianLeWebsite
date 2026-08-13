@@ -1,6 +1,6 @@
 import Link from "next/link";
 import PageContainer from "@/components/PageContainer";
-import MenuCategoryNav from "@/components/menu/MenuCategoryNav";
+import OrderCategoryTabs from "@/components/order/OrderCategoryTabs";
 import OrderMenuItemCard from "@/components/menu/OrderMenuItemCard";
 import { LiveMenuAvailabilityProvider } from "@/components/menu/LiveMenuAvailabilityProvider";
 import CartDrawer from "@/components/cart/CartDrawer";
@@ -60,34 +60,43 @@ export default async function OrderPage({
     (a, b) => (a.order ?? 0) - (b.order ?? 0),
   );
 
-  const serverCategoryLinks: { id: string; label: string }[] =
-    categoriesSorted.map((c) => ({ id: `category-${c.id}`, label: c.name }));
+  const categoryTabs = categoriesSorted.map((c) => ({
+    id: `category-${c.id}`,
+    label: c.name,
+  }));
 
   return (
     <>
-      <MenuCategoryNav serverCategoryLinks={serverCategoryLinks} />
       <CartDrawer />
-      <section className="bg-white py-16 md:py-24">
+
+      <div className="border-b border-stone-100 bg-stone-50/60">
         <PageContainer>
-          <div className="mx-auto max-w-6xl">
-            <div className="mx-auto max-w-3xl text-center">
-              <h1 className="text-3xl font-bold text-stone-900 sm:text-4xl">
+          <div className="flex flex-wrap items-center justify-between gap-3 py-6">
+            <div>
+              <h1 className="text-2xl font-bold text-stone-900 sm:text-3xl">
                 Order for pickup
               </h1>
-              <p className="mt-4 text-base leading-relaxed text-stone-600">
-                Pay in person when you pick up your order — no online
-                payment.
+              <p className="mt-1 text-sm text-stone-600">
+                Pay in person when you pick up — no online payment.
               </p>
-              <Link
-                href="/menu"
-                className="mt-3 inline-block text-sm font-semibold text-amber-700 hover:text-amber-800"
-              >
-                ← Back to menu
-              </Link>
             </div>
+            <Link
+              href="/menu"
+              className="text-sm font-semibold text-amber-700 hover:text-amber-800"
+            >
+              ← Back to menu
+            </Link>
+          </div>
+        </PageContainer>
+      </div>
 
+      {!error ? <OrderCategoryTabs tabs={categoryTabs} /> : null}
+
+      <section className="bg-white py-10 md:py-14">
+        <PageContainer>
+          <div className="mx-auto max-w-6xl">
             {error ? (
-              <div className="mx-auto mt-20 max-w-3xl rounded-xl border border-stone-200 bg-stone-50/50 p-6 text-center">
+              <div className="mx-auto mt-4 max-w-3xl rounded-xl border border-stone-200 bg-stone-50/50 p-6 text-center">
                 <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
                   Couldn&apos;t load menu
                 </p>
@@ -101,7 +110,7 @@ export default async function OrderPage({
               </div>
             ) : (
               <LiveMenuAvailabilityProvider storeSettings={storeSettings}>
-                <div className="mt-16 space-y-28">
+                <div className="space-y-16">
                   {categoriesSorted.map((category) => {
                     const itemsInCategory = itemViewModels.filter(
                       (vm) =>
@@ -111,23 +120,19 @@ export default async function OrderPage({
                       <div
                         key={category.id}
                         id={`category-${category.id}`}
-                        className="scroll-mt-28 mx-auto w-full max-w-5xl"
+                        className="scroll-mt-40 mx-auto w-full"
                       >
-                        <div className="mb-8 text-center">
-                          <h2 className="text-4xl font-bold tracking-tight text-stone-900 sm:text-4xl">
+                        <div className="mb-5 text-center">
+                          <h2 className="text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">
                             {category.name}
                           </h2>
-                          <div
-                            className="mx-auto mt-3 h-1 w-20 rounded-full bg-amber-500/90"
-                            aria-hidden
-                          />
+                          {category.description ? (
+                            <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-stone-600">
+                              {category.description}
+                            </p>
+                          ) : null}
                         </div>
-                        {category.description ? (
-                          <p className="mx-auto mb-8 max-w-2xl text-center text-stone-600">
-                            {category.description}
-                          </p>
-                        ) : null}
-                        <ul className="grid grid-cols-1 gap-x-10 gap-y-6 lg:grid-cols-2">
+                        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
                           {itemsInCategory.map((vm) => (
                             <OrderMenuItemCard
                               key={vm.item.id}

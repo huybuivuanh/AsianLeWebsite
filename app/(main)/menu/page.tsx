@@ -110,6 +110,10 @@ export default async function MenuPage() {
               />
             </svg>
           </a>
+          <p className="mt-3 text-xs text-stone-300">
+            That&apos;s delivery, paid online. For pickup, order below and
+            pay in person.
+          </p>
         </div>
       </section>
 
@@ -129,6 +133,23 @@ export default async function MenuPage() {
                 in Prince Albert, with comforting classics, flavourful lunch
                 specials, and convenient takeout options.
               </p>
+              <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
+                <svg
+                  className="h-4 w-4 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Order below for pickup — pay in person, no online payment.
+              </div>
             </div>
 
             <div id="daily-special" className="scroll-mt-28 text-center">
@@ -239,6 +260,10 @@ export default async function MenuPage() {
                     />
                   </svg>
                 </a>
+                <p className="mt-3 text-xs text-stone-500">
+                  That&apos;s delivery, paid online. For pickup, order above
+                  and pay in person.
+                </p>
               </div>
             </div>
 

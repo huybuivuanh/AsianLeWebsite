@@ -78,9 +78,11 @@ export default function OrderMenuItemCard({
           {item.description ? (
             <p className="line-clamp-2 text-xs text-stone-500">{item.description}</p>
           ) : null}
-          <span className="mt-auto pt-1 font-semibold tabular-nums text-amber-700">
-            {formatPriceCAD(item.price)}
-          </span>
+          {item.price > 0 ? (
+            <span className="mt-auto pt-1 font-semibold tabular-nums text-amber-700">
+              {formatPriceCAD(item.price)}
+            </span>
+          ) : null}
         </div>
       </button>
 

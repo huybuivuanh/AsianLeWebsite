@@ -73,9 +73,11 @@ export default function ItemDetailModal({
       <div className="p-6">
         <div className="flex items-start justify-between gap-4">
           <h4 className="text-xl font-bold text-stone-900">{item.name}</h4>
-          <p className="shrink-0 font-semibold tabular-nums text-amber-700">
-            {formatPriceCAD(item.price)}
-          </p>
+          {item.price > 0 ? (
+            <p className="shrink-0 font-semibold tabular-nums text-amber-700">
+              {formatPriceCAD(item.price)}
+            </p>
+          ) : null}
         </div>
         {item.description ? (
           <p className="mt-2 text-sm text-stone-600">{item.description}</p>

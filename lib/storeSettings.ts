@@ -4,7 +4,7 @@ import { db } from "@/lib/firebase";
 import { INDEFINITE_PAUSE } from "@/lib/availability";
 
 /**
- * Server-side fetchers for settings/store and menuVersion, per ecommerce.md.
+ * Server-side fetchers for settings/store, per ecommerce.md.
  * See lib/availability.ts for the open/closed decision logic.
  */
 
@@ -85,13 +85,3 @@ export async function fetchStoreSettingsForServer(): Promise<StoreSettings> {
 
 /** Deduped per request when referenced from multiple server components. */
 export const getStoreSettings = cache(fetchStoreSettingsForServer);
-
-export async function fetchMenuVersionForServer(): Promise<MenuVersion> {
-  const snapshot = await getDoc(doc(db, "menuVersion", "versionDoc"));
-  if (!snapshot.exists()) return { version: 0, lastUpdated: null };
-  const d = snapshot.data();
-  return {
-    version: typeof d.version === "number" ? d.version : 0,
-    lastUpdated: d.lastUpdated?.toDate?.() ?? null,
-  };
-}

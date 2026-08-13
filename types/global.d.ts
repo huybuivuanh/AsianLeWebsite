@@ -114,11 +114,6 @@ declare global {
     createdAt: Date;
   }
 
-  interface MenuVersion {
-    version: number;
-    lastUpdated: Date | null;
-  }
-
   interface DayHours {
     isOpen: boolean;
     open: string;

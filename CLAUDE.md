@@ -59,7 +59,7 @@ Public pages are **async Server Components** with `export const revalidate = 900
 - `lib/siteData.server.ts` — updates, gallery, daily specials (home page)
 - `lib/menuData.ts` — **legacy** `categories`/`menuItems` model, no longer used by any page — kept only for reference, do not build on it
 - `lib/orderMenuData.ts` — `demoCategories`/`demoMenuItems`/`optionGroups`/`options` (menu page, the active model — see `ecommerce.md`)
-- `lib/storeSettings.ts` — `settings/store` (hours/holidays/pause-ordering) and `menuVersion`
+- `lib/storeSettings.ts` — `settings/store` (hours/holidays/pause-ordering)
 
 All wrap their loaders in React's `cache()` to deduplicate within a single request.
 
@@ -82,7 +82,6 @@ The `/menu` page doubles as the ordering UI (see `ecommerce.md` for the full Fir
 | `demoMenuItems` | `DemoMenuItem` | Individual menu items (active model) |
 | `optionGroups` | `OptionGroup` | Reusable modifier groups |
 | `options` | `ItemOption` | Individual modifier choices |
-| `menuVersion` (doc `versionDoc`) | `MenuVersion` | Bumped on admin publish |
 | `settings/store` (single doc) | `StoreSettings` | Hours, holidays, pause-ordering kill switch |
 | `orders` | `Order` | Written by this site (`/api/orders`), read by the separate admin app |
 | `categories` / `menuItems` | `FoodCategory` / `MenuItem` | **Legacy**, unused, do not build on |

@@ -1,27 +1,36 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useState } from "react";
-import { skipNextImageOptimization } from "@/lib/imagePolicy";
-import { formatPriceCAD } from "@/lib/utils";
 import type { MenuItemViewModel } from "@/lib/menuOptions";
 import { useLiveMenuAvailability } from "@/components/menu/LiveMenuAvailabilityProvider";
 import { useMenuItemSelection } from "@/hooks/useMenuItemSelection";
 import ItemDetailModal from "@/components/menu/ItemDetailModal";
 import OrderingUnavailableModal from "@/components/menu/OrderingUnavailableModal";
+import MenuItemCardFace from "@/components/menu/MenuItemCardFace";
 
-type OrderMenuItemCardProps = MenuItemViewModel;
+type OrderMenuItemCardProps = MenuItemViewModel & {
+  /** Auto-opens this item's modal on mount — used for deep links from /menu (?item=<id>). */
+  autoOpen?: boolean;
+};
 
 export default function OrderMenuItemCard({
   item,
   availability: initialAvailability,
   optionGroups: initialOptionGroups,
+  autoOpen = false,
 }: OrderMenuItemCardProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showOrderingUnavailable, setShowOrderingUnavailable] = useState(false);
-
   const { getItemAvailability, getOptionAvailability, isOrderingAvailable } =
     useLiveMenuAvailability();
+
+  // Mirrors the open() handler below (gate on isOrderingAvailable, else show the
+  // unavailable modal) — evaluated once on mount instead of on click. Safe as a lazy
+  // initializer since isOrderingAvailable is derived synchronously from the SSR-fetched
+  // storeSettings on first render, no async wait involved.
+  const [isOpen, setIsOpen] = useState(() => autoOpen && isOrderingAvailable);
+  const [showOrderingUnavailable, setShowOrderingUnavailable] = useState(
+    () => autoOpen && !isOrderingAvailable,
+  );
+
   const availability = getItemAvailability(item.id, initialAvailability);
   const optionGroups = initialOptionGroups.map((og) => ({
     ...og,
@@ -44,8 +53,6 @@ export default function OrderMenuItemCard({
   const close = useCallback(() => setIsOpen(false), []);
   const closeOrderingUnavailable = useCallback(() => setShowOrderingUnavailable(false), []);
 
-  const imageSrc = item.image?.url || "/Soup Bowl Icon.jpg";
-
   return (
     <li>
       <button
@@ -54,35 +61,7 @@ export default function OrderMenuItemCard({
         className="group flex w-full items-start gap-4 text-left focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
         aria-label={`View details for ${item.name}`}
       >
-        <div className="relative h-20 w-25 shrink-0 overflow-hidden rounded-lg bg-white">
-          <Image
-            src={imageSrc}
-            alt={item.name}
-            fill
-            className={`object-cover ${availability.available ? "" : "grayscale"}`}
-            sizes="100px"
-            unoptimized={skipNextImageOptimization(imageSrc)}
-          />
-        </div>
-
-        <div className="min-w-0 flex-1 border-b border-dotted border-stone-300 pb-1">
-          <div className="flex flex-wrap items-baseline gap-2">
-            <span className="text-2xl font-semibold text-stone-900 group-hover:text-amber-700">
-              {item.name}
-            </span>
-            {!availability.available ? (
-              <span className="shrink-0 rounded-full bg-stone-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
-                {availability.label}
-              </span>
-            ) : null}
-          </div>
-          {item.description ? (
-            <p className="mt-0.5 text-sm italic text-stone-600">{item.description}</p>
-          ) : null}
-        </div>
-        <p className="shrink-0 font-semibold tabular-nums text-amber-700">
-          {formatPriceCAD(item.price)}
-        </p>
+        <MenuItemCardFace item={item} availability={availability} />
       </button>
 
       <ItemDetailModal

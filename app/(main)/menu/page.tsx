@@ -2,9 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import PageContainer from "@/components/PageContainer";
 import MenuCategoryNav from "@/components/menu/MenuCategoryNav";
-import OrderMenuItemCard from "@/components/menu/OrderMenuItemCard";
-import { LiveMenuAvailabilityProvider } from "@/components/menu/LiveMenuAvailabilityProvider";
-import CartDrawer from "@/components/cart/CartDrawer";
+import MenuItemCard from "@/components/menu/MenuItemCard";
 import { STORE } from "@/lib/store";
 import { fetchOrderMenuDataForServer } from "@/lib/orderMenuData";
 import { getStoreSettings } from "@/lib/storeSettings";
@@ -69,7 +67,6 @@ export default async function MenuPage() {
   return (
     <>
       <MenuCategoryNav serverCategoryLinks={serverCategoryLinks} />
-      <CartDrawer />
       {/* Hero */}
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image
@@ -88,32 +85,36 @@ export default async function MenuPage() {
           <p className="mt-4 text-lg text-stone-200 sm:text-xl">
             Chinese &amp; Vietnamese favorites — lunch specials to dinner
           </p>
-          <a
-            href={STORE.socialLinks.skipthedishes}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3.5 text-base font-semibold text-stone-900 shadow-lg transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900"
-          >
-            Order on Skip the Dishes
-            <svg
-              className="size-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={STORE.socialLinks.skipthedishes}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3.5 text-base font-semibold text-stone-900 shadow-lg transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-              />
-            </svg>
-          </a>
-          <p className="mt-3 text-xs text-stone-300">
-            That&apos;s delivery, paid online. For pickup, order below and
-            pay in person.
-          </p>
+              Order on Skip the Dishes
+              <svg
+                className="size-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
+            </a>
+            <Link
+              href="/order"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-white/70 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-stone-900"
+            >
+              Order and pay when pick up
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -189,43 +190,45 @@ export default async function MenuPage() {
                 </Link>
               </div>
             ) : (
-              <LiveMenuAvailabilityProvider storeSettings={storeSettings}>
-                <div className="mt-24 space-y-28">
-                  {categoriesSorted.map((category) => {
-                    const itemsInCategory = itemViewModels.filter(
-                      (vm) =>
-                        vm.item.categoryIds?.includes(category.id) ?? false,
-                    );
-                    return (
-                      <div
-                        key={category.id}
-                        id={`category-${category.id}`}
-                        className="scroll-mt-28 mx-auto w-full max-w-5xl"
-                      >
-                        <div className="mb-8 text-center">
-                          <h3 className="text-4xl font-bold tracking-tight text-stone-900 sm:text-4xl">
-                            {category.name}
-                          </h3>
-                          <div
-                            className="mx-auto mt-3 h-1 w-20 rounded-full bg-amber-500/90"
-                            aria-hidden
-                          />
-                        </div>
-                        {category.description ? (
-                          <p className="mx-auto mb-8 max-w-2xl text-center text-stone-600">
-                            {category.description}
-                          </p>
-                        ) : null}
-                        <ul className="grid grid-cols-1 gap-x-10 gap-y-6 lg:grid-cols-2">
-                          {itemsInCategory.map((vm) => (
-                            <OrderMenuItemCard key={vm.item.id} {...vm} />
-                          ))}
-                        </ul>
+              <div className="mt-24 space-y-28">
+                {categoriesSorted.map((category) => {
+                  const itemsInCategory = itemViewModels.filter(
+                    (vm) =>
+                      vm.item.categoryIds?.includes(category.id) ?? false,
+                  );
+                  return (
+                    <div
+                      key={category.id}
+                      id={`category-${category.id}`}
+                      className="scroll-mt-28 mx-auto w-full max-w-5xl"
+                    >
+                      <div className="mb-8 text-center">
+                        <h3 className="text-4xl font-bold tracking-tight text-stone-900 sm:text-4xl">
+                          {category.name}
+                        </h3>
+                        <div
+                          className="mx-auto mt-3 h-1 w-20 rounded-full bg-amber-500/90"
+                          aria-hidden
+                        />
                       </div>
-                    );
-                  })}
-                </div>
-              </LiveMenuAvailabilityProvider>
+                      {category.description ? (
+                        <p className="mx-auto mb-8 max-w-2xl text-center text-stone-600">
+                          {category.description}
+                        </p>
+                      ) : null}
+                      <ul className="grid grid-cols-1 gap-x-10 gap-y-6 lg:grid-cols-2">
+                        {itemsInCategory.map((vm) => (
+                          <MenuItemCard
+                            key={vm.item.id}
+                            item={vm.item}
+                            availability={vm.availability}
+                          />
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
             )}
 
             {/* Order online CTA */}
@@ -238,32 +241,36 @@ export default async function MenuPage() {
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">
                   Order online
                 </p>
-                <a
-                  href={STORE.socialLinks.skipthedishes}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-8 inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3.5 text-base font-semibold text-stone-900 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400 hover:shadow-amber-500/30 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
-                >
-                  Order on Skip the Dishes
-                  <svg
-                    className="size-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                  <a
+                    href={STORE.socialLinks.skipthedishes}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3.5 text-base font-semibold text-stone-900 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400 hover:shadow-amber-500/30 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                    />
-                  </svg>
-                </a>
-                <p className="mt-3 text-xs text-stone-500">
-                  That&apos;s delivery, paid online. For pickup, order above
-                  and pay in person.
-                </p>
+                    Order on Skip the Dishes
+                    <svg
+                      className="size-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                  </a>
+                  <Link
+                    href="/order"
+                    className="inline-flex items-center gap-2 rounded-full border-2 border-amber-600 px-6 py-3 text-base font-semibold text-amber-800 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
+                  >
+                    Order and pay when pick up
+                  </Link>
+                </div>
               </div>
             </div>
 

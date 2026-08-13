@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 
 function scrollToSection(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
   e.preventDefault();
@@ -19,10 +18,8 @@ type MenuCategoryNavProps = {
 export default function MenuCategoryNav({
   serverCategoryLinks,
 }: MenuCategoryNavProps) {
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  if (pathname !== "/menu") return null;
   if (serverCategoryLinks.length <= 1) return null;
 
   const categoryLinks = serverCategoryLinks;

@@ -222,7 +222,6 @@ export default async function MenuPage() {
                             key={vm.item.id}
                             item={vm.item}
                             availability={vm.availability}
-                            optionGroups={vm.optionGroups}
                           />
                         ))}
                       </ul>

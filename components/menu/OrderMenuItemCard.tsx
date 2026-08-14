@@ -78,11 +78,12 @@ export default function OrderMenuItemCard({
           {item.description ? (
             <p className="line-clamp-2 text-xs text-stone-500">{item.description}</p>
           ) : null}
-          {item.price > 0 ? (
-            <span className="mt-auto pt-1 font-semibold tabular-nums text-amber-700">
-              {formatPriceCAD(item.price)}
-            </span>
-          ) : null}
+          <span
+            className={`mt-auto pt-1 font-semibold tabular-nums text-amber-700 ${item.price > 0 ? "" : "invisible"}`}
+            aria-hidden={item.price > 0 ? undefined : true}
+          >
+            {formatPriceCAD(item.price > 0 ? item.price : 1)}
+          </span>
         </div>
       </button>
 

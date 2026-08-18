@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import PageContainer from "@/components/PageContainer";
+import DailySpecialsGrid from "@/components/daily-specials/DailySpecialsGrid";
 import MenuCategoryNav from "@/components/menu/MenuCategoryNav";
 import MenuItemCard from "@/components/menu/MenuItemCard";
 import { STORE } from "@/lib/store";
@@ -171,6 +172,13 @@ export default async function MenuPage() {
                       {dailyError}
                     </p>
                   ) : null}
+                  <div className="mt-8">
+                    <DailySpecialsGrid
+                      variant="light"
+                      dailySpecials={daily.dailySpecials}
+                      dailySpecialItems={daily.dailySpecialItems}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

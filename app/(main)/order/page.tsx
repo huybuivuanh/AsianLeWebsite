@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import PageContainer from "@/components/PageContainer";
 import CartDrawer from "@/components/cart/CartDrawer";
@@ -6,6 +7,17 @@ import { fetchOrderMenuDataForServer } from "@/lib/orderMenuData";
 import { getStoreSettings } from "@/lib/storeSettings";
 
 export const revalidate = 900;
+
+export const metadata: Metadata = {
+  title: "Order Online",
+  description:
+    "Order takeout online from Asian Le Restaurant in Prince Albert — pay in person when you pick up, no online payment required.",
+  openGraph: {
+    title: "Order Online | Asian Le Restaurant",
+    description:
+      "Order Chinese & Vietnamese takeout for pickup at Asian Le Restaurant, Prince Albert, SK.",
+  },
+};
 
 export default async function OrderPage({
   searchParams,

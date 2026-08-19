@@ -5,7 +5,9 @@ import { useCheckoutForm } from "@/hooks/useCheckoutForm";
 import PickupSection from "@/components/checkout/PickupSection";
 import CustomerInfoSection from "@/components/checkout/CustomerInfoSection";
 import OrderSummaryPanel from "@/components/checkout/OrderSummaryPanel";
+import OrderConfirmingView from "@/components/checkout/OrderConfirmingView";
 import OrderSuccessView from "@/components/checkout/OrderSuccessView";
+import OrderCancelledView from "@/components/checkout/OrderCancelledView";
 import EmptyCartView from "@/components/checkout/EmptyCartView";
 import StoreClosedView from "@/components/checkout/StoreClosedView";
 
@@ -18,6 +20,16 @@ export default function CheckoutForm({
 }: CheckoutFormProps) {
   const checkout = useCheckoutForm(initialStoreSettings);
 
+  if (checkout.submitState.status === "confirming") {
+    return (
+      <OrderConfirmingView
+        onCancel={checkout.handleCancelOrder}
+        cancelling={checkout.cancelling}
+        cancelError={checkout.cancelError}
+      />
+    );
+  }
+
   if (checkout.submitState.status === "success") {
     return (
       <OrderSuccessView
@@ -26,6 +38,10 @@ export default function CheckoutForm({
         fulfillment={checkout.submitState.fulfillment}
       />
     );
+  }
+
+  if (checkout.submitState.status === "cancelled") {
+    return <OrderCancelledView />;
   }
 
   if (checkout.lines.length === 0) return <EmptyCartView />;

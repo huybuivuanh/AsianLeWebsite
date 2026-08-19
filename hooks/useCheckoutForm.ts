@@ -14,7 +14,7 @@ import {
 } from "@/lib/availability";
 import { calculateTaxBreakdown } from "@/lib/orderPricing";
 import { formatTimeHHmmTo12h } from "@/lib/utils";
-import { TakeOutFulfillmentKind } from "@/types/enum";
+import { OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
 
 /** Wire shape for fulfillment — "YYYY-MM-DD" + "HH:mm" over the wire; the persisted Order
  * stores a real `scheduledAt` Date instead, computed server-side (see app/api/orders/route.ts). */
@@ -27,11 +27,22 @@ export type SubmitState =
   | { status: "submitting" }
   | { status: "error"; message: string }
   | {
+      // Order is placed (status "New" in Firestore) but not yet acknowledged by
+      // the restaurant — waiting on a live status change before revealing the
+      // order number.
+      status: "confirming";
+      orderId: string;
+      orderNumber: string;
+      total: number;
+      fulfillment: FulfillmentWire;
+    }
+  | {
       status: "success";
       orderNumber: string;
       total: number;
       fulfillment: FulfillmentWire;
-    };
+    }
+  | { status: "cancelled" };
 
 const SCHEDULED_PICKUP_INVALID_MESSAGES: Record<
   ScheduledPickupInvalidReason,
@@ -156,6 +167,59 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
   const [submitState, setSubmitState] = useState<SubmitState>({
     status: "idle",
   });
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
+  // While "confirming", watch the order doc live for the restaurant's status change —
+  // resolves to "success" once acknowledged (InProgress or beyond), or "cancelled" if
+  // the restaurant (or our own handleCancelOrder below) cancels it first.
+  const confirmingOrderId =
+    submitState.status === "confirming" ? submitState.orderId : null;
+  useEffect(() => {
+    if (!confirmingOrderId) return;
+    const unsubscribe = onSnapshot(doc(db, "orders", confirmingOrderId), (snapshot) => {
+      const status = snapshot.data()?.status as OrderStatus | undefined;
+      setSubmitState((prev) => {
+        if (prev.status !== "confirming") return prev;
+        if (status === OrderStatus.Cancelled) {
+          return { status: "cancelled" };
+        }
+        if (status === OrderStatus.InProgress || status === OrderStatus.Completed) {
+          return {
+            status: "success",
+            orderNumber: prev.orderNumber,
+            total: prev.total,
+            fulfillment: prev.fulfillment,
+          };
+        }
+        return prev;
+      });
+    });
+    return unsubscribe;
+  }, [confirmingOrderId]);
+
+  async function handleCancelOrder() {
+    if (submitState.status !== "confirming") return;
+    setCancelling(true);
+    setCancelError(null);
+    try {
+      const res = await fetch(`/api/orders/${submitState.orderId}/cancel`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        // If the restaurant just confirmed, the onSnapshot listener above will move
+        // this to "success" on its own — surface the reason in the meantime.
+        setCancelError(data.error ?? "Couldn't cancel your order. Please try again.");
+        return;
+      }
+      setSubmitState({ status: "cancelled" });
+    } catch {
+      setCancelError("Network error. Please try again.");
+    } finally {
+      setCancelling(false);
+    }
+  }
 
   const subTotal = cartSubtotal(lines);
   const taxBreakDown = calculateTaxBreakdown(subTotal);
@@ -245,7 +309,8 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
       }
       clearCart();
       setSubmitState({
-        status: "success",
+        status: "confirming",
+        orderId: data.orderId,
         orderNumber: data.orderNumber,
         total: data.taxBreakDown.total,
         fulfillment: data.fulfillment,
@@ -282,6 +347,9 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
     submitState,
     taxBreakDown,
     handleSubmit,
+    handleCancelOrder,
+    cancelling,
+    cancelError,
   };
 }
 

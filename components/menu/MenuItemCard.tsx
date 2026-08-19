@@ -19,7 +19,7 @@ export default function MenuItemCard({ item, availability }: MenuItemCardProps) 
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="group flex w-full items-start gap-4 text-left focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+        className="group flex w-full flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
         aria-label={`View larger image of ${item.name}`}
       >
         <MenuItemCardFace item={item} availability={availability} />

@@ -4,6 +4,7 @@ import PageContainer from "@/components/PageContainer";
 import DailySpecialsGrid from "@/components/daily-specials/DailySpecialsGrid";
 import MenuCategoryNav from "@/components/menu/MenuCategoryNav";
 import MenuItemCard from "@/components/menu/MenuItemCard";
+import FloatingOrderBar from "@/components/menu/FloatingOrderBar";
 import { STORE } from "@/lib/store";
 import { fetchOrderMenuDataForServer } from "@/lib/orderMenuData";
 import { getStoreSettings } from "@/lib/storeSettings";
@@ -68,6 +69,7 @@ export default async function MenuPage() {
   return (
     <>
       <MenuCategoryNav serverCategoryLinks={serverCategoryLinks} />
+      <FloatingOrderBar />
       {/* Hero */}
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image
@@ -120,7 +122,7 @@ export default async function MenuPage() {
       </section>
 
       {/* Menu content */}
-      <section className="bg-white py-16 md:py-24">
+      <section className="bg-white pt-16 pb-32 md:pt-24 md:pb-36">
         <PageContainer>
           <div className="mx-auto max-w-6xl">
             <div className="mx-auto max-w-3xl text-center">
@@ -208,7 +210,7 @@ export default async function MenuPage() {
                     <div
                       key={category.id}
                       id={`category-${category.id}`}
-                      className="scroll-mt-28 mx-auto w-full max-w-5xl"
+                      className="scroll-mt-28 mx-auto w-full"
                     >
                       <div className="mb-8 text-center">
                         <h3 className="text-4xl font-bold tracking-tight text-stone-900 sm:text-4xl">
@@ -224,7 +226,7 @@ export default async function MenuPage() {
                           {category.description}
                         </p>
                       ) : null}
-                      <ul className="grid grid-cols-1 gap-x-10 gap-y-6 lg:grid-cols-2">
+                      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
                         {itemsInCategory.map((vm) => (
                           <MenuItemCard
                             key={vm.item.id}
@@ -239,50 +241,7 @@ export default async function MenuPage() {
               </div>
             )}
 
-            {/* Order online CTA */}
-            <div className="relative mt-20 overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 px-8 py-12 text-center shadow-lg shadow-amber-900/5 sm:px-12">
-              <div
-                className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber-400/80 to-transparent"
-                aria-hidden
-              />
-              <div className="relative">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">
-                  Order online
-                </p>
-                <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                  <a
-                    href={STORE.socialLinks.skipthedishes}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3.5 text-base font-semibold text-stone-900 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400 hover:shadow-amber-500/30 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
-                  >
-                    Order on Skip the Dishes
-                    <svg
-                      className="size-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      aria-hidden
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                      />
-                    </svg>
-                  </a>
-                  <Link
-                    href="/order"
-                    className="inline-flex items-center gap-2 rounded-full border-2 border-amber-600 px-6 py-3 text-base font-semibold text-amber-800 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
-                  >
-                    Order and pay when pick up
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            <p className="mt-16 border-t border-stone-200 pt-8 text-center text-sm text-stone-500">
+            <p className="mt-20 border-t border-stone-200 pt-8 text-center text-sm text-stone-500">
               Please let us know if you have any allergies or dietary
               restrictions.
             </p>

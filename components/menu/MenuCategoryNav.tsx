@@ -29,7 +29,7 @@ export default function MenuCategoryNav({
 
   return (
     <nav
-      className="fixed bottom-6 right-6 z-40"
+      className="fixed bottom-28 right-6 z-40"
       aria-label="Menu categories"
     >
       <button

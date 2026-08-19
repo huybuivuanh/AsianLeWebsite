@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCheckoutForm } from "@/hooks/useCheckoutForm";
 import PickupSection from "@/components/checkout/PickupSection";
 import CustomerInfoSection from "@/components/checkout/CustomerInfoSection";
@@ -37,6 +38,13 @@ export default function CheckoutForm({
       className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-[1fr_22rem]"
     >
       <div className="space-y-6">
+        <Link
+          href="/order"
+          className="inline-flex items-center gap-2 rounded-full border-2 border-amber-600 px-4 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
+        >
+          ← Back to shopping
+        </Link>
+
         <PickupSection
           storeOpenNow={checkout.storeOpenNow}
           currentStoreTime={checkout.currentStoreTime}

@@ -59,9 +59,18 @@ declare global {
 
   // --- Ordering data model (demoCategories / demoMenuItems), see ecommerce.md ---
 
-  interface MenuItemAvailability {
-    start: string;
-    end: string;
+  /** Weekly per-day availability window for a DemoMenuItem/ItemOption. A missing day key
+   * means unavailable that day; an explicit `{}` (no day keys at all) means unavailable
+   * every day — distinct from `undefined` on the item/option, which means unrestricted.
+   * Matches the admin app's contract exactly, see its instruction.md. */
+  interface Availability {
+    mon?: TimeRange;
+    tue?: TimeRange;
+    wed?: TimeRange;
+    thu?: TimeRange;
+    fri?: TimeRange;
+    sat?: TimeRange;
+    sun?: TimeRange;
   }
 
   interface OptionGroupId {
@@ -87,7 +96,7 @@ declare global {
     optionGroupIds?: OptionGroupId[];
     categoryIds?: string[];
     kitchenType: KitchenType;
-    availability?: MenuItemAvailability;
+    availability?: Availability;
     soldOutUntil?: Date;
     createdAt: Date;
   }
@@ -109,7 +118,7 @@ declare global {
     name: string;
     price: number;
     groupIds?: string[];
-    availability?: MenuItemAvailability;
+    availability?: Availability;
     soldOutUntil?: Date;
     createdAt: Date;
   }

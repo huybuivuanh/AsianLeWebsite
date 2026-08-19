@@ -22,12 +22,35 @@ import { KitchenType } from "@/types/enum";
 
 const KITCHEN_TYPES: KitchenType[] = Object.values(KitchenType);
 
-export function mapAvailability(raw: unknown): MenuItemAvailability | undefined {
+const AVAILABILITY_DAY_KEYS = [
+  "mon",
+  "tue",
+  "wed",
+  "thu",
+  "fri",
+  "sat",
+  "sun",
+] as const;
+
+function mapTimeRange(raw: unknown): TimeRange | undefined {
   if (!raw || typeof raw !== "object") return undefined;
-  const start = (raw as { start?: unknown }).start;
-  const end = (raw as { end?: unknown }).end;
-  if (typeof start !== "string" || typeof end !== "string") return undefined;
-  return { start, end };
+  const startTime = (raw as { startTime?: unknown }).startTime;
+  const endTime = (raw as { endTime?: unknown }).endTime;
+  if (typeof startTime !== "string" || typeof endTime !== "string") return undefined;
+  return { startTime, endTime };
+}
+
+/** Absent/non-object means unrestricted (`undefined`, per Availability's contract) — but a
+ * present object with no matching day keys, e.g. `{}`, decodes to `{}`, not `undefined`:
+ * that's "restricted to zero days" (always unavailable), a distinct state from unrestricted. */
+export function mapAvailability(raw: unknown): Availability | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const result: Availability = {};
+  for (const day of AVAILABILITY_DAY_KEYS) {
+    const range = mapTimeRange((raw as Record<string, unknown>)[day]);
+    if (range) result[day] = range;
+  }
+  return result;
 }
 
 /** Absent/malformed both mean "not sold out" — unlike settings/store's pausedUntil,

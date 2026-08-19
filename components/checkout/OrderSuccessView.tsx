@@ -50,10 +50,10 @@ export default function OrderSuccessView({
         Total: {formatPriceCAD(total)} — pay at pickup.
       </p>
       <Link
-        href="/menu"
+        href="/order"
         className="mt-6 inline-flex items-center justify-center rounded-full bg-amber-500 px-6 py-3 text-sm font-semibold text-stone-900 shadow-md transition hover:bg-amber-400"
       >
-        Back to menu
+        Order again
       </Link>
     </div>
   );

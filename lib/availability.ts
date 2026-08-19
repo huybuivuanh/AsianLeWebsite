@@ -52,20 +52,35 @@ export function isSoldOut(
   return isStorePaused(soldOutUntil ?? null, now);
 }
 
-/** True if the current store-local time falls within an item's/option's availability window. */
+/** The current day's TimeRange from a weekly Availability map — undefined if that day
+ * isn't listed (including an explicit `{}`, which has no day keys at all). */
+function getTodayRange(
+  availability: Availability,
+  timezone: string,
+  now: Date,
+): TimeRange | undefined {
+  const { dayKey } = getZonedParts(timezone, now);
+  return availability[dayKey];
+}
+
+/** True if the current store-local time falls within an item's/option's availability
+ * window for today. A day missing from the weekly map (including `{}`) means unavailable
+ * that day — never merge `{}` with `undefined`, they mean opposite things. */
 export function isWithinAvailabilityWindow(
-  availability: MenuItemAvailability | undefined,
+  availability: Availability | undefined,
   timezone: string,
   now: Date = new Date(),
 ): boolean {
   if (!availability) return true;
+  const range = getTodayRange(availability, timezone, now);
+  if (!range) return false;
   const { hhmm } = getZonedParts(timezone, now);
-  return hhmm >= availability.start && hhmm < availability.end;
+  return hhmm >= range.startTime && hhmm < range.endTime;
 }
 
 /** Combined availability check shared by DemoMenuItem and ItemOption. */
 export function isAvailableNow(
-  entity: { availability?: MenuItemAvailability; soldOutUntil?: Date },
+  entity: { availability?: Availability; soldOutUntil?: Date },
   timezone: string,
   now: Date = new Date(),
 ): boolean {
@@ -75,20 +90,25 @@ export function isAvailableNow(
 
 /** Availability as a display-ready status: whether to show it, and what label to show if not. */
 export function getAvailabilityStatus(
-  entity: { availability?: MenuItemAvailability; soldOutUntil?: Date },
+  entity: { availability?: Availability; soldOutUntil?: Date },
   timezone: string,
   now: Date = new Date(),
 ): AvailabilityStatus {
   if (isSoldOut(entity.soldOutUntil, now))
     return { available: false, label: "Sold out" };
+
+  const availability = entity.availability;
   if (
-    entity.availability &&
-    !isWithinAvailabilityWindow(entity.availability, timezone, now)
+    availability &&
+    !isWithinAvailabilityWindow(availability, timezone, now)
   ) {
-    return {
-      available: false,
-      label: `Available ${formatTimeHHmmTo12h(entity.availability.start)} – ${formatTimeHHmmTo12h(entity.availability.end)}`,
-    };
+    const range = getTodayRange(availability, timezone, now);
+    return range
+      ? {
+          available: false,
+          label: `Available ${formatTimeHHmmTo12h(range.startTime)} – ${formatTimeHHmmTo12h(range.endTime)}`,
+        }
+      : { available: false, label: "Not available" };
   }
   return { available: true };
 }
@@ -227,7 +247,8 @@ export function getScheduledPickupInvalidReason(
   now: Date = new Date(),
   { checkBusinessHours = true }: { checkBusinessHours?: boolean } = {},
 ): ScheduledPickupInvalidReason | null {
-  if (checkBusinessHours && isStorePaused(settings.pausedUntil, now)) return "paused";
+  if (checkBusinessHours && isStorePaused(settings.pausedUntil, now))
+    return "paused";
   if (
     !/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ||
     !/^([01]\d|2[0-3]):[0-5]\d$/.test(pickupTime) ||
@@ -283,8 +304,13 @@ export function isValidScheduledPickup(
   options?: { checkBusinessHours?: boolean },
 ): boolean {
   return (
-    getScheduledPickupInvalidReason(settings, dateStr, pickupTime, now, options) ===
-    null
+    getScheduledPickupInvalidReason(
+      settings,
+      dateStr,
+      pickupTime,
+      now,
+      options,
+    ) === null
   );
 }
 

@@ -1,10 +1,10 @@
 "use client";
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 /**
- * Client-side cart, persisted to localStorage. Mirrors AsianLePOS's cart pattern
+ * Client-side cart, in-memory only (no persistence — cart does not survive a
+ * refresh or a new session, by design). Mirrors AsianLePOS's cart pattern
  * (a different Firebase project — no shared data, just a consistent shape): each
  * line is snapshotted at add-to-cart time, `price` is the per-unit price INCLUDING
  * selected options (matching POS's OrderItem convention), and `options` is kept
@@ -53,65 +53,57 @@ function lineConfigKey(menuItemId: string, options: CartOptionSelection[]): stri
   return `${menuItemId}::${optionsKey}`;
 }
 
-export const useCartStore = create<CartState>()(
-  persist(
-    (set, get) => ({
-      lines: [],
+export const useCartStore = create<CartState>()((set, get) => ({
+  lines: [],
 
-      addLine: (input) => {
-        const quantity = input.quantity ?? 1;
-        const key = lineConfigKey(input.menuItemId, input.options);
-        const existing = get().lines.find(
-          (line) => lineConfigKey(line.menuItemId, line.options) === key,
-        );
+  addLine: (input) => {
+    const quantity = input.quantity ?? 1;
+    const key = lineConfigKey(input.menuItemId, input.options);
+    const existing = get().lines.find(
+      (line) => lineConfigKey(line.menuItemId, line.options) === key,
+    );
 
-        if (existing) {
-          set({
-            lines: get().lines.map((line) =>
-              line.id === existing.id
-                ? { ...line, quantity: line.quantity + quantity }
-                : line,
-            ),
-          });
-          return;
-        }
+    if (existing) {
+      set({
+        lines: get().lines.map((line) =>
+          line.id === existing.id
+            ? { ...line, quantity: line.quantity + quantity }
+            : line,
+        ),
+      });
+      return;
+    }
 
-        set({
-          lines: [
-            ...get().lines,
-            {
-              id: crypto.randomUUID(),
-              menuItemId: input.menuItemId,
-              name: input.name,
-              price: input.price,
-              imageUrl: input.imageUrl,
-              quantity,
-              options: input.options,
-            },
-          ],
-        });
-      },
+    set({
+      lines: [
+        ...get().lines,
+        {
+          id: crypto.randomUUID(),
+          menuItemId: input.menuItemId,
+          name: input.name,
+          price: input.price,
+          imageUrl: input.imageUrl,
+          quantity,
+          options: input.options,
+        },
+      ],
+    });
+  },
 
-      updateQuantity: (id, quantity) => {
-        if (quantity <= 0) {
-          set({ lines: get().lines.filter((l) => l.id !== id) });
-          return;
-        }
-        set({
-          lines: get().lines.map((l) => (l.id === id ? { ...l, quantity } : l)),
-        });
-      },
+  updateQuantity: (id, quantity) => {
+    if (quantity <= 0) {
+      set({ lines: get().lines.filter((l) => l.id !== id) });
+      return;
+    }
+    set({
+      lines: get().lines.map((l) => (l.id === id ? { ...l, quantity } : l)),
+    });
+  },
 
-      removeLine: (id) => set({ lines: get().lines.filter((l) => l.id !== id) }),
+  removeLine: (id) => set({ lines: get().lines.filter((l) => l.id !== id) }),
 
-      clear: () => set({ lines: [] }),
-    }),
-    // skipHydration: the store starts empty on both server and first client
-    // render (matching SSR output), then CartDrawer triggers rehydrate() from
-    // localStorage in a useEffect, after mount — avoids a hydration mismatch.
-    { name: "asian-le-cart", skipHydration: true },
-  ),
-);
+  clear: () => set({ lines: [] }),
+}));
 
 /** price already includes selected options — matches POS's orderItemsSubtotal (price * quantity). */
 export function lineTotal(line: CartLine): number {

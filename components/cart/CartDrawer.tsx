@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   useCartStore,
   cartItemCount,
@@ -14,10 +14,6 @@ export default function CartDrawer() {
   const lines = useCartStore((s) => s.lines);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeLine = useCartStore((s) => s.removeLine);
-
-  useEffect(() => {
-    useCartStore.persist.rehydrate();
-  }, []);
 
   const itemCount = cartItemCount(lines);
   const subtotal = cartSubtotal(lines);

@@ -54,7 +54,7 @@ type LineAvailabilityResult = {
 };
 
 /**
- * All checkout state/business logic: cart rehydration, live availability re-check against
+ * All checkout state/business logic: live availability re-check against
  * /api/cart/availability, live wait-time subscription, pickup scheduling validity, form
  * fields, and order submission to /api/orders. Kept separate from CheckoutForm/its
  * subcomponents so those stay presentational.
@@ -63,10 +63,6 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
   const lines = useCartStore((s) => s.lines);
   const clearCart = useCartStore((s) => s.clear);
   const removeLine = useCartStore((s) => s.removeLine);
-
-  useEffect(() => {
-    useCartStore.persist.rehydrate();
-  }, []);
 
   const [unavailableLineIds, setUnavailableLineIds] = useState<Set<string>>(
     new Set(),

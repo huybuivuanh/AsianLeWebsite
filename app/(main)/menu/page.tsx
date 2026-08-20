@@ -5,6 +5,7 @@ import DailySpecialsGrid from "@/components/daily-specials/DailySpecialsGrid";
 import MenuCategoryNav from "@/components/menu/MenuCategoryNav";
 import MenuItemCard from "@/components/menu/MenuItemCard";
 import FloatingOrderBar from "@/components/menu/FloatingOrderBar";
+import OrderPickupCta from "@/components/menu/OrderPickupCta";
 import { STORE } from "@/lib/store";
 import { fetchOrderMenuDataForServer } from "@/lib/orderMenuData";
 import { getStoreSettings } from "@/lib/storeSettings";
@@ -69,7 +70,7 @@ export default async function MenuPage() {
   return (
     <>
       <MenuCategoryNav serverCategoryLinks={serverCategoryLinks} />
-      <FloatingOrderBar />
+      <FloatingOrderBar storeSettings={storeSettings} />
       {/* Hero */}
       <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
         <Image
@@ -111,12 +112,12 @@ export default async function MenuPage() {
                 />
               </svg>
             </a>
-            <Link
-              href="/order"
+            <OrderPickupCta
+              storeSettings={storeSettings}
               className="inline-flex items-center gap-2 rounded-full border-2 border-white/70 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-stone-900"
             >
               Order and pay when pick up
-            </Link>
+            </OrderPickupCta>
           </div>
         </div>
       </section>

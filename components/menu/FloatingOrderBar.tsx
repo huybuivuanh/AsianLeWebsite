@@ -1,8 +1,12 @@
-import Link from "next/link";
 import { STORE } from "@/lib/store";
+import OrderPickupCta from "@/components/menu/OrderPickupCta";
 
 /** Persistent bottom bar with the two order CTAs — stays visible while browsing the menu, so users don't have to scroll back to the hero to order. */
-export default function FloatingOrderBar() {
+export default function FloatingOrderBar({
+  storeSettings,
+}: {
+  storeSettings: StoreSettings;
+}) {
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur supports-[backdrop-filter]:bg-white/85">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-3 px-4 py-3 sm:gap-4 sm:py-4">
@@ -28,12 +32,12 @@ export default function FloatingOrderBar() {
             />
           </svg>
         </a>
-        <Link
-          href="/order"
+        <OrderPickupCta
+          storeSettings={storeSettings}
           className="inline-flex items-center gap-2 rounded-full border-2 border-amber-600 px-5 py-2.5 text-base font-semibold text-amber-800 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 sm:px-6 sm:py-3"
         >
           Order and pay when pick up
-        </Link>
+        </OrderPickupCta>
       </div>
     </div>
   );

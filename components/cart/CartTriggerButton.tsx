@@ -17,7 +17,7 @@ export default function CartTriggerButton({
     <button
       type="button"
       onClick={onClick}
-      className="fixed bottom-6 left-6 z-40 flex items-center gap-2 rounded-full bg-stone-900 px-5 py-3.5 text-white shadow-lg shadow-stone-900/25 transition hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
+      className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-stone-900 px-5 py-3.5 text-white shadow-lg shadow-stone-900/25 transition hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
       aria-label={`Open cart, ${itemCount} item${itemCount === 1 ? "" : "s"}`}
     >
       <svg

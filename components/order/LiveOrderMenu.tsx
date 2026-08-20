@@ -129,7 +129,7 @@ export default function LiveOrderMenu({
         <PageContainer>
           <div className="mx-auto max-w-6xl">
             <div className="space-y-16">
-              {categories.map((category) => {
+              {categories.map((category, categoryIndex) => {
                 const itemsInCategory = itemViewModels.filter(
                   (vm) => vm.item.categoryIds?.includes(category.id) ?? false,
                 );
@@ -150,12 +150,13 @@ export default function LiveOrderMenu({
                       ) : null}
                     </div>
                     <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
-                      {itemsInCategory.map((vm) => (
+                      {itemsInCategory.map((vm, itemIndex) => (
                         <OrderMenuItemCard
                           key={vm.item.id}
                           {...vm}
                           isOrderingAvailable={isOrderingAvailable}
                           autoOpen={vm.item.id === openItemId}
+                          priority={categoryIndex === 0 && itemIndex === 0}
                         />
                       ))}
                     </ul>

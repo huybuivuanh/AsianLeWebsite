@@ -12,6 +12,7 @@ type OrderMenuItemCardProps = MenuItemViewModel & {
   isOrderingAvailable: boolean;
   /** Auto-opens this item's modal on mount — used for deep links from /menu (?item=<id>). */
   autoOpen?: boolean;
+  priority?: boolean;
 };
 
 export default function OrderMenuItemCard({
@@ -20,6 +21,7 @@ export default function OrderMenuItemCard({
   optionGroups,
   isOrderingAvailable,
   autoOpen = false,
+  priority,
 }: OrderMenuItemCardProps) {
   // Mirrors the open() handler below (gate on isOrderingAvailable, else show the
   // unavailable modal) — evaluated once on mount instead of on click. Safe as a lazy
@@ -51,7 +53,7 @@ export default function OrderMenuItemCard({
         className="group flex w-full flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
         aria-label={`View details for ${item.name}`}
       >
-        <MenuItemCardFace item={item} availability={availability} />
+        <MenuItemCardFace item={item} availability={availability} priority={priority} />
       </button>
 
       <ItemDetailModal

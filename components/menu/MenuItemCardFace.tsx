@@ -6,12 +6,16 @@ import type { AvailabilityStatus } from "@/lib/availability";
 type MenuItemCardFaceProps = {
   item: DemoMenuItem;
   availability: AvailabilityStatus;
+  /** Set for the first card above the fold so Next.js eager-loads it instead of lazy-loading
+   * the page's LCP image (see next/image's loading="eager"/priority guidance). */
+  priority?: boolean;
 };
 
 /** Shared image/name/price/availability-badge/description card face, used by both /menu (MenuItemCard, read-only) and /order (OrderMenuItemCard, opens the order flow). */
 export default function MenuItemCardFace({
   item,
   availability,
+  priority = false,
 }: MenuItemCardFaceProps) {
   const imageSrc = item.image?.url || "/Soup Bowl Icon.jpg";
 
@@ -24,6 +28,7 @@ export default function MenuItemCardFace({
           fill
           className={`object-cover transition duration-300 group-hover:scale-105 ${availability.available ? "" : "grayscale"}`}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          priority={priority}
           unoptimized={skipNextImageOptimization(imageSrc)}
         />
         {!availability.available ? (

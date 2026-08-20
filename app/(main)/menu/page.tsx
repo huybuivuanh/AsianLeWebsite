@@ -202,7 +202,7 @@ export default async function MenuPage() {
               </div>
             ) : (
               <div className="mt-24 space-y-28">
-                {categoriesSorted.map((category) => {
+                {categoriesSorted.map((category, categoryIndex) => {
                   const itemsInCategory = itemViewModels.filter(
                     (vm) =>
                       vm.item.categoryIds?.includes(category.id) ?? false,
@@ -228,11 +228,12 @@ export default async function MenuPage() {
                         </p>
                       ) : null}
                       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
-                        {itemsInCategory.map((vm) => (
+                        {itemsInCategory.map((vm, itemIndex) => (
                           <MenuItemCard
                             key={vm.item.id}
                             item={vm.item}
                             availability={vm.availability}
+                            priority={categoryIndex === 0 && itemIndex === 0}
                           />
                         ))}
                       </ul>

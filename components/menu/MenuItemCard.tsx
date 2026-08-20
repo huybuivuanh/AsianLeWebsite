@@ -7,10 +7,12 @@ import MenuItemCardFace from "@/components/menu/MenuItemCardFace";
 import Modal from "@/components/ui/Modal";
 import { skipNextImageOptimization } from "@/lib/imagePolicy";
 
-type MenuItemCardProps = Pick<MenuItemViewModel, "item" | "availability">;
+type MenuItemCardProps = Pick<MenuItemViewModel, "item" | "availability"> & {
+  priority?: boolean;
+};
 
 /** Read-only menu card for /menu — clicking an item zooms its photo, no cart/order flow. */
-export default function MenuItemCard({ item, availability }: MenuItemCardProps) {
+export default function MenuItemCard({ item, availability, priority }: MenuItemCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const imageSrc = item.image?.url || "/Soup Bowl Icon.jpg";
 
@@ -22,7 +24,7 @@ export default function MenuItemCard({ item, availability }: MenuItemCardProps) 
         className="group flex w-full flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
         aria-label={`View larger image of ${item.name}`}
       >
-        <MenuItemCardFace item={item} availability={availability} />
+        <MenuItemCardFace item={item} availability={availability} priority={priority} />
       </button>
 
       <Modal

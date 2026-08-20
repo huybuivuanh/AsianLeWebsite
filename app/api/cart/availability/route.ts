@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  fetchDemoMenuItemsForServer,
+  fetchMenuItemsForServer,
   fetchItemOptionsForServer,
 } from "@/lib/orderMenuData";
 import { fetchStoreSettingsForServer } from "@/lib/storeSettings";
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   }
 
   const [menuItems, options, storeSettings] = await Promise.all([
-    fetchDemoMenuItemsForServer(),
+    fetchMenuItemsForServer(),
     fetchItemOptionsForServer(),
     fetchStoreSettingsForServer(),
   ]);

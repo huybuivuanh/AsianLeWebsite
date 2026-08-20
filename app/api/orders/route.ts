@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebaseAdmin";
 import {
-  fetchDemoMenuItemsForServer,
+  fetchMenuItemsForServer,
   fetchOptionGroupsForServer,
   fetchItemOptionsForServer,
 } from "@/lib/orderMenuData";
@@ -12,7 +12,7 @@ import {
   resolveScheduledPickupInstant,
 } from "@/lib/availability";
 import { calculateTaxBreakdown } from "@/lib/orderPricing";
-import { OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
+import { KitchenType, OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
 
 /**
  * Places a pay-at-pickup order. Never trusts client-submitted prices — only
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
   if (!EMAIL_RE.test(customerEmail)) return badRequest("Invalid email address");
 
   const [menuItems, optionGroups, options, storeSettings] = await Promise.all([
-    fetchDemoMenuItemsForServer(),
+    fetchMenuItemsForServer(),
     fetchOptionGroupsForServer(),
     fetchItemOptionsForServer(),
     fetchStoreSettingsForServer(),
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
   const optionGroupsById = new Map(optionGroups.map((g) => [g.id, g]));
   const optionsById = new Map(options.map((o) => [o.id, o]));
 
-  let fulfillment: TakeOutFulfillment;
+  let fulfillment: OrderFulfillment;
   let fulfillmentWire: FulfillmentWire;
   if (body.fulfillment?.kind === TakeOutFulfillmentKind.Scheduled) {
     const date = body.fulfillment.date;
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
       price: item.price + optionsTotal,
       quantity,
       options: selectedOptions,
-      kitchenType: item.kitchenType,
+      kitchenType: item.kitchenType ?? KitchenType.Other,
     });
   }
 

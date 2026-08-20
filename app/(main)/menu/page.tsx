@@ -18,7 +18,7 @@ import { getDailySpecialsBundle } from "@/lib/siteData.server";
 export const revalidate = 900;
 
 export default async function MenuPage() {
-  let categories: DemoCategory[];
+  let categories: FoodCategory[];
   let itemViewModels: MenuItemViewModel[];
   let error: string | null = null;
   let dailyError: string | null = null;

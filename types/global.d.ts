@@ -21,6 +21,25 @@ declare global {
     url: string;
   }
 
+  /** Weekly per-day availability window for a MenuItem/ItemOption. A missing day key
+   * means unavailable that day; an explicit `{}` (no day keys at all) means unavailable
+   * every day — distinct from `undefined` on the item/option, which means unrestricted.
+   * Matches the admin app's contract exactly, see its instruction.md. */
+  interface Availability {
+    mon?: TimeRange;
+    tue?: TimeRange;
+    wed?: TimeRange;
+    thu?: TimeRange;
+    fri?: TimeRange;
+    sat?: TimeRange;
+    sun?: TimeRange;
+  }
+
+  interface OptionGroupId {
+    optionGroupId: string;
+    order: number;
+  }
+
   interface MenuItem {
     id: string;
     name: string;
@@ -28,9 +47,14 @@ declare global {
     price: number;
     image?: ImageItem;
     options?: string[];
+    optionGroupIds?: OptionGroupId[];
     categoryIds?: string[];
+    kitchenType?: KitchenType;
+    availability?: Availability;
+    soldOutUntil?: Date;
     createdAt: Date;
   }
+
   interface DailySpecialItem {
     id: string;
     name: string;
@@ -55,50 +79,6 @@ declare global {
     days: string;
     time: string;
     order: number;
-  }
-
-  // --- Ordering data model (demoCategories / demoMenuItems), see ecommerce.md ---
-
-  /** Weekly per-day availability window for a DemoMenuItem/ItemOption. A missing day key
-   * means unavailable that day; an explicit `{}` (no day keys at all) means unavailable
-   * every day — distinct from `undefined` on the item/option, which means unrestricted.
-   * Matches the admin app's contract exactly, see its instruction.md. */
-  interface Availability {
-    mon?: TimeRange;
-    tue?: TimeRange;
-    wed?: TimeRange;
-    thu?: TimeRange;
-    fri?: TimeRange;
-    sat?: TimeRange;
-    sun?: TimeRange;
-  }
-
-  interface OptionGroupId {
-    optionGroupId: string;
-    order: number;
-  }
-
-  interface DemoCategory {
-    id: string;
-    name: string;
-    description?: string;
-    itemIds?: string[];
-    order: number;
-    createdAt: Date;
-  }
-
-  interface DemoMenuItem {
-    id: string;
-    name: string;
-    description?: string;
-    price: number;
-    image?: ImageItem;
-    optionGroupIds?: OptionGroupId[];
-    categoryIds?: string[];
-    kitchenType: KitchenType;
-    availability?: Availability;
-    soldOutUntil?: Date;
-    createdAt: Date;
   }
 
   interface OptionGroup {
@@ -131,14 +111,16 @@ declare global {
 
   interface Holiday {
     id: string;
-    from: string;
-    to?: string;
+    from: string; // YYYY-MM-DD
+    to?: string; // YYYY-MM-DD — if absent, single day
   }
 
   interface StoreSettings {
     pausedUntil: Date | null;
     timezone: string;
     waitTime: number;
+    /** E.164, e.g. "+13065551234" — who the confirm-call Cloud Function calls. */
+    restaurantPhoneNumber: string;
     hours: {
       mon: DayHours;
       tue: DayHours;
@@ -151,11 +133,12 @@ declare global {
     holidays: Holiday[];
   }
 
-  // --- Orders (written by this site, read by the separate admin app — see orders-schema.md).
-  // Field names/enum values mirror the AsianLePOS app's Order model (a different Firebase
-  // project — no shared data, just a consistent vocabulary), with a few extensions specific
-  // to an unauthenticated online-ordering flow: `orderNumber`, `customerEmail`, and
-  // `menuItemId` traceability back to demoMenuItems. ---
+  // --- Orders (written by this site, read by the separate admin app — see that repo's
+  // orders-schema.md for the full contract). Field names/enum values mirror the
+  // AsianLePOS app's Order model (a different Firebase project — no shared data, just a
+  // consistent vocabulary), with a few extensions specific to an unauthenticated
+  // online-ordering flow: `orderNumber`, `customerEmail`, and `menuItemId` traceability
+  // back to menuItems. ---
 
   interface OrderItemOption {
     name: string;
@@ -166,37 +149,40 @@ declare global {
   interface OrderItem {
     menuItemId: string;
     name: string;
-    price: number;
+    price: number; // per-unit price INCLUDING selected options
     quantity: number;
     options?: OrderItemOption[];
     instructions?: string;
     kitchenType: KitchenType;
   }
 
-  interface TaxBreakDown {
+  interface OrderTaxBreakDown {
     subTotal: number;
     pst: number;
     gst: number;
     total: number;
   }
 
-  type TakeOutFulfillment =
+  type OrderFulfillment =
     | { kind: TakeOutFulfillmentKind.Immediate; readyTimeMinutes?: number }
     | { kind: TakeOutFulfillmentKind.Scheduled; scheduledAt: Date };
 
   interface Order {
-    id?: string;
-    orderNumber: string; // extension — short pickup code, POS has no analog (staff see the ticket directly)
+    id: string;
+    orderNumber: string;
     status: OrderStatus;
-    fulfillment: TakeOutFulfillment;
+    fulfillment: OrderFulfillment;
     customerName: string;
     phoneNumber: string;
     customerEmail: string;
     orderItems: OrderItem[];
-    printed: boolean;
+    taxBreakDown: OrderTaxBreakDown;
     paid: boolean;
-    taxBreakDown: TaxBreakDown;
+    printed: boolean;
     createdAt: Date;
+    /** Written only by the confirmOrderCall Cloud Function (functions/), never by this app. */
+    confirmationCallStatus?: "placed" | "failed";
+    confirmationCallPlacedAt?: Date;
   }
 }
 

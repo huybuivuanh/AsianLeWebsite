@@ -4,7 +4,7 @@ import { formatPriceCAD } from "@/lib/utils";
 import type { AvailabilityStatus } from "@/lib/availability";
 
 type MenuItemCardFaceProps = {
-  item: DemoMenuItem;
+  item: MenuItem;
   availability: AvailabilityStatus;
   /** Set for the first card above the fold so Next.js eager-loads it instead of lazy-loading
    * the page's LCP image (see next/image's loading="eager"/priority guidance). */

@@ -1,7 +1,7 @@
 import { getAvailabilityStatus, type AvailabilityStatus } from "@/lib/availability";
 
 /**
- * Resolves a DemoMenuItem's option groups/options into display-ready view models
+ * Resolves a MenuItem's option groups/options into display-ready view models
  * (pre-sorted, pre-filtered, with availability computed). No Firestore access here.
  */
 
@@ -15,13 +15,13 @@ export type MenuOptionGroupViewModel = {
 };
 
 export type MenuItemViewModel = {
-  item: DemoMenuItem;
+  item: MenuItem;
   availability: AvailabilityStatus;
   optionGroups: MenuOptionGroupViewModel[];
 };
 
 export function buildMenuItemViewModel(
-  item: DemoMenuItem,
+  item: MenuItem,
   optionGroupsById: Map<string, OptionGroup>,
   optionsById: Map<string, ItemOption>,
   timezone: string,

@@ -18,6 +18,7 @@ const DEFAULT_STORE_SETTINGS: StoreSettings = {
   pausedUntil: INDEFINITE_PAUSE,
   timezone: DEFAULT_TIMEZONE,
   waitTime: 0,
+  restaurantPhoneNumber: "",
   hours: {
     mon: DEFAULT_DAY_HOURS,
     tue: DEFAULT_DAY_HOURS,
@@ -78,6 +79,8 @@ export async function fetchStoreSettingsForServer(): Promise<StoreSettings> {
           : INDEFINITE_PAUSE,
     timezone: typeof d.timezone === "string" ? d.timezone : DEFAULT_TIMEZONE,
     waitTime: typeof d.waitTime === "number" ? d.waitTime : DEFAULT_STORE_SETTINGS.waitTime,
+    restaurantPhoneNumber:
+      typeof d.restaurantPhoneNumber === "string" ? d.restaurantPhoneNumber : "",
     hours: mapWeeklyHours(d.hours),
     holidays: mapHolidays(d.holidays),
   };

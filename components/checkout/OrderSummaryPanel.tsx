@@ -7,7 +7,7 @@ type OrderSummaryPanelProps = {
   unavailableLineIds: Set<string>;
   priceUpdates: Map<string, number>;
   removeLine: (lineId: string) => void;
-  taxBreakDown: TaxBreakDown;
+  taxBreakDown: OrderTaxBreakDown;
   submitState: SubmitState;
 };
 

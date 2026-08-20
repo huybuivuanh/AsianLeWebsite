@@ -78,7 +78,7 @@ export function isWithinAvailabilityWindow(
   return hhmm >= range.startTime && hhmm < range.endTime;
 }
 
-/** Combined availability check shared by DemoMenuItem and ItemOption. */
+/** Combined availability check shared by MenuItem and ItemOption. */
 export function isAvailableNow(
   entity: { availability?: Availability; soldOutUntil?: Date },
   timezone: string,

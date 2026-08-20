@@ -57,8 +57,7 @@ All pages live under `app/(main)/` using a route group (no URL segment added). `
 Public pages are **async Server Components** with `export const revalidate = 900` (ISR, 15-min TTL) — except `/checkout`, which is `export const dynamic = "force-dynamic"` since store-hours/pause-ordering gating must never be stale. Data is fetched directly from Firestore on the server:
 
 - `lib/siteData.server.ts` — updates, gallery, daily specials (home page)
-- `lib/menuData.ts` — **legacy** `categories`/`menuItems` model, no longer used by any page — kept only for reference, do not build on it
-- `lib/orderMenuData.ts` — `demoCategories`/`demoMenuItems`/`optionGroups`/`options` (menu page, the active model — see `ecommerce.md`)
+- `lib/orderMenuData.ts` — `categories`/`menuItems`/`optionGroups`/`options` (menu page, the active model — see `ecommerce.md`)
 - `lib/storeSettings.ts` — `settings/store` (hours/holidays/pause-ordering)
 
 All wrap their loaders in React's `cache()` to deduplicate within a single request.
@@ -78,13 +77,12 @@ The `/menu` page doubles as the ordering UI (see `ecommerce.md` for the full Fir
 
 | Collection | Type | Used for |
 |---|---|---|
-| `demoCategories` | `DemoCategory` | Menu category groupings (active model) |
-| `demoMenuItems` | `DemoMenuItem` | Individual menu items (active model) |
+| `categories` | `FoodCategory` | Menu category groupings |
+| `menuItems` | `MenuItem` | Individual menu items |
 | `optionGroups` | `OptionGroup` | Reusable modifier groups |
 | `options` | `ItemOption` | Individual modifier choices |
-| `settings/store` (single doc) | `StoreSettings` | Hours, holidays, pause-ordering kill switch |
+| `settings/store` (single doc) | `StoreSettings` | Hours, holidays, pause-ordering kill switch, restaurant confirm-call number |
 | `orders` | `Order` | Written by this site (`/api/orders`), read by the separate admin app |
-| `categories` / `menuItems` | `FoodCategory` / `MenuItem` | **Legacy**, unused, do not build on |
 | `dailySpecials` | `DailySpecial` | Day-of-week special configs |
 | `dailySpecialItems` | `DailySpecialItem` | Items belonging to daily specials |
 | `updates` | `ImageItem` | News/updates on home page |
@@ -92,7 +90,7 @@ The `/menu` page doubles as the ordering UI (see `ecommerce.md` for the full Fir
 
 ### Global types
 
-All domain types are declared globally in `types/global.d.ts` — no import needed in component files. This includes the legacy menu model, the active ordering model (`DemoCategory`, `DemoMenuItem`, `OptionGroup`, `ItemOption`, `StoreSettings`, etc. — see `ecommerce.md`), and the `Order` model this site writes (see `orders-schema.md`).
+All domain types are declared globally in `types/global.d.ts` — no import needed in component files. This includes the ordering model (`FoodCategory`, `MenuItem`, `OptionGroup`, `ItemOption`, `StoreSettings`, etc. — see `ecommerce.md`), which mirrors the separate admin app's contract exactly, and the `Order` model this site writes (see `orders-schema.md`).
 
 ### Key lib files
 

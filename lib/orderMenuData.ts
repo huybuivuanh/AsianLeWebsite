@@ -13,7 +13,7 @@ import { mapImageItemField, sortAlphabetically } from "@/lib/utils";
 import { KitchenType } from "@/types/enum";
 
 /**
- * Server-side fetchers for the ordering data model (demoCategories / demoMenuItems /
+ * Server-side fetchers for the ordering data model (categories / menuItems /
  * optionGroups / options), per ecommerce.md. The fetch*ForServer functions are for Server
  * Components only, but the exported mapDocTo* mappers are pure (no server-only deps) and
  * are also reused client-side by components/order/LiveOrderMenu.tsx to map onSnapshot
@@ -85,7 +85,7 @@ function normalizeOptionGroupRefs(raw: unknown): OptionGroupId[] | undefined {
   return refs.length > 0 ? refs.sort((a, b) => a.order - b.order) : undefined;
 }
 
-export function mapDocToDemoCategory(doc: QueryDocumentSnapshot<DocumentData>): DemoCategory {
+export function mapDocToFoodCategory(doc: QueryDocumentSnapshot<DocumentData>): FoodCategory {
   const d = doc.data();
   return {
     id: doc.id,
@@ -97,7 +97,7 @@ export function mapDocToDemoCategory(doc: QueryDocumentSnapshot<DocumentData>): 
   };
 }
 
-export function mapDocToDemoMenuItem(doc: QueryDocumentSnapshot<DocumentData>): DemoMenuItem {
+export function mapDocToMenuItem(doc: QueryDocumentSnapshot<DocumentData>): MenuItem {
   const d = doc.data();
   const price = typeof d.price === "number" && Number.isFinite(d.price) ? d.price : 0;
   const kitchenType = KITCHEN_TYPES.includes(d.kitchenType)
@@ -147,15 +147,15 @@ export function mapDocToItemOption(doc: QueryDocumentSnapshot<DocumentData>): It
   };
 }
 
-export async function fetchDemoCategoriesForServer(): Promise<DemoCategory[]> {
-  const q = query(collection(db, "demoCategories"), orderBy("order"));
+export async function fetchCategoriesForServer(): Promise<FoodCategory[]> {
+  const q = query(collection(db, "categories"), orderBy("order"));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(mapDocToDemoCategory);
+  return snapshot.docs.map(mapDocToFoodCategory);
 }
 
-export async function fetchDemoMenuItemsForServer(): Promise<DemoMenuItem[]> {
-  const snapshot = await getDocs(collection(db, "demoMenuItems"));
-  const items = snapshot.docs.map(mapDocToDemoMenuItem);
+export async function fetchMenuItemsForServer(): Promise<MenuItem[]> {
+  const snapshot = await getDocs(collection(db, "menuItems"));
+  const items = snapshot.docs.map(mapDocToMenuItem);
   return sortAlphabetically(items, (item) => item.name);
 }
 
@@ -170,14 +170,14 @@ export async function fetchItemOptionsForServer(): Promise<ItemOption[]> {
 }
 
 async function loadOrderMenuDataForServer(): Promise<{
-  categories: DemoCategory[];
-  menuItems: DemoMenuItem[];
+  categories: FoodCategory[];
+  menuItems: MenuItem[];
   optionGroups: OptionGroup[];
   options: ItemOption[];
 }> {
   const [categories, menuItems, optionGroups, options] = await Promise.all([
-    fetchDemoCategoriesForServer(),
-    fetchDemoMenuItemsForServer(),
+    fetchCategoriesForServer(),
+    fetchMenuItemsForServer(),
     fetchOptionGroupsForServer(),
     fetchItemOptionsForServer(),
   ]);

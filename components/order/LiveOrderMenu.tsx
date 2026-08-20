@@ -5,8 +5,8 @@ import { collection, doc, onSnapshot, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { sortAlphabetically } from "@/lib/utils";
 import {
-  mapDocToDemoCategory,
-  mapDocToDemoMenuItem,
+  mapDocToFoodCategory,
+  mapDocToMenuItem,
   mapDocToOptionGroup,
   mapDocToItemOption,
 } from "@/lib/orderMenuData";
@@ -18,7 +18,7 @@ import OrderCategoryTabs from "@/components/order/OrderCategoryTabs";
 import OrderMenuItemCard from "@/components/menu/OrderMenuItemCard";
 
 /**
- * Owns all of /order's reactive data: subscribes to demoCategories, demoMenuItems,
+ * Owns all of /order's reactive data: subscribes to categories, menuItems,
  * optionGroups, options, and settings/store via onSnapshot, and re-renders the category
  * tabs + item grid with live data — not just availability, the whole catalog (names,
  * prices, descriptions, images, category membership). The SSR-fetched initial* props are
@@ -39,8 +39,8 @@ export default function LiveOrderMenu({
   initialStoreSettings,
   openItemId,
 }: {
-  initialCategories: DemoCategory[];
-  initialMenuItems: DemoMenuItem[];
+  initialCategories: FoodCategory[];
+  initialMenuItems: MenuItem[];
   initialOptionGroups: OptionGroup[];
   initialOptions: ItemOption[];
   initialStoreSettings: StoreSettings;
@@ -54,12 +54,12 @@ export default function LiveOrderMenu({
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const unsubCategories = onSnapshot(collection(db, "demoCategories"), (snapshot) => {
-      const mapped = snapshot.docs.map(mapDocToDemoCategory);
+    const unsubCategories = onSnapshot(collection(db, "categories"), (snapshot) => {
+      const mapped = snapshot.docs.map(mapDocToFoodCategory);
       setCategories([...mapped].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
     });
-    const unsubItems = onSnapshot(collection(db, "demoMenuItems"), (snapshot) => {
-      const mapped = snapshot.docs.map(mapDocToDemoMenuItem);
+    const unsubItems = onSnapshot(collection(db, "menuItems"), (snapshot) => {
+      const mapped = snapshot.docs.map(mapDocToMenuItem);
       setMenuItems(sortAlphabetically(mapped, (item) => item.name));
     });
     const unsubOptionGroups = onSnapshot(collection(db, "optionGroups"), (snapshot) => {
@@ -80,6 +80,10 @@ export default function LiveOrderMenu({
               : INDEFINITE_PAUSE,
         timezone: typeof d.timezone === "string" ? d.timezone : initialStoreSettings.timezone,
         waitTime: typeof d.waitTime === "number" ? d.waitTime : initialStoreSettings.waitTime,
+        restaurantPhoneNumber:
+          typeof d.restaurantPhoneNumber === "string"
+            ? d.restaurantPhoneNumber
+            : initialStoreSettings.restaurantPhoneNumber,
         hours: mapWeeklyHours(d.hours),
         holidays: mapHolidays(d.holidays),
       });

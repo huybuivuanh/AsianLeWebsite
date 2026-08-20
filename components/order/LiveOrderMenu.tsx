@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { collection, doc, onSnapshot, Timestamp } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { sortAlphabetically } from "@/lib/utils";
 import {
@@ -10,9 +10,9 @@ import {
   mapDocToOptionGroup,
   mapDocToItemOption,
 } from "@/lib/orderMenuData";
-import { mapWeeklyHours, mapHolidays } from "@/lib/storeSettings";
 import { buildMenuItemViewModel } from "@/lib/menuOptions";
-import { isStoreOpenNow, INDEFINITE_PAUSE } from "@/lib/availability";
+import { isStoreOpenNow } from "@/lib/availability";
+import { useLiveStoreSettings } from "@/hooks/useLiveStoreSettings";
 import PageContainer from "@/components/PageContainer";
 import OrderCategoryTabs from "@/components/order/OrderCategoryTabs";
 import OrderMenuItemCard from "@/components/menu/OrderMenuItemCard";
@@ -50,7 +50,7 @@ export default function LiveOrderMenu({
   const [menuItems, setMenuItems] = useState(initialMenuItems);
   const [optionGroups, setOptionGroups] = useState(initialOptionGroups);
   const [options, setOptions] = useState(initialOptions);
-  const [storeSettings, setStoreSettings] = useState(initialStoreSettings);
+  const storeSettings = useLiveStoreSettings(initialStoreSettings);
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -68,40 +68,14 @@ export default function LiveOrderMenu({
     const unsubOptions = onSnapshot(collection(db, "options"), (snapshot) => {
       setOptions(snapshot.docs.map(mapDocToItemOption));
     });
-    const unsubStoreSettings = onSnapshot(doc(db, "settings", "store"), (snapshot) => {
-      const d = snapshot.data();
-      if (!d) return;
-      setStoreSettings({
-        pausedUntil:
-          d.pausedUntil === null
-            ? null
-            : d.pausedUntil instanceof Timestamp
-              ? d.pausedUntil.toDate()
-              : INDEFINITE_PAUSE,
-        timezone: typeof d.timezone === "string" ? d.timezone : initialStoreSettings.timezone,
-        waitTime: typeof d.waitTime === "number" ? d.waitTime : initialStoreSettings.waitTime,
-        restaurantPhoneNumber:
-          typeof d.restaurantPhoneNumber === "string"
-            ? d.restaurantPhoneNumber
-            : initialStoreSettings.restaurantPhoneNumber,
-        hours: mapWeeklyHours(d.hours),
-        holidays: mapHolidays(d.holidays),
-      });
-    });
     const interval = setInterval(() => setNow(new Date()), TIME_RECHECK_INTERVAL_MS);
     return () => {
       unsubCategories();
       unsubItems();
       unsubOptionGroups();
       unsubOptions();
-      unsubStoreSettings();
       clearInterval(interval);
     };
-    // Only initialStoreSettings' timezone/waitTime are read as fallbacks inside the
-    // callback (not categories/menuItems/etc, which are only ever set, never read here) —
-    // listeners are meant to be set up once on mount, not torn down/recreated on every
-    // live update.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const itemViewModels = useMemo(() => {

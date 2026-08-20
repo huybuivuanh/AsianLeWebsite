@@ -66,10 +66,15 @@ export function mapHolidays(raw: unknown): Holiday[] {
     .filter((v): v is Holiday => v !== null);
 }
 
-export async function fetchStoreSettingsForServer(): Promise<StoreSettings> {
-  const snapshot = await getDoc(doc(db, "settings", "store"));
-  if (!snapshot.exists()) return DEFAULT_STORE_SETTINGS;
-  const d = snapshot.data();
+/** Maps a raw settings/store Firestore doc into StoreSettings, falling back to `fallback`
+ * for missing/malformed scalar fields. Shared by the SSR fetch below (getDoc) and the
+ * client-side live subscriptions in useLiveStoreSettings (onSnapshot) — same doc shape
+ * either way, just a different read API. */
+export function mapStoreSettingsDoc(
+  d: Record<string, unknown> | undefined,
+  fallback: StoreSettings = DEFAULT_STORE_SETTINGS,
+): StoreSettings {
+  if (!d) return fallback;
   return {
     pausedUntil:
       d.pausedUntil === null
@@ -77,13 +82,20 @@ export async function fetchStoreSettingsForServer(): Promise<StoreSettings> {
         : d.pausedUntil instanceof Timestamp
           ? d.pausedUntil.toDate()
           : INDEFINITE_PAUSE,
-    timezone: typeof d.timezone === "string" ? d.timezone : DEFAULT_TIMEZONE,
-    waitTime: typeof d.waitTime === "number" ? d.waitTime : DEFAULT_STORE_SETTINGS.waitTime,
+    timezone: typeof d.timezone === "string" ? d.timezone : fallback.timezone,
+    waitTime: typeof d.waitTime === "number" ? d.waitTime : fallback.waitTime,
     restaurantPhoneNumber:
-      typeof d.restaurantPhoneNumber === "string" ? d.restaurantPhoneNumber : "",
+      typeof d.restaurantPhoneNumber === "string"
+        ? d.restaurantPhoneNumber
+        : fallback.restaurantPhoneNumber,
     hours: mapWeeklyHours(d.hours),
     holidays: mapHolidays(d.holidays),
   };
+}
+
+export async function fetchStoreSettingsForServer(): Promise<StoreSettings> {
+  const snapshot = await getDoc(doc(db, "settings", "store"));
+  return mapStoreSettingsDoc(snapshot.exists() ? snapshot.data() : undefined);
 }
 
 /** Deduped per request when referenced from multiple server components. */

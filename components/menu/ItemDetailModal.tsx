@@ -80,7 +80,7 @@ export default function ItemDetailModal({
           ) : null}
         </div>
         {item.description ? (
-          <p className="mt-2 text-sm text-stone-600">{item.description}</p>
+          <p className="mt-2 text-base font-medium text-stone-700">{item.description}</p>
         ) : null}
         {!availability.available ? (
           <p className="mt-3 inline-block rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-stone-500">

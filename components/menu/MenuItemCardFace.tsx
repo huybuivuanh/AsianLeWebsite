@@ -34,11 +34,11 @@ export default function MenuItemCardFace({
       </div>
 
       <div className="flex flex-1 flex-col gap-1 p-3.5">
-        <span className="line-clamp-1 font-semibold text-stone-900 group-hover:text-amber-700">
+        <span className="font-semibold text-stone-900 group-hover:text-amber-700">
           {item.name}
         </span>
         {item.description ? (
-          <p className="line-clamp-2 text-xs text-stone-500">{item.description}</p>
+          <p className="text-sm font-medium text-stone-600">{item.description}</p>
         ) : null}
         <span
           className={`mt-auto pt-1 font-semibold tabular-nums text-amber-700 ${item.price > 0 ? "" : "invisible"}`}

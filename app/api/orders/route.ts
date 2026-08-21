@@ -32,6 +32,7 @@ import { KitchenType, OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_LINE_QUANTITY = 20;
+const MAX_INSTRUCTIONS_LENGTH = 200;
 
 // Hashes the Firestore doc id into a 6-digit number, purely for a short,
 // easy-to-call-out pickup code — not a uniqueness guarantee.
@@ -48,6 +49,7 @@ type IncomingLine = {
   menuItemId?: unknown;
   quantity?: unknown;
   options?: IncomingSelection[];
+  instructions?: unknown;
 };
 type IncomingFulfillment = { kind?: unknown; date?: unknown; time?: unknown };
 type IncomingOrder = {
@@ -177,6 +179,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const instructions =
+      typeof line.instructions === "string"
+        ? line.instructions.trim().slice(0, MAX_INSTRUCTIONS_LENGTH)
+        : "";
+
     orderItems.push({
       menuItemId: item.id,
       name: item.name,
@@ -184,6 +191,7 @@ export async function POST(request: NextRequest) {
       price: item.price + optionsTotal,
       quantity,
       options: selectedOptions,
+      ...(instructions ? { instructions } : {}),
       kitchenType: item.kitchenType ?? KitchenType.Other,
     });
   }

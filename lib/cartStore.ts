@@ -25,6 +25,7 @@ export type CartLine = {
   imageUrl?: string;
   quantity: number;
   options: CartOptionSelection[];
+  instructions?: string;
 };
 
 type AddLineInput = {
@@ -34,6 +35,7 @@ type AddLineInput = {
   imageUrl?: string;
   options: CartOptionSelection[];
   quantity?: number;
+  instructions?: string;
 };
 
 type CartState = {
@@ -44,13 +46,29 @@ type CartState = {
   clear: () => void;
 };
 
-/** Two lines are "the same" (and should stack quantity) if the item + exact option selections match. */
-function lineConfigKey(menuItemId: string, options: CartOptionSelection[]): string {
+/** crypto.randomUUID() only exists in secure contexts (HTTPS, or "localhost" itself) — it's
+ * undefined when browsing dev over a plain-http LAN IP. This id is only ever a client-side
+ * React/stacking key, never sent to the server, so a non-cryptographic fallback is fine. */
+function generateLineId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
+/** Two lines are "the same" (and should stack quantity) if the item + exact option
+ * selections + instructions match — different instructions get their own line so
+ * neither note is silently dropped when merging quantities. */
+function lineConfigKey(
+  menuItemId: string,
+  options: CartOptionSelection[],
+  instructions?: string,
+): string {
   const optionsKey = options
     .map((o) => `${o.optionId}x${o.quantity}`)
     .sort()
     .join("|");
-  return `${menuItemId}::${optionsKey}`;
+  return `${menuItemId}::${optionsKey}::${instructions ?? ""}`;
 }
 
 export const useCartStore = create<CartState>()((set, get) => ({
@@ -58,9 +76,11 @@ export const useCartStore = create<CartState>()((set, get) => ({
 
   addLine: (input) => {
     const quantity = input.quantity ?? 1;
-    const key = lineConfigKey(input.menuItemId, input.options);
+    const instructions = input.instructions?.trim() || undefined;
+    const key = lineConfigKey(input.menuItemId, input.options, instructions);
     const existing = get().lines.find(
-      (line) => lineConfigKey(line.menuItemId, line.options) === key,
+      (line) =>
+        lineConfigKey(line.menuItemId, line.options, line.instructions) === key,
     );
 
     if (existing) {
@@ -78,13 +98,14 @@ export const useCartStore = create<CartState>()((set, get) => ({
       lines: [
         ...get().lines,
         {
-          id: crypto.randomUUID(),
+          id: generateLineId(),
           menuItemId: input.menuItemId,
           name: input.name,
           price: input.price,
           imageUrl: input.imageUrl,
           quantity,
           options: input.options,
+          instructions,
         },
       ],
     });

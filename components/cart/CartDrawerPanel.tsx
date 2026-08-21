@@ -96,6 +96,11 @@ export default function CartDrawerPanel({
                       ))}
                     </ul>
                   ) : null}
+                  {line.instructions ? (
+                    <p className="mt-1 text-xs italic text-stone-500">
+                      &ldquo;{line.instructions}&rdquo;
+                    </p>
+                  ) : null}
                   <div className="mt-2 flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <button

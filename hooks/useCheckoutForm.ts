@@ -285,6 +285,7 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
           optionId: s.optionId,
           quantity: s.quantity,
         })),
+        instructions: line.instructions,
       })),
       fulfillment,
       customerName: name.trim(),

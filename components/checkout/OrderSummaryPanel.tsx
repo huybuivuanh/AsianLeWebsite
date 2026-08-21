@@ -40,6 +40,11 @@ export default function OrderSummaryPanel({
                   {formatPriceCAD(lineTotal(line))}
                 </span>
               </div>
+              {line.instructions ? (
+                <p className="mt-0.5 text-xs italic text-stone-500">
+                  &ldquo;{line.instructions}&rdquo;
+                </p>
+              ) : null}
               {unavailable ? (
                 <div className="mt-1 flex items-center justify-between gap-3 text-xs text-red-600">
                   <span>No longer available</span>

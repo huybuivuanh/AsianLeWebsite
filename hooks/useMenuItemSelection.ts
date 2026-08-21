@@ -33,11 +33,13 @@ export function useMenuItemSelection(
 ) {
   const [itemQuantity, setItemQuantity] = useState(1);
   const [selections, setSelections] = useState<SelectionState>({});
+  const [instructions, setInstructions] = useState("");
   const addLine = useCartStore((s) => s.addLine);
 
   const reset = useCallback(() => {
     setItemQuantity(1);
     setSelections(buildDefaultSelections(optionGroups));
+    setInstructions("");
   }, [optionGroups]);
 
   function selectSingle(groupId: string, optionId: string, optional: boolean) {
@@ -115,6 +117,7 @@ export function useMenuItemSelection(
       imageUrl: item.image?.url,
       options: cartOptions,
       quantity: itemQuantity,
+      instructions,
     });
     return true;
   }
@@ -126,6 +129,8 @@ export function useMenuItemSelection(
     selectSingle,
     toggleMulti,
     setOptionQuantity,
+    instructions,
+    setInstructions,
     allGroupsValid,
     optionsTotal,
     total,

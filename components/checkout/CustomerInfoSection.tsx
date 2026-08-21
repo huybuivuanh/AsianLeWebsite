@@ -31,7 +31,7 @@ export default function CustomerInfoSection({
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900"
+            className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-base text-stone-900"
           />
         </label>
         <label className="block text-sm text-stone-700 sm:col-span-1">
@@ -46,7 +46,7 @@ export default function CustomerInfoSection({
             type="tel"
             inputMode="numeric"
             placeholder="+1 (000) 000-0000"
-            className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900"
+            className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-base text-stone-900"
           />
         </label>
         <label className="block text-sm text-stone-700 sm:col-span-2">
@@ -56,7 +56,7 @@ export default function CustomerInfoSection({
             onChange={(e) => setEmail(e.target.value)}
             required
             type="email"
-            className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900"
+            className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-base text-stone-900"
           />
         </label>
       </div>

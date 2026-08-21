@@ -57,6 +57,17 @@ export default function Modal({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
+  // Locks page scroll behind the modal — restores whatever overflow was set before
+  // (rather than always clearing it) so nested/sequential modals don't unlock each other.
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   if (!open || !mounted) return null;
 
   return createPortal(

@@ -62,7 +62,7 @@ export default function PickupSection({
           min={minLocal}
           max={maxLocal}
           required
-          className="mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900"
+          className="mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-base text-stone-900"
         />
       ) : null}
     </fieldset>

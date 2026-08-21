@@ -167,6 +167,9 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
   const [submitState, setSubmitState] = useState<SubmitState>({
     status: "idle",
   });
+  const [showInstructionsWarning, setShowInstructionsWarning] = useState(false);
+  const [pendingFulfillment, setPendingFulfillment] =
+    useState<FulfillmentWire | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
@@ -275,6 +278,14 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
       fulfillment = { kind: TakeOutFulfillmentKind.Immediate };
     }
 
+    // One extra confirmation step before actually placing the order — e.g. free-text
+    // special instructions (substitutions, extras) aren't priced anywhere in this flow, so
+    // any extra charge they need gets added at pickup instead of showing in this total.
+    setPendingFulfillment(fulfillment);
+    setShowInstructionsWarning(true);
+  }
+
+  async function submitOrder(fulfillment: FulfillmentWire) {
     setSubmitState({ status: "submitting" });
 
     const payload = {
@@ -324,6 +335,19 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
     }
   }
 
+  function confirmInstructionsWarning() {
+    setShowInstructionsWarning(false);
+    if (!pendingFulfillment) return;
+    const fulfillment = pendingFulfillment;
+    setPendingFulfillment(null);
+    void submitOrder(fulfillment);
+  }
+
+  function dismissInstructionsWarning() {
+    setShowInstructionsWarning(false);
+    setPendingFulfillment(null);
+  }
+
   return {
     lines,
     removeLine,
@@ -351,6 +375,9 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
     handleCancelOrder,
     cancelling,
     cancelError,
+    showInstructionsWarning,
+    confirmInstructionsWarning,
+    dismissInstructionsWarning,
   };
 }
 

@@ -5,6 +5,7 @@ import { useCheckoutForm } from "@/hooks/useCheckoutForm";
 import PickupSection from "@/components/checkout/PickupSection";
 import CustomerInfoSection from "@/components/checkout/CustomerInfoSection";
 import OrderSummaryPanel from "@/components/checkout/OrderSummaryPanel";
+import InstructionsWarningModal from "@/components/checkout/InstructionsWarningModal";
 import OrderConfirmingView from "@/components/checkout/OrderConfirmingView";
 import OrderSuccessView from "@/components/checkout/OrderSuccessView";
 import OrderCancelledView from "@/components/checkout/OrderCancelledView";
@@ -53,6 +54,11 @@ export default function CheckoutForm({
       onSubmit={checkout.handleSubmit}
       className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-[1fr_22rem]"
     >
+      <InstructionsWarningModal
+        open={checkout.showInstructionsWarning}
+        onConfirm={checkout.confirmInstructionsWarning}
+        onCancel={checkout.dismissInstructionsWarning}
+      />
       <div className="space-y-6">
         <Link
           href="/order"

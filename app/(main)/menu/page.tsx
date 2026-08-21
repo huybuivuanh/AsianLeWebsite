@@ -94,11 +94,11 @@ export default async function MenuPage() {
               href={STORE.socialLinks.skipthedishes}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3.5 text-base font-semibold text-stone-900 shadow-lg transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900"
+              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-stone-900 shadow-lg transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900 sm:gap-2 sm:px-6 sm:py-3.5 sm:text-base"
             >
               Order on Skip the Dishes
               <svg
-                className="size-5"
+                className="size-4 shrink-0 sm:size-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -114,7 +114,7 @@ export default async function MenuPage() {
             </a>
             <OrderPickupCta
               storeSettings={storeSettings}
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white/70 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-stone-900"
+              className="inline-flex items-center gap-1.5 rounded-full border-2 border-white/70 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-stone-900 sm:gap-2 sm:px-6 sm:py-3 sm:text-base"
             >
               Order and pay when pick up
             </OrderPickupCta>

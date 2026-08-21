@@ -37,6 +37,7 @@ export default function CheckoutForm({
         orderNumber={checkout.submitState.orderNumber}
         total={checkout.submitState.total}
         fulfillment={checkout.submitState.fulfillment}
+        readyBy={checkout.submitState.readyBy}
       />
     );
   }

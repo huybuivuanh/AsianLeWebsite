@@ -76,7 +76,7 @@ export const useCartStore = create<CartState>()((set, get) => ({
 
   addLine: (input) => {
     const quantity = input.quantity ?? 1;
-    const instructions = input.instructions?.trim() || undefined;
+    const instructions = input.instructions?.trim().toUpperCase() || undefined;
     const key = lineConfigKey(input.menuItemId, input.options, instructions);
     const existing = get().lines.find(
       (line) =>

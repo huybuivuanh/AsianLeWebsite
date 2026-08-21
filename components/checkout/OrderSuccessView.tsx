@@ -7,7 +7,16 @@ type OrderSuccessViewProps = {
   orderNumber: string;
   total: number;
   fulfillment: FulfillmentWire;
+  readyBy: Date | null;
 };
+
+function formatReadyByLabel(date: Date): string {
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
 
 /** Formats a "YYYY-MM-DD" + "HH:mm" pair for display — treats the numbers as-is (no
  * timezone conversion), since we're just re-presenting what the customer picked. */
@@ -32,6 +41,7 @@ export default function OrderSuccessView({
   orderNumber,
   total,
   fulfillment,
+  readyBy,
 }: OrderSuccessViewProps) {
   return (
     <div className="mx-auto max-w-xl rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 p-8 text-center shadow-lg shadow-amber-900/5">
@@ -44,7 +54,9 @@ export default function OrderSuccessView({
       <p className="mt-4 text-stone-700">
         {fulfillment.kind === TakeOutFulfillmentKind.Scheduled
           ? `Pickup ${formatScheduledLabel(fulfillment.date, fulfillment.time)}`
-          : "Ready for pickup as soon as possible"}
+          : readyBy
+            ? `Ready by ${formatReadyByLabel(readyBy)}`
+            : "Ready for pickup as soon as possible"}
       </p>
       <p className="mt-1 font-semibold text-stone-900">
         Total: {formatPriceCAD(total)} — pay at pickup.

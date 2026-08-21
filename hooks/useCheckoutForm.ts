@@ -35,12 +35,17 @@ export type SubmitState =
       orderNumber: string;
       total: number;
       fulfillment: FulfillmentWire;
+      // Only meaningful for Immediate fulfillment — computed once from the order's own
+      // readyTimeMinutes at the moment it was placed, so it doesn't drift later if the
+      // restaurant takes a bit to confirm or updates the live wait time in the meantime.
+      readyBy: Date | null;
     }
   | {
       status: "success";
       orderNumber: string;
       total: number;
       fulfillment: FulfillmentWire;
+      readyBy: Date | null;
     }
   | { status: "cancelled" };
 
@@ -181,18 +186,28 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
   useEffect(() => {
     if (!confirmingOrderId) return;
     const unsubscribe = onSnapshot(doc(db, "orders", confirmingOrderId), (snapshot) => {
-      const status = snapshot.data()?.status as OrderStatus | undefined;
+      const orderData = snapshot.data();
+      const status = orderData?.status as OrderStatus | undefined;
       setSubmitState((prev) => {
         if (prev.status !== "confirming") return prev;
         if (status === OrderStatus.Cancelled) {
           return { status: "cancelled" };
         }
         if (status === OrderStatus.InProgress || status === OrderStatus.Completed) {
+          // readyTimeMinutes is written by the POS app right when staff confirm the
+          // order — read it straight off the order doc rather than estimating it here.
+          const orderFulfillment = orderData?.fulfillment as OrderFulfillment | undefined;
+          const readyBy =
+            orderFulfillment?.kind === TakeOutFulfillmentKind.Immediate &&
+            typeof orderFulfillment.readyTimeMinutes === "number"
+              ? new Date(Date.now() + orderFulfillment.readyTimeMinutes * 60_000)
+              : null;
           return {
             status: "success",
             orderNumber: prev.orderNumber,
             total: prev.total,
             fulfillment: prev.fulfillment,
+            readyBy,
           };
         }
         return prev;
@@ -326,6 +341,9 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
         orderNumber: data.orderNumber,
         total: data.taxBreakDown.total,
         fulfillment: data.fulfillment,
+        // Not known yet — the POS app only writes readyTimeMinutes onto the order once
+        // staff confirm it, which the onSnapshot listener below picks up.
+        readyBy: null,
       });
     } catch {
       setSubmitState({

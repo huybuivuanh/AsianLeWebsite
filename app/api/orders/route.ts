@@ -120,6 +120,8 @@ export async function POST(request: NextRequest) {
     fulfillment = { kind: TakeOutFulfillmentKind.Scheduled, scheduledAt };
     fulfillmentWire = { kind: TakeOutFulfillmentKind.Scheduled, date, time };
   } else {
+    // readyTimeMinutes is deliberately left unset here — it's written by the POS/admin app
+    // when staff confirm the order into the kitchen, not guessed at creation time.
     fulfillment = { kind: TakeOutFulfillmentKind.Immediate };
     fulfillmentWire = { kind: TakeOutFulfillmentKind.Immediate };
   }

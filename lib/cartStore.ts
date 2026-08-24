@@ -131,6 +131,15 @@ export function lineTotal(line: CartLine): number {
   return line.price * line.quantity;
 }
 
+/** Per-unit item price with selected options backed out, for itemized display only. */
+export function lineBasePrice(line: CartLine): number {
+  const optionsTotal = line.options.reduce(
+    (sum, o) => sum + o.price * o.quantity,
+    0,
+  );
+  return line.price - optionsTotal;
+}
+
 export function cartSubtotal(lines: CartLine[]): number {
   return lines.reduce((sum, line) => sum + lineTotal(line), 0);
 }

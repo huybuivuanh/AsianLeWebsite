@@ -1,4 +1,4 @@
-import { lineTotal, type CartLine } from "@/lib/cartStore";
+import { lineBasePrice, lineTotal, type CartLine } from "@/lib/cartStore";
 import { formatPriceCAD } from "@/lib/utils";
 import type { SubmitState } from "@/hooks/useCheckoutForm";
 
@@ -26,25 +26,62 @@ export default function OrderSummaryPanel({
         {lines.map((line) => {
           const unavailable = unavailableLineIds.has(line.id);
           const updatedPrice = priceUpdates.get(line.id);
+          const basePrice = lineBasePrice(line);
           return (
             <li key={line.id} className="text-sm text-stone-700">
-              <div className="flex justify-between gap-3">
-                <span
-                  className={
-                    unavailable ? "text-stone-400 line-through" : undefined
-                  }
-                >
-                  {line.quantity}x {line.name}
-                </span>
-                <span className="shrink-0 tabular-nums">
-                  {formatPriceCAD(lineTotal(line))}
-                </span>
-              </div>
+              <span
+                className={
+                  unavailable
+                    ? "font-semibold text-stone-400 line-through"
+                    : "font-semibold text-stone-900"
+                }
+              >
+                {line.quantity}x {line.name}
+              </span>
+              {basePrice !== 0 ? (
+                <div className="mt-0.5 flex justify-between gap-2 text-xs text-stone-500">
+                  <span>Item price</span>
+                  <span className="shrink-0 tabular-nums">
+                    {formatPriceCAD(basePrice)}
+                  </span>
+                </div>
+              ) : null}
+              {line.options && line.options.length > 0 ? (
+                <ul className="mt-0.5 space-y-0.5 text-xs text-stone-500">
+                  {line.options.map((o) => (
+                    <li key={o.optionId} className="flex justify-between gap-2">
+                      <span>
+                        {o.name}
+                        {o.quantity > 1 ? ` x${o.quantity}` : ""}
+                      </span>
+                      {o.price > 0 ? (
+                        <span className="shrink-0 tabular-nums">
+                          {formatPriceCAD(o.price * o.quantity)}
+                        </span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
               {line.instructions ? (
                 <p className="mt-0.5 text-xs italic text-stone-500">
                   &ldquo;{line.instructions}&rdquo;
                 </p>
               ) : null}
+              <div className="mt-1 flex items-center justify-between border-t border-dashed border-stone-200 pt-1">
+                <span className="text-xs font-medium text-stone-500">
+                  Total
+                </span>
+                <span
+                  className={
+                    unavailable
+                      ? "shrink-0 tabular-nums text-stone-400 line-through"
+                      : "shrink-0 font-semibold tabular-nums text-red-600"
+                  }
+                >
+                  {formatPriceCAD(lineTotal(line))}
+                </span>
+              </div>
               {unavailable ? (
                 <div className="mt-1 flex items-center justify-between gap-3 text-xs text-red-600">
                   <span>No longer available</span>

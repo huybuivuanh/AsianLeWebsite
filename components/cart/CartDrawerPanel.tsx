@@ -3,7 +3,7 @@ import Link from "next/link";
 import Modal from "@/components/ui/Modal";
 import { skipNextImageOptimization } from "@/lib/imagePolicy";
 import { formatPriceCAD } from "@/lib/utils";
-import { lineTotal, type CartLine } from "@/lib/cartStore";
+import { lineBasePrice, lineTotal, type CartLine } from "@/lib/cartStore";
 
 type CartDrawerPanelProps = {
   open: boolean;
@@ -62,78 +62,99 @@ export default function CartDrawerPanel({
           </p>
         ) : (
           <ul className="space-y-4">
-            {lines.map((line) => (
-              <li
-                key={line.id}
-                className="flex gap-3 border-b border-stone-100 pb-4"
-              >
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-stone-100">
-                  {line.imageUrl ? (
-                    <Image
-                      src={line.imageUrl}
-                      alt={line.name}
-                      fill
-                      className="object-cover"
-                      sizes="64px"
-                      unoptimized={skipNextImageOptimization(line.imageUrl)}
-                    />
-                  ) : null}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="font-semibold text-stone-900">{line.name}</p>
-                    <p className="shrink-0 font-semibold tabular-nums text-amber-700">
-                      {formatPriceCAD(lineTotal(line))}
-                    </p>
+            {lines.map((line) => {
+              const basePrice = lineBasePrice(line);
+              return (
+                <li
+                  key={line.id}
+                  className="flex gap-3 border-b border-stone-100 pb-4"
+                >
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-stone-100">
+                    {line.imageUrl ? (
+                      <Image
+                        src={line.imageUrl}
+                        alt={line.name}
+                        fill
+                        className="object-cover"
+                        sizes="64px"
+                        unoptimized={skipNextImageOptimization(line.imageUrl)}
+                      />
+                    ) : null}
                   </div>
-                  {line.options && line.options.length > 0 ? (
-                    <ul className="mt-1 space-y-0.5 text-xs text-stone-500">
-                      {line.options.map((s) => (
-                        <li key={s.optionId}>
-                          {s.name}
-                          {s.quantity > 1 ? ` x${s.quantity}` : ""}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                  {line.instructions ? (
-                    <p className="mt-1 text-xs italic text-stone-500">
-                      &ldquo;{line.instructions}&rdquo;
-                    </p>
-                  ) : null}
-                  <div className="mt-2 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(line.id, line.quantity - 1)}
-                        className="flex h-6 w-6 items-center justify-center rounded-full border border-stone-300 text-stone-600 hover:bg-stone-100"
-                        aria-label={`Decrease ${line.name} quantity`}
-                      >
-                        −
-                      </button>
-                      <span className="w-4 text-center text-sm tabular-nums">
-                        {line.quantity}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-stone-900">{line.name}</p>
+                    {basePrice !== 0 ? (
+                      <div className="mt-1 flex justify-between gap-2 text-xs text-stone-500">
+                        <span>Item price</span>
+                        <span className="shrink-0 tabular-nums">
+                          {formatPriceCAD(basePrice)}
+                        </span>
+                      </div>
+                    ) : null}
+                    {line.options && line.options.length > 0 ? (
+                      <ul className="mt-1 space-y-0.5 text-xs text-stone-500">
+                        {line.options.map((s) => (
+                          <li key={s.optionId} className="flex justify-between gap-2">
+                            <span>
+                              {s.name}
+                              {s.quantity > 1 ? ` x${s.quantity}` : ""}
+                            </span>
+                            {s.price > 0 ? (
+                              <span className="shrink-0 tabular-nums">
+                                {formatPriceCAD(s.price * s.quantity)}
+                              </span>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    {line.instructions ? (
+                      <p className="mt-1 text-xs italic text-stone-500">
+                        &ldquo;{line.instructions}&rdquo;
+                      </p>
+                    ) : null}
+                    <div className="mt-2 flex items-center justify-between border-t border-dashed border-stone-200 pt-2">
+                      <span className="text-xs font-medium text-stone-500">
+                        Total
                       </span>
+                      <span className="font-semibold tabular-nums text-red-600">
+                        {formatPriceCAD(lineTotal(line))}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(line.id, line.quantity - 1)}
+                          className="flex h-6 w-6 items-center justify-center rounded-full border border-stone-300 text-stone-600 hover:bg-stone-100"
+                          aria-label={`Decrease ${line.name} quantity`}
+                        >
+                          −
+                        </button>
+                        <span className="w-4 text-center text-sm tabular-nums">
+                          {line.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(line.id, line.quantity + 1)}
+                          className="flex h-6 w-6 items-center justify-center rounded-full border border-stone-300 text-stone-600 hover:bg-stone-100"
+                          aria-label={`Increase ${line.name} quantity`}
+                        >
+                          +
+                        </button>
+                      </div>
                       <button
                         type="button"
-                        onClick={() => updateQuantity(line.id, line.quantity + 1)}
-                        className="flex h-6 w-6 items-center justify-center rounded-full border border-stone-300 text-stone-600 hover:bg-stone-100"
-                        aria-label={`Increase ${line.name} quantity`}
+                        onClick={() => removeLine(line.id)}
+                        className="text-xs font-medium text-stone-400 hover:text-red-600"
                       >
-                        +
+                        Remove
                       </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeLine(line.id)}
-                      className="text-xs font-medium text-stone-400 hover:text-red-600"
-                    >
-                      Remove
-                    </button>
                   </div>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

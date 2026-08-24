@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { useCheckoutForm } from "@/hooks/useCheckoutForm";
 import PickupSection from "@/components/checkout/PickupSection";
 import CustomerInfoSection from "@/components/checkout/CustomerInfoSection";
@@ -15,6 +15,33 @@ import StoreClosedView from "@/components/checkout/StoreClosedView";
 type CheckoutFormProps = {
   initialStoreSettings: StoreSettings;
 };
+
+function BackToShoppingSpinner() {
+  const { pending } = useLinkStatus();
+  if (!pending) return null;
+  return (
+    <svg
+      className="h-4 w-4 animate-spin"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+      />
+    </svg>
+  );
+}
 
 export default function CheckoutForm({
   initialStoreSettings,
@@ -66,6 +93,7 @@ export default function CheckoutForm({
           className="inline-flex items-center gap-2 rounded-full border-2 border-amber-600 px-4 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
         >
           ← Back to shopping
+          <BackToShoppingSpinner />
         </Link>
 
         <PickupSection

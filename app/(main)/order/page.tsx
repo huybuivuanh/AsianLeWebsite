@@ -3,6 +3,7 @@ import Link from "next/link";
 import PageContainer from "@/components/PageContainer";
 import CartDrawer from "@/components/cart/CartDrawer";
 import LiveOrderMenu from "@/components/order/LiveOrderMenu";
+import WaitTimeBadge from "@/components/order/WaitTimeBadge";
 import { fetchOrderMenuDataForServer } from "@/lib/orderMenuData";
 import { getStoreSettings } from "@/lib/storeSettings";
 
@@ -44,9 +45,12 @@ export default async function OrderPage({
         <PageContainer>
           <div className="flex flex-wrap items-center justify-between gap-3 py-6">
             <div>
-              <h1 className="text-2xl font-bold text-stone-900 sm:text-3xl">
-                Order for pickup
-              </h1>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                <h1 className="text-2xl font-bold text-stone-900 sm:text-3xl">
+                  Order for pickup
+                </h1>
+                <WaitTimeBadge initialStoreSettings={storeSettings} />
+              </div>
               <p className="mt-1 text-sm text-stone-600">
                 Pay in person when you pick up — no online payment.
               </p>

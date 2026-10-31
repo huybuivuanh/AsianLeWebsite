@@ -32,7 +32,14 @@ Placing an order additionally requires a Firebase Admin service account (server-
 SERVICE_ACCOUNT_KEY      # the full service-account JSON, as a single-line string
 ```
 
-Without these, `/api/orders` fails cleanly (checkout UI shows "Network error", nothing crashes) — everything else in the app works fine without them.
+Optional — Asian Le Rewards sign-in at checkout (public web config of the separate `asian-le-rewards` Firebase project; without these the rewards box is hidden). `lib/rewardsFirebase.ts` is the browser connection, `lib/server/rewardsAuth.ts` verifies the member's sign-in token in `/api/orders` and saves `order.loyalty = { memberId, memberName }` (same field as the POS). Points are earned later by the `asian-le-orders` admin app on Complete:
+
+```
+NEXT_PUBLIC_REWARDS_API_KEY, _AUTH_DOMAIN, _PROJECT_ID, _STORAGE_BUCKET, _MESSAGING_SENDER_ID, _APP_ID
+NEXT_PUBLIC_REWARDS_APP_URL   # optional, defaults to https://asian-le-rewards.web.app
+```
+
+Without `SERVICE_ACCOUNT_KEY`, `/api/orders` fails cleanly (checkout UI shows "Network error", nothing crashes) — everything else in the app works fine without them.
 
 ## Architecture
 

@@ -13,6 +13,8 @@ import {
   type ScheduledPickupInvalidReason,
 } from "@/lib/availability";
 import { calculateTaxBreakdown } from "@/lib/orderPricing";
+import { estimatePoints } from "@/lib/rewardsFirebase";
+import { useRewardsMember } from "@/hooks/useRewardsMember";
 import { formatTimeHHmmTo12h } from "@/lib/utils";
 import { OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
 
@@ -39,6 +41,8 @@ export type SubmitState =
       // readyTimeMinutes at the moment it was placed, so it doesn't drift later if the
       // restaurant takes a bit to confirm or updates the live wait time in the meantime.
       readyBy: Date | null;
+      // Estimated rewards points, if a member was signed in (earned at pickup).
+      rewardsPoints: number | null;
     }
   | {
       status: "success";
@@ -46,6 +50,7 @@ export type SubmitState =
       total: number;
       fulfillment: FulfillmentWire;
       readyBy: Date | null;
+      rewardsPoints: number | null;
     }
   | { status: "cancelled" };
 
@@ -180,6 +185,16 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
+  const rewards = useRewardsMember();
+  // Fill in contact details from the rewards account — only fields still empty.
+  const rewardsMember = rewards.member;
+  useEffect(() => {
+    if (!rewardsMember) return;
+    setName((prev) => prev || rewardsMember.name);
+    setPhone((prev) => prev || rewardsMember.phone);
+    setEmail((prev) => prev || rewardsMember.email);
+  }, [rewardsMember]);
+
   // While "confirming", watch the order doc live for the restaurant's status change —
   // resolves to "success" once acknowledged (InProgress or beyond), or "cancelled" if
   // the restaurant (or our own handleCancelOrder below) cancels it first.
@@ -210,6 +225,7 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
             total: prev.total,
             fulfillment: prev.fulfillment,
             readyBy,
+            rewardsPoints: prev.rewardsPoints,
           };
         }
         return prev;
@@ -305,7 +321,20 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
   async function submitOrder(fulfillment: FulfillmentWire) {
     setSubmitState({ status: "submitting" });
 
+    let rewardsFields: Awaited<ReturnType<typeof rewards.getOrderRewardsFields>> = null;
+    try {
+      rewardsFields = await rewards.getOrderRewardsFields();
+    } catch {
+      setSubmitState({
+        status: "error",
+        message:
+          "Couldn't confirm your rewards sign-in — check your connection, or sign out of rewards to order without points.",
+      });
+      return;
+    }
+
     const payload = {
+      ...(rewardsFields ?? {}),
       lines: lines.map((line) => ({
         menuItemId: line.menuItemId,
         quantity: line.quantity,
@@ -346,6 +375,7 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
         // Not known yet — the POS app only writes readyTimeMinutes onto the order once
         // staff confirm it, which the onSnapshot listener below picks up.
         readyBy: null,
+        rewardsPoints: rewardsFields ? estimatePoints(data.taxBreakDown.subTotal) : null,
       });
     } catch {
       setSubmitState({
@@ -391,6 +421,7 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
     setEmail,
     submitState,
     taxBreakDown,
+    rewards,
     handleSubmit,
     handleCancelOrder,
     cancelling,

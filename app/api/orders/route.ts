@@ -13,6 +13,7 @@ import {
 } from "@/lib/availability";
 import { calculateTaxBreakdown } from "@/lib/orderPricing";
 import { orderNumberFromId, parseCustomerInfo } from "@/lib/server/orderHelpers";
+import { verifyRewardsIdToken } from "@/lib/server/rewardsAuth";
 import { KitchenType, OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
 
 /**
@@ -48,6 +49,10 @@ type IncomingOrder = {
   customerName?: unknown;
   phoneNumber?: unknown;
   customerEmail?: unknown;
+  /** Optional: sign-in token from the rewards project, to link a member for points. */
+  rewardsIdToken?: unknown;
+  /** Display only (shown to staff) — the member is identified by the verified token. */
+  rewardsMemberName?: unknown;
 };
 
 /** Wire shape returned to the client — "YYYY-MM-DD" + "HH:mm", not the persisted `scheduledAt: Date`. */
@@ -74,6 +79,23 @@ export async function POST(request: NextRequest) {
   const customer = parseCustomerInfo(body);
   if ("error" in customer) return badRequest(customer.error);
   const { customerName, phoneNumber, customerEmail } = customer;
+
+  // Rewards member, if the customer signed in at checkout. Points are earned later, when
+  // the admin app completes the order — this only links the member.
+  let loyalty: OrderLoyalty | null = null;
+  if (typeof body.rewardsIdToken === "string" && body.rewardsIdToken) {
+    const memberId = await verifyRewardsIdToken(body.rewardsIdToken);
+    if (!memberId) {
+      return badRequest(
+        "Your rewards sign-in has expired — please sign in again, or sign out to order without points.",
+      );
+    }
+    const memberName =
+      typeof body.rewardsMemberName === "string"
+        ? body.rewardsMemberName.trim().slice(0, 100)
+        : "";
+    loyalty = { memberId, memberName: memberName || customerName };
+  }
 
   const [menuItems, optionGroups, options, storeSettings] = await Promise.all([
     fetchMenuItemsForServer(),
@@ -201,6 +223,7 @@ export async function POST(request: NextRequest) {
     printed: false,
     paid: false,
     taxBreakDown,
+    ...(loyalty ? { loyalty } : {}),
     createdAt: FieldValue.serverTimestamp(),
   });
 

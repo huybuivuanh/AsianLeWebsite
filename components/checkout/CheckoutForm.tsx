@@ -4,6 +4,7 @@ import Link, { useLinkStatus } from "next/link";
 import { useCheckoutForm } from "@/hooks/useCheckoutForm";
 import PickupSection from "@/components/checkout/PickupSection";
 import CustomerInfoSection from "@/components/checkout/CustomerInfoSection";
+import RewardsSection from "@/components/checkout/RewardsSection";
 import OrderSummaryPanel from "@/components/checkout/OrderSummaryPanel";
 import InstructionsWarningModal from "@/components/checkout/InstructionsWarningModal";
 import OrderConfirmingView from "@/components/checkout/OrderConfirmingView";
@@ -65,6 +66,7 @@ export default function CheckoutForm({
         total={checkout.submitState.total}
         fulfillment={checkout.submitState.fulfillment}
         readyBy={checkout.submitState.readyBy}
+        rewardsPoints={checkout.submitState.rewardsPoints}
       />
     );
   }
@@ -106,6 +108,11 @@ export default function CheckoutForm({
           setScheduledLocal={checkout.setScheduledLocal}
           minLocal={checkout.minLocal}
           maxLocal={checkout.maxLocal}
+        />
+
+        <RewardsSection
+          rewards={checkout.rewards}
+          subTotal={checkout.taxBreakDown.subTotal}
         />
 
         <CustomerInfoSection

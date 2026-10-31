@@ -9,8 +9,9 @@ import { getFirestore } from "firebase-admin/firestore";
  */
 
 function getAdminApp() {
-  const existing = getApps();
-  if (existing.length > 0) return existing[0];
+  // Look up the default app by name: lib/server/rewardsAuth.ts adds a second, named app.
+  const existing = getApps().find((a) => a.name === "[DEFAULT]");
+  if (existing) return existing;
 
   const raw = process.env.SERVICE_ACCOUNT_KEY;
   if (!raw) {

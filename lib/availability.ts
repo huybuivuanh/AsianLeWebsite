@@ -226,7 +226,18 @@ export type ScheduledPickupInvalidReason =
   | "holiday"
   | "closed"
   | "outside-hours"
+  | "too-close-to-closing"
   | "lead-time";
+
+export type ScheduledRequestOptions = {
+  /** Gate on paused/holiday/closed/outside-hours (default true) — see below. */
+  checkBusinessHours?: boolean;
+  /** Minimum minutes from now for a same-day request (default SCHEDULE_LEAD_MINUTES). */
+  leadMinutes?: number;
+  /** Requests must be at least this many minutes before closing (default 0) — e.g. a
+   * last-seating cutoff for reservations. Only applies when checkBusinessHours is on. */
+  closeBufferMinutes?: number;
+};
 
 /**
  * Why a "YYYY-MM-DD" + "HH:mm" pickup request is currently invalid, or `null` if it's
@@ -245,7 +256,11 @@ export function getScheduledPickupInvalidReason(
   dateStr: string,
   pickupTime: string,
   now: Date = new Date(),
-  { checkBusinessHours = true }: { checkBusinessHours?: boolean } = {},
+  {
+    checkBusinessHours = true,
+    leadMinutes = SCHEDULE_LEAD_MINUTES,
+    closeBufferMinutes = 0,
+  }: ScheduledRequestOptions = {},
 ): ScheduledPickupInvalidReason | null {
   if (checkBusinessHours && isStorePaused(settings.pausedUntil, now))
     return "paused";
@@ -280,11 +295,14 @@ export function getScheduledPickupInvalidReason(
     ) {
       return "outside-hours";
     }
+    if (requestedMin > hhmmToMinutes(dayHours.close) - closeBufferMinutes) {
+      return "too-close-to-closing";
+    }
   }
 
   if (
     dateStr === today.dateStr &&
-    requestedMin < hhmmToMinutes(today.hhmm) + SCHEDULE_LEAD_MINUTES
+    requestedMin < hhmmToMinutes(today.hhmm) + leadMinutes
   ) {
     return "lead-time";
   }
@@ -301,7 +319,7 @@ export function isValidScheduledPickup(
   dateStr: string,
   pickupTime: string,
   now: Date = new Date(),
-  options?: { checkBusinessHours?: boolean },
+  options?: ScheduledRequestOptions,
 ): boolean {
   return (
     getScheduledPickupInvalidReason(

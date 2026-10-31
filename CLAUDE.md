@@ -51,6 +51,8 @@ All pages live under `app/(main)/` using a route group (no URL segment added). `
 | `/contact-us` | `app/(main)/contact-us/page.tsx` |
 | `/checkout` | `app/(main)/checkout/page.tsx` — cart checkout, pay-at-pickup |
 | `POST /api/orders` | `app/api/orders/route.ts` — places an order (see below) |
+| `/reservations` | `app/(main)/reservations/page.tsx` — table booking form |
+| `POST /api/reservations` | `app/api/reservations/route.ts` — saves a reservation as a regular scheduled order |
 
 ### Data fetching pattern
 
@@ -71,6 +73,7 @@ The `/menu` page doubles as the ordering UI (see `ecommerce.md` for the full Fir
 - `lib/cartStore.ts` — client-side cart, Zustand, in-memory only (no persistence — cart does not survive a refresh or a new session, by design). Snapshots name/price at add-to-cart time so the cart renders without the full menu loaded; **never trusted for money** — `/api/orders` re-derives every price from live Firestore data.
 - `lib/orderPricing.ts` — GST (5%) + PST (6%) computation, Saskatchewan restaurant meal rates confirmed with the business owner.
 - `lib/firebaseAdmin.ts` — trusted server-only Firestore (bypasses security rules) for the one write path that must not be reachable via the public client SDK: `orders`. Requires `SERVICE_ACCOUNT_KEY` above; never import from a Client Component.
+- `lib/reservation.ts` — reservations are regular scheduled orders with one hard-coded $0 "Reservation" item (guest count = quantity of its "Number of guests" option). Unlike `/api/orders`, `/api/reservations` enforces hours/holidays/pause, a 60-min lead time, and last seating 60 min before close.
 - `app/api/orders/route.ts` — validates the cart against live Firestore data (availability, min/max option selection, pickup-time validity) and writes to `orders` via `firebaseAdmin`. See `orders-schema.md` for the Firestore shape, written for the separate admin app to read — **this repo has no admin/order-management UI**, by design (see that doc).
 
 ### Firebase collections

@@ -9,6 +9,7 @@ import Logo from "./Logo";
 const menuLinks = [
   { href: "/", label: "Home" },
   { href: "/menu", label: "Menu" },
+  { href: "/reservations", label: "Reservations" },
   { href: "/gallery", label: "Gallery" },
   { href: "/about-us", label: "About Us" },
   { href: "/contact-us", label: "Contact Us" },

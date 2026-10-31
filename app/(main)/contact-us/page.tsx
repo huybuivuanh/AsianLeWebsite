@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { STORE } from "@/lib/store";
 import { getStoreHours } from "@/lib/siteData.server";
 import PageContainer from "../../../components/PageContainer";
@@ -44,7 +45,15 @@ export default async function ContactUs() {
               We&apos;re here for you
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-center text-stone-600">
-              Stop by for a meal, give us a Call Us, or send a message below.
+              Stop by for a meal, give us a call, or send a message below.
+            </p>
+            <p className="mt-3 text-center">
+              <Link
+                href="/reservations"
+                className="font-semibold text-amber-700 underline-offset-4 transition hover:text-amber-800 hover:underline"
+              >
+                Want to book a table? Reserve online →
+              </Link>
             </p>
 
             <div className="mt-14 grid gap-10 lg:grid-cols-2 lg:gap-14 xl:gap-16">

@@ -12,6 +12,7 @@ import {
   resolveScheduledPickupInstant,
 } from "@/lib/availability";
 import { calculateTaxBreakdown } from "@/lib/orderPricing";
+import { orderNumberFromId, parseCustomerInfo } from "@/lib/server/orderHelpers";
 import { KitchenType, OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
 
 /**
@@ -30,19 +31,8 @@ import { KitchenType, OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
  * project — see orders-schema.md).
  */
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_LINE_QUANTITY = 20;
 const MAX_INSTRUCTIONS_LENGTH = 200;
-
-// Hashes the Firestore doc id into a 6-digit number, purely for a short,
-// easy-to-call-out pickup code — not a uniqueness guarantee.
-function orderNumberFromId(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash * 31 + id.charCodeAt(i)) % 1_000_000;
-  }
-  return hash.toString().padStart(6, "0");
-}
 
 type IncomingSelection = { optionId?: unknown; quantity?: unknown };
 type IncomingLine = {
@@ -81,14 +71,9 @@ export async function POST(request: NextRequest) {
     return badRequest("Your cart is empty");
   }
 
-  const customerName = typeof body.customerName === "string" ? body.customerName.trim() : "";
-  const phoneNumber = typeof body.phoneNumber === "string" ? body.phoneNumber.trim() : "";
-  if (!customerName) return badRequest("Name is required");
-  if (!phoneNumber) return badRequest("Phone number is required");
-
-  const customerEmail = typeof body.customerEmail === "string" ? body.customerEmail.trim() : "";
-  if (!customerEmail) return badRequest("Email is required");
-  if (!EMAIL_RE.test(customerEmail)) return badRequest("Invalid email address");
+  const customer = parseCustomerInfo(body);
+  if ("error" in customer) return badRequest(customer.error);
+  const { customerName, phoneNumber, customerEmail } = customer;
 
   const [menuItems, optionGroups, options, storeSettings] = await Promise.all([
     fetchMenuItemsForServer(),

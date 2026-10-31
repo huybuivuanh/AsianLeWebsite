@@ -60,6 +60,8 @@ const SCHEDULED_PICKUP_INVALID_MESSAGES: Record<
   holiday: "We're closed that day — please choose another date.",
   closed: "We're closed that day — please choose another date.",
   "outside-hours": "That time is outside store hours — please choose another.",
+  // Not reachable for pickups (closeBufferMinutes defaults to 0) — reservations only.
+  "too-close-to-closing": "That time is too close to closing — please choose an earlier time.",
   "lead-time": `Please choose a time at least ${SCHEDULE_LEAD_MINUTES} minutes from now.`,
 };
 

@@ -20,7 +20,7 @@ function formatReadyByLabel(date: Date): string {
 
 /** Formats a "YYYY-MM-DD" + "HH:mm" pair for display — treats the numbers as-is (no
  * timezone conversion), since we're just re-presenting what the customer picked. */
-function formatScheduledLabel(dateStr: string, timeStr: string): string {
+export function formatScheduledLabel(dateStr: string, timeStr: string): string {
   const [year, month, day] = dateStr.split("-").map(Number);
   const [hour, minute] = timeStr.split(":").map(Number);
   const local = new Date(year, month - 1, day, hour, minute);

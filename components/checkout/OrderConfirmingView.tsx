@@ -2,6 +2,8 @@ type OrderConfirmingViewProps = {
   onCancel: () => void;
   cancelling: boolean;
   cancelError: string | null;
+  /** "order" (default) or "reservation" — only changes the wording. */
+  noun?: string;
 };
 
 /** Shown after the order is placed (Firestore status "New") but before the restaurant
@@ -11,6 +13,7 @@ export default function OrderConfirmingView({
   onCancel,
   cancelling,
   cancelError,
+  noun = "order",
 }: OrderConfirmingViewProps) {
   return (
     <div className="mx-auto max-w-xl rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 p-8 text-center shadow-lg shadow-amber-900/5">
@@ -35,7 +38,7 @@ export default function OrderConfirmingView({
         />
       </svg>
       <p className="mt-4 text-lg font-semibold text-stone-900">
-        Sending your order to the restaurant…
+        Sending your {noun} to the restaurant…
       </p>
       <p className="mt-2 text-sm text-stone-600">
         We&apos;re waiting for them to confirm it — this usually only takes a
@@ -52,7 +55,7 @@ export default function OrderConfirmingView({
         disabled={cancelling}
         className="mt-6 inline-flex items-center justify-center rounded-full border-2 border-stone-300 px-6 py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {cancelling ? "Cancelling…" : "Cancel order"}
+        {cancelling ? "Cancelling…" : `Cancel ${noun}`}
       </button>
     </div>
   );

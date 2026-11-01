@@ -24,7 +24,7 @@ export const rewardsEnabled = Boolean(config.apiKey && config.authDomain && conf
 
 /** Where customers create an account / see their points (the rewards web app). */
 export const REWARDS_APP_URL =
-  process.env.NEXT_PUBLIC_REWARDS_APP_URL ?? "https://asian-le-rewards.web.app";
+  process.env.NEXT_PUBLIC_REWARDS_APP_URL ?? "https://rewards.asianle.ca";
 
 let app: FirebaseApp | null = null;
 

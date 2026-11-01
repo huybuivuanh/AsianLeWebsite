@@ -1,19 +1,39 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Design tokens for the "Dark & ivory" look. Use these utilities (bg-ink, text-gold,
+ * bg-ivory, font-accent, …) instead of raw hex values or the old stone/amber classes,
+ * so every page stays consistent.
+ */
+@theme {
+  /* Dark surfaces */
+  --color-ink: #141210;
+  --color-ink-raised: #1d1a17;
+  --color-ink-line: #2e2925;
+  /* Light surfaces */
+  --color-ivory: #f5f0e6;
+  --color-sand: #ede6d8;
+  --color-sand-deep: #e2d9c8;
+  --color-sand-line: #ddd3c1;
+  /* Text on light / on dark */
+  --color-body: #4f483f;
+  --color-muted: #5e564c;
+  --color-on-ink: #f3eee6;
+  --color-on-ink-muted: #b8b0a4;
+  /* Accents: gold on dark, brand red on light */
+  --color-gold: #d4b26a;
+  --color-gold-ink: #3b2f17;
+  --color-brand: #a3281e;
+  --color-brand-dark: #7a1d15;
+  /* Brand red bright enough to read on dark surfaces (prices on dark cards). */
+  --color-brand-bright: #e5574a;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  /* The italic serif used for one accent word in headings ("great *food*"). */
+  --font-accent: var(--font-instrument), ui-serif, Georgia, serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ivory);
+  color: var(--color-ink);
 }

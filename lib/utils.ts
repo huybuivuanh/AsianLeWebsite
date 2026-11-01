@@ -28,6 +28,13 @@ export function formatTimeHHmmTo12h(timeStr: string): string {
 }
 
 /** "MONDAY" -> "Monday" */
+/** Today's weekday in the given IANA timezone, as a DayOfWeek value ("MONDAY"…). */
+export function dayOfWeekInTimezone(timeZone: string, now: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-US", { timeZone, weekday: "long" })
+    .format(now)
+    .toUpperCase();
+}
+
 export function formatDayOfWeekLabel(day: string): string {
   if (!day) return "";
   return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();

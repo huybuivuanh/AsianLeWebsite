@@ -1,28 +1,30 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export default function Logo() {
+type LogoProps = {
+  /** "md" for the nav, "sm" for the footer. */
+  size?: "md" | "sm";
+};
+
+/** "ASIAN [Vietnam map] LE" — the map is the logo mark (public/logo.png). */
+export default function Logo({ size = "md" }: LogoProps) {
+  const text = size === "md" ? "text-xl sm:text-2xl" : "text-lg";
+  const mark = size === "md" ? "h-10 w-7 sm:h-11 sm:w-8" : "h-8 w-6";
+
   return (
     <Link
       href="/"
-      className="group flex items-center gap-0 focus:outline-none"
+      className="group flex items-center gap-1 rounded-md text-on-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
       aria-label="Asian Le Restaurant – Home"
     >
-      <span className="-mr-1 text-lg font-semibold font-serif uppercase tracking-tight text-white transition group-hover:text-amber-100 sm:text-xl">
-        Asian
+      <span className={`${text} font-extrabold tracking-wide transition group-hover:text-gold`}>
+        ASIAN
       </span>
-      <div className="relative -mx-1 h-11 w-11 shrink-0 overflow-hidden sm:h-12 sm:w-12">
-        <Image
-          src="/logo.png"
-          alt=""
-          fill
-          className="object-contain"
-          sizes="60px"
-          unoptimized
-        />
-      </div>
-      <span className="-ml-1 text-lg font-semibold font-serif uppercase tracking-tight text-white transition group-hover:text-amber-100 sm:text-xl">
-        Le
+      <span className={`relative shrink-0 ${mark}`}>
+        <Image src="/logo.png" alt="" fill className="object-contain" sizes="40px" unoptimized />
+      </span>
+      <span className={`${text} font-extrabold tracking-wide transition group-hover:text-gold`}>
+        LE
       </span>
     </Link>
   );

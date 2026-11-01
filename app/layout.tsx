@@ -1,10 +1,26 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { Instrument_Serif, Plus_Jakarta_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
 import { STORE } from "@/lib/store";
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin", "latin-ext", "vietnamese"],
+  variable: "--font-jakarta",
+  display: "swap",
+});
+
+// Accent serif for one italic word in headings.
+const instrument = Instrument_Serif({
+  subsets: ["latin", "latin-ext"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument",
+  display: "swap",
+});
 
 const siteName = "Asian Le Restaurant";
 const siteUrl = "https://asianle.ca";
@@ -85,8 +101,8 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-white text-stone-900 antialiased">
+    <html lang="en" className={`${jakarta.variable} ${instrument.variable}`}>
+      <body className="min-h-screen bg-ivory font-sans text-ink antialiased">
         <script
           type="application/ld+json"
           suppressHydrationWarning

@@ -1,40 +1,48 @@
 import Logo from "./Logo";
 import { STORE } from "@/lib/store";
+
+const SOCIAL_LINKS = [
+  { href: STORE.socialLinks.facebook, label: "Facebook" },
+  { href: STORE.socialLinks.skipthedishes, label: "SkipTheDishes" },
+  { href: STORE.socialLinks.tripadvisor, label: "Tripadvisor" },
+  { href: STORE.socialLinks.yelp, label: "Yelp" },
+];
+
 export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-stone-800 bg-stone-900 text-stone-300">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          <Logo />
-          <div>
-            <p className="text-sm font-medium uppercase tracking-widest text-stone-500">
-              Address
-            </p>
-            <address className="mt-2 not-italic text-stone-300">
-              {STORE.address.line1}
-              <br />
-              {STORE.address.city}
-            </address>
-          </div>
-          <div>
-            <p className="text-sm font-medium uppercase tracking-widest text-stone-500">
-              Phone
-            </p>
+    <footer className="border-t border-ink-line bg-ink text-on-ink-muted">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6 px-4 py-11 text-sm sm:px-6 lg:px-8">
+        <div>
+          <Logo size="sm" />
+          <p className="mt-2">
+            {STORE.address.line1} · {STORE.address.city} ·{" "}
             <a
               href={`tel:${STORE.phone.replace(/\D/g, "")}`}
-              className="mt-2 block text-stone-300 hover:text-amber-200"
+              className="text-on-ink transition hover:text-gold"
             >
               {STORE.phone}
             </a>
-          </div>
-        </div>
-        <div className="mt-10 border-t border-stone-800 pt-8 text-center text-sm text-stone-500">
-          <p>
-            © {year} {STORE.name}. All rights reserved.
+          </p>
+          <p className="mt-1">
+            © {year} {STORE.name}
           </p>
         </div>
+        <ul className="flex flex-wrap gap-x-6 gap-y-2">
+          {SOCIAL_LINKS.map((link) => (
+            <li key={link.label}>
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-on-ink transition hover:text-gold"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </footer>
   );

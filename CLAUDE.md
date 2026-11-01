@@ -36,7 +36,7 @@ Optional — Asian Le Rewards sign-in at checkout (public web config of the sepa
 
 ```
 NEXT_PUBLIC_REWARDS_API_KEY, _AUTH_DOMAIN, _PROJECT_ID, _STORAGE_BUCKET, _MESSAGING_SENDER_ID, _APP_ID
-NEXT_PUBLIC_REWARDS_APP_URL   # optional, defaults to https://asian-le-rewards.web.app
+NEXT_PUBLIC_REWARDS_APP_URL   # optional, defaults to https://rewards.asianle.ca
 ```
 
 Using points online (`lib/rewardsRules.ts`, `lib/server/rewardsPoints.ts`, `/api/rewards/points`): 100 pts = $5 off before tax, saved as `taxBreakDown.discount` (POS shape) + `loyalty.pointsToRedeem`. Points are **not** taken at checkout — the Orders app takes them on Complete (`redeemPoints`, then `earnPoints` on the discounted subtotal) and sets `loyalty.pointsRedeemed`. To stop the same points being promised twice, `/api/orders` reads the member's balance from the rewards project as the member (their ID token over Firestore REST) and, in the same transaction as the save, subtracts `pointsToRedeem` on their other open orders.
@@ -111,13 +111,15 @@ All domain types are declared globally in `types/global.d.ts` — no import need
 
 ### Component conventions
 
-- `"use client"` is only added when React hooks or browser APIs are needed (e.g., `Nav.tsx`, `HeroCarousel`). Everything else is a Server Component.
+- `"use client"` is only added when React hooks or browser APIs are needed (e.g., `Nav.tsx`, `UpdatesSection`). Everything else is a Server Component.
 - Section components under `components/home/` are pure presentational; data is fetched in `app/(main)/page.tsx` and passed as props.
 - `components/PageContainer.tsx` wraps content with max-width + horizontal padding.
 
 ### Styling
 
-Tailwind CSS v4 with a stone/amber color palette (stone-900 background, amber-500 accent). No custom theme config — all utilities are inline.
+Tailwind CSS v4. The "Dark & ivory" design tokens live in `app/globals.css` (`@theme`): `ink` / `ink-raised` / `ink-line` (dark sections), `ivory` / `sand` (light sections), `on-ink` / `on-ink-muted` / `body` / `muted` (text), `gold` (accent on dark), `brand` (red accent on light). Fonts come from `next/font` in `app/layout.tsx`: Plus Jakarta Sans (`font-sans`, everything) and Instrument Serif (`font-accent`, one italic word in a heading). Use the tokens, not raw hex or the old stone/amber classes — pages not yet redesigned (menu, order, checkout, reservations, about, contact, gallery) still use stone/amber.
+
+Home page (`app/(main)/page.tsx`) sections, in order: `HeroSection`, `WelcomeSection`, `WeeklySpecialsSection` (Firestore daily specials, today highlighted via `dayOfWeekInTimezone` + the order/rewards cards), `MenuHighlightsSection` (`discoverMenuData.ts`), `UpdatesSection` (Firestore `updates` images shown whole; a placeholder when empty, so sections keep alternating dark/light), `KitchenSection`, `VisitSection` (Firestore `hours`, storefront photo, map). Hero and storefront photos are placeholders to be replaced.
 
 ### SEO
 

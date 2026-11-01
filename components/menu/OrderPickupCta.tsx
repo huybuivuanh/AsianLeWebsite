@@ -1,48 +1,78 @@
 "use client";
 
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { isStoreOpenNow } from "@/lib/availability";
-import { useLiveStoreSettings } from "@/hooks/useLiveStoreSettings";
+import { mapStoreSettingsDoc } from "@/lib/storeSettings";
 import OrderingUnavailableModal from "@/components/menu/OrderingUnavailableModal";
 
 type OrderPickupCtaProps = {
-  storeSettings: StoreSettings;
+  /** The page's ISR snapshot of settings/store, kept live from here. Leave out where the
+   * page has none (the nav): settings/store is then read once, when the button is pressed. */
+  storeSettings?: StoreSettings;
   className: string;
   children: ReactNode;
+  /** Runs before navigating or showing the modal (e.g. close the mobile menu). */
+  onPress?: () => void;
 };
 
-/** "Order and pay when pick up" CTA — checks live store availability before navigating to
- * /order, showing OrderingUnavailableModal instead of a dead-end redirect when the store
- * isn't currently accepting orders. Used by both the /menu hero and FloatingOrderBar.
- * `storeSettings` comes in as /menu's ISR-cached (up to 15 min stale) snapshot, so this
- * subscribes to live updates instead of trusting it directly — see useLiveStoreSettings. */
+/** "Order online" CTA — checks store availability (hours, holidays, pause switch) before
+ * going to /order, and shows OrderingUnavailableModal instead when the store isn't taking
+ * orders. Used on /menu (hero + FloatingOrderBar), the home page and the nav. */
 export default function OrderPickupCta({
   storeSettings: initialStoreSettings,
   className,
   children,
+  onPress,
 }: OrderPickupCtaProps) {
   const router = useRouter();
-  const storeSettings = useLiveStoreSettings(initialStoreSettings);
+  const [liveSettings, setLiveSettings] = useState(initialStoreSettings);
+  const [checking, setChecking] = useState(false);
   const [showUnavailable, setShowUnavailable] = useState(false);
 
-  const handleClick = useCallback(() => {
-    if (isStoreOpenNow(storeSettings)) {
-      router.push("/order");
-    } else {
-      setShowUnavailable(true);
+  // With a snapshot from the page, follow the live doc (the snapshot can be 15 min stale).
+  useEffect(() => {
+    if (!initialStoreSettings) return;
+    return onSnapshot(doc(db, "settings", "store"), (snapshot) => {
+      setLiveSettings(mapStoreSettingsDoc(snapshot.data(), initialStoreSettings));
+    });
+    // Subscribe once on mount; `initialStoreSettings` is only the fallback.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleClick = useCallback(async () => {
+    onPress?.();
+    let settings = liveSettings;
+    if (!settings) {
+      setChecking(true);
+      try {
+        settings = mapStoreSettingsDoc((await getDoc(doc(db, "settings", "store"))).data());
+      } catch {
+        // Couldn't check (offline etc.): let /order show its own state.
+        router.push("/order");
+        return;
+      } finally {
+        setChecking(false);
+      }
     }
-  }, [storeSettings, router]);
+    if (isStoreOpenNow(settings)) router.push("/order");
+    else setShowUnavailable(true);
+  }, [liveSettings, onPress, router]);
 
   return (
     <>
-      <button type="button" onClick={handleClick} className={className}>
+      <button
+        type="button"
+        onClick={() => void handleClick()}
+        disabled={checking}
+        aria-busy={checking}
+        className={className}
+      >
         {children}
       </button>
-      <OrderingUnavailableModal
-        open={showUnavailable}
-        onClose={() => setShowUnavailable(false)}
-      />
+      <OrderingUnavailableModal open={showUnavailable} onClose={() => setShowUnavailable(false)} />
     </>
   );
 }

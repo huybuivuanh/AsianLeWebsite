@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import OrderPickupCta from "@/components/menu/OrderPickupCta";
+import OrderDropdown from "@/components/OrderDropdown";
 import { usePathname } from "next/navigation";
 import { STORE } from "@/lib/store";
 import Logo from "./Logo";
@@ -56,9 +56,9 @@ export default function Nav() {
             >
               Call Us
             </a>
-            <OrderPickupCta className="inline-flex min-h-11 items-center rounded-full bg-on-ink px-5 text-[15px] font-bold text-ink transition hover:bg-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ink">
-            Order online
-          </OrderPickupCta>
+            <OrderDropdown className="inline-flex gap-1.5 min-h-11 items-center rounded-full bg-on-ink px-5 text-[15px] font-bold text-ink transition hover:bg-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ink">
+              Order online
+            </OrderDropdown>
           </div>
         </div>
 
@@ -71,9 +71,9 @@ export default function Nav() {
           >
             Call
           </a>
-          <OrderPickupCta onPress={() => setMobileOpen(false)} className="inline-flex min-h-11 items-center rounded-full bg-on-ink px-4 text-sm font-bold text-ink">
+          <OrderDropdown onChoose={() => setMobileOpen(false)} className="inline-flex gap-1 min-h-11 items-center rounded-full bg-on-ink px-4 text-sm font-bold text-ink">
             Order
-          </OrderPickupCta>
+          </OrderDropdown>
           <button
             type="button"
             className="inline-flex h-11 w-11 items-center justify-center rounded-full text-on-ink transition hover:bg-ink-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"

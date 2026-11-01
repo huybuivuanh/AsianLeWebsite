@@ -1,29 +1,27 @@
-import Image from "next/image";
 import Link from "next/link";
-import PageContainer from "@/components/PageContainer";
-import DailySpecialsGrid from "@/components/daily-specials/DailySpecialsGrid";
-import MenuCategoryNav from "@/components/menu/MenuCategoryNav";
-import MenuItemCard from "@/components/menu/MenuItemCard";
-import FloatingOrderBar from "@/components/menu/FloatingOrderBar";
+import WeeklySpecialsSection from "@/components/home/WeeklySpecialsSection";
+import MenuCategoryBar from "@/components/menu/MenuCategoryBar";
+import MenuListItem from "@/components/menu/MenuListItem";
+import FloatingOrderButtons from "@/components/menu/FloatingOrderButtons";
 import OrderPickupCta from "@/components/menu/OrderPickupCta";
 import { STORE } from "@/lib/store";
 import { fetchOrderMenuDataForServer } from "@/lib/orderMenuData";
 import { getStoreSettings } from "@/lib/storeSettings";
-import {
-  buildMenuItemViewModel,
-  type MenuItemViewModel,
-} from "@/lib/menuOptions";
-import { getDailySpecialsBundle } from "@/lib/siteData.server";
+import { buildMenuItemViewModel, type MenuItemViewModel } from "@/lib/menuOptions";
+import { getDailySpecialsBundle, getStoreHours } from "@/lib/siteData.server";
+import { dayOfWeekInTimezone } from "@/lib/utils";
+import type { DayOfWeek } from "@/types/enum";
 
 export const revalidate = 900;
 
-export default async function MenuPage() {
-  let categories: FoodCategory[];
-  let itemViewModels: MenuItemViewModel[];
-  let error: string | null = null;
-  let dailyError: string | null = null;
+// The "Daily Specials" menu category is the orderable copy of the weekly specials; on
+// /menu the weekly cards already show them, so it's left out of the list.
+const isDailySpecialsCategory = (c: FoodCategory) => /daily\s*special/i.test(c.name);
 
-  const [menuRes, daily, storeSettings] = await Promise.all([
+const telHref = `tel:${STORE.phone.replace(/\D/g, "")}`;
+
+export default async function MenuPage() {
+  const [menuRes, daily, storeSettings, hours] = await Promise.all([
     fetchOrderMenuDataForServer()
       .then((data) => ({ ok: true as const, data }))
       .catch((err) => ({
@@ -32,224 +30,174 @@ export default async function MenuPage() {
       })),
     getDailySpecialsBundle(),
     getStoreSettings(),
+    getStoreHours().catch(() => [] as StoreHour[]),
   ]);
 
+  let categories: FoodCategory[] = [];
+  let itemViewModels: MenuItemViewModel[] = [];
+  const error = menuRes.ok ? null : menuRes.message;
   if (menuRes.ok) {
-    categories = menuRes.data.categories;
-    const optionGroupsById = new Map(
-      menuRes.data.optionGroups.map((g) => [g.id, g]),
-    );
+    categories = [...menuRes.data.categories]
+      .filter((c) => !isDailySpecialsCategory(c))
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const optionGroupsById = new Map(menuRes.data.optionGroups.map((g) => [g.id, g]));
     const optionsById = new Map(menuRes.data.options.map((o) => [o.id, o]));
     const now = new Date();
     itemViewModels = menuRes.data.menuItems.map((item) =>
-      buildMenuItemViewModel(
-        item,
-        optionGroupsById,
-        optionsById,
-        storeSettings.timezone,
-        now,
-      ),
+      buildMenuItemViewModel(item, optionGroupsById, optionsById, storeSettings.timezone, now),
     );
-  } else {
-    error = menuRes.message;
-    categories = [];
-    itemViewModels = [];
   }
 
-  dailyError = daily.error;
+  const sections = categories
+    .map((category) => ({
+      category,
+      items: itemViewModels.filter((vm) => vm.item.categoryIds?.includes(category.id)),
+    }))
+    .filter((s) => s.items.length > 0);
 
-  const categoriesSorted = [...categories].sort(
-    (a, b) => (a.order ?? 0) - (b.order ?? 0),
-  );
-
-  const serverCategoryLinks: { id: string; label: string }[] = [
-    { id: "daily-special", label: "Daily Special" },
-    ...categoriesSorted.map((c) => ({ id: `category-${c.id}`, label: c.name })),
+  const links = [
+    { id: "daily-special", label: "Daily Specials" },
+    ...sections.map(({ category }) => ({ id: `category-${category.id}`, label: category.name })),
   ];
+  const today = dayOfWeekInTimezone(storeSettings.timezone) as DayOfWeek;
+  const firstHours = hours[0];
 
   return (
     <>
-      <MenuCategoryNav serverCategoryLinks={serverCategoryLinks} />
-      <FloatingOrderBar storeSettings={storeSettings} />
-      {/* Hero */}
-      <section className="relative flex min-h-[280px] items-center justify-center overflow-hidden bg-stone-800 sm:min-h-[320px]">
-        <Image
-          src="/home/hero carousel/5.jpg"
-          alt="Assorted Chinese and Vietnamese dishes at Asian Le Restaurant in Prince Albert"
-          fill
-          className="object-cover"
-          sizes="100vw"
-          priority
-        />
-        <div className="absolute inset-0 bg-stone-900/60" />
-        <div className="relative z-10 mx-auto max-w-3xl px-4 text-center">
-          <h1 className="text-4xl font-bold text-white sm:text-5xl md:text-6xl">
-            Restaurant Menu
-          </h1>
-          <p className="mt-4 text-lg text-stone-200 sm:text-xl">
-            Chinese &amp; Vietnamese favorites — lunch specials to dinner
-          </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+      <section className="bg-ink text-on-ink">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-end justify-between gap-7 px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.22em] text-gold">
+              Chinese &amp; Vietnamese · Prince Albert
+            </p>
+            <h1 className="mt-3.5 text-[clamp(3rem,6vw,5rem)] font-extrabold leading-none tracking-[-0.035em]">
+              Our <span className="font-accent font-normal italic text-gold">menu</span>
+            </h1>
+            <p className="mt-4 text-lg text-on-ink-muted">
+              Comforting classics, lunch specials and takeout favourites. Order online for pickup
+              and pay in person — no online payment.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <OrderPickupCta
+              storeSettings={storeSettings}
+              className="inline-flex min-h-13 flex-col items-center justify-center rounded-full bg-gold px-7 leading-tight text-ink transition hover:bg-on-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+            >
+              <span className="font-bold">Order online</span>
+              <span className="text-xs font-semibold text-gold-ink">Pay when you pick up</span>
+            </OrderPickupCta>
             <a
               href={STORE.socialLinks.skipthedishes}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-stone-900 shadow-lg transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-900 sm:gap-2 sm:px-6 sm:py-3.5 sm:text-base"
+              className="inline-flex min-h-13 items-center gap-2 rounded-full bg-skip px-6 font-bold text-ink transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-skip focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               Order on Skip the Dishes
-              <svg
-                className="size-4 shrink-0 sm:size-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                />
+              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
               </svg>
             </a>
-            <OrderPickupCta
-              storeSettings={storeSettings}
-              className="inline-flex items-center gap-1.5 rounded-full border-2 border-white/70 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-stone-900 sm:gap-2 sm:px-6 sm:py-3 sm:text-base"
-            >
-              Order and pay when pick up
-            </OrderPickupCta>
           </div>
         </div>
       </section>
 
-      {/* Menu content */}
-      <section className="bg-white pt-16 pb-32 md:pt-24 md:pb-36">
-        <PageContainer>
-          <div className="mx-auto max-w-6xl">
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
-                Chinese &amp; Vietnamese restaurant
-              </p>
-              <h2 className="mt-2 text-3xl font-bold text-stone-900 sm:text-4xl">
-                Lunch specials, takeout, and more in Prince Albert
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-stone-600">
-                Explore the full menu at our Chinese and Vietnamese restaurant
-                in Prince Albert, with comforting classics, flavourful lunch
-                specials, and convenient takeout options.
-              </p>
-              <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
-                <svg
-                  className="h-4 w-4 shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Order below for pickup — pay in person, no online payment.
+      <MenuCategoryBar links={links} />
+
+      <div className="[&_#daily-special]:scroll-mt-36">
+        <WeeklySpecialsSection
+          dailySpecials={daily.dailySpecials}
+          dailySpecialItems={daily.dailySpecialItems}
+          error={daily.error}
+          today={today}
+          storeSettings={storeSettings}
+          showOrderCards={false}
+        />
+      </div>
+
+      <section className="mx-auto max-w-7xl px-4 pb-10 pt-20 sm:px-6 lg:px-8">
+        {error ? (
+          <div className="mx-auto max-w-2xl rounded-3xl border border-sand-line bg-white p-8 text-center">
+            <p className="text-[13px] font-bold uppercase tracking-[0.2em] text-brand">
+              Couldn&apos;t load the menu
+            </p>
+            <p className="mt-3 text-body">{error}</p>
+            <Link
+              href="/menu"
+              className="mt-6 inline-flex min-h-11 items-center rounded-full bg-ink px-6 font-bold text-on-ink"
+            >
+              Try again
+            </Link>
+          </div>
+        ) : (
+          sections.map(({ category, items }) => (
+            <div key={category.id} id={`category-${category.id}`} className="scroll-mt-36 pb-16">
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b-2 border-ink pb-3">
+                <h2 className="text-[clamp(1.6rem,3vw,2rem)] font-extrabold leading-tight tracking-[-0.02em]">
+                  {category.name}
+                </h2>
+                <span className="text-sm font-semibold text-muted">
+                  {items.length} {items.length === 1 ? "item" : "items"}
+                </span>
+                {category.description ? (
+                  <span className="ml-auto font-accent text-lg italic text-muted">
+                    {category.description}
+                  </span>
+                ) : null}
               </div>
+              <ul className="grid gap-x-14 md:grid-cols-2">
+                {items.map((vm) => (
+                  <MenuListItem key={vm.item.id} item={vm.item} availability={vm.availability} />
+                ))}
+              </ul>
             </div>
+          ))
+        )}
+        <p className="border-t border-sand-line pt-8 text-center text-sm text-muted">
+          Please let us know if you have any allergies or dietary restrictions.
+        </p>
+      </section>
 
-            <div id="daily-special" className="scroll-mt-28 text-center">
-              <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 px-6 py-10 shadow-lg shadow-amber-900/5 sm:px-8 sm:py-12">
-                <div
-                  className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber-400/80 to-transparent"
-                  aria-hidden
-                />
-                <div className="relative">
-                  <h3 className="pl-4 text-xl font-bold tracking-tight text-stone-900 sm:text-2xl">
-                    Daily Special (11:00 AM - 2:00 PM)
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-stone-600">
-                    Great value specials by day. Available at the times shown.
-                  </p>
-                  {dailyError ? (
-                    <p className="mt-6 text-center text-red-600" role="alert">
-                      {dailyError}
-                    </p>
-                  ) : null}
-                  <div className="mt-8">
-                    <DailySpecialsGrid
-                      variant="light"
-                      dailySpecials={daily.dailySpecials}
-                      dailySpecialItems={daily.dailySpecialItems}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Categories + menu items - server-rendered for SEO and fast first paint */}
-            {error ? (
-              <div className="mx-auto mt-20 max-w-3xl rounded-xl border border-stone-200 bg-stone-50/50 p-6 text-center">
-                <p className="text-sm font-medium uppercase tracking-widest text-amber-700">
-                  Couldn&apos;t load menu
-                </p>
-                <p className="mt-3 text-stone-700">{error}</p>
-                <Link
-                  href="/menu"
-                  className="mt-6 inline-flex items-center justify-center rounded-lg bg-amber-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-stone-50"
-                >
-                  Try again
-                </Link>
-              </div>
-            ) : (
-              <div className="mt-24 space-y-28">
-                {categoriesSorted.map((category, categoryIndex) => {
-                  const itemsInCategory = itemViewModels.filter(
-                    (vm) =>
-                      vm.item.categoryIds?.includes(category.id) ?? false,
-                  );
-                  return (
-                    <div
-                      key={category.id}
-                      id={`category-${category.id}`}
-                      className="scroll-mt-28 mx-auto w-full"
-                    >
-                      <div className="mb-8 text-center">
-                        <h3 className="text-4xl font-bold tracking-tight text-stone-900 sm:text-4xl">
-                          {category.name}
-                        </h3>
-                        <div
-                          className="mx-auto mt-3 h-1 w-20 rounded-full bg-amber-500/90"
-                          aria-hidden
-                        />
-                      </div>
-                      {category.description ? (
-                        <p className="mx-auto mb-8 max-w-2xl text-center text-stone-600">
-                          {category.description}
-                        </p>
-                      ) : null}
-                      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
-                        {itemsInCategory.map((vm, itemIndex) => (
-                          <MenuItemCard
-                            key={vm.item.id}
-                            item={vm.item}
-                            availability={vm.availability}
-                            priority={categoryIndex === 0 && itemIndex === 0}
-                          />
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            <p className="mt-20 border-t border-stone-200 pt-8 text-center text-sm text-stone-500">
-              Please let us know if you have any allergies or dietary
-              restrictions.
+      <section className="bg-ink text-on-ink">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-7 px-4 py-16 sm:px-6 lg:px-8">
+          <div>
+            <h2 className="text-[clamp(2rem,4vw,2.5rem)] font-extrabold leading-[1.05] tracking-[-0.03em]">
+              Ready to <span className="font-accent font-normal italic text-gold">order?</span>
+            </h2>
+            <p className="mt-2.5 text-on-ink-muted">
+              {firstHours ? `${firstHours.days} · ${firstHours.time} · ` : ""}
+              {STORE.phone}
             </p>
           </div>
-        </PageContainer>
+          <div className="flex flex-wrap gap-3">
+            <OrderPickupCta
+              storeSettings={storeSettings}
+              className="inline-flex min-h-13 flex-col items-center justify-center rounded-full bg-gold px-7 leading-tight text-ink transition hover:bg-on-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+            >
+              <span className="font-bold">Order online</span>
+              <span className="text-xs font-semibold text-gold-ink">Pay when you pick up</span>
+            </OrderPickupCta>
+            <a
+              href={STORE.socialLinks.skipthedishes}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-13 items-center gap-2 rounded-full bg-skip px-6 font-bold text-ink transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-skip focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+            >
+              Order on Skip the Dishes
+              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+              </svg>
+            </a>
+            <a
+              href={telHref}
+              className="inline-flex min-h-13 items-center rounded-full border border-gold px-6 font-bold text-gold transition hover:bg-gold hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            >
+              Call Us
+            </a>
+          </div>
+        </div>
       </section>
+
+      <FloatingOrderButtons storeSettings={storeSettings} />
     </>
   );
 }

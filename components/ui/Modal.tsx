@@ -20,7 +20,7 @@ function useMounted() {
  * popup, image preview, side drawer) so callers own `panelClassName` in full;
  * `overlayClassName` defaults to the common centered-dialog case.
  *
- * Rendered via a portal to document.body — some callers (e.g. the FloatingOrderBar,
+ * Rendered via a portal to document.body — some callers (e.g. the sticky menu category bar,
  * which uses backdrop-blur) establish a new containing block for fixed-position
  * descendants, which would otherwise scope this modal's `fixed inset-0` overlay to
  * that ancestor instead of the viewport.

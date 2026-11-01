@@ -20,7 +20,7 @@ type OrderPickupCtaProps = {
 
 /** "Order online" CTA — checks store availability (hours, holidays, pause switch) before
  * going to /order, and shows OrderingUnavailableModal instead when the store isn't taking
- * orders. Used on /menu (hero + FloatingOrderBar), the home page and the nav. */
+ * orders. Used on /menu (hero, category bar, closing band), the home page and the nav. */
 export default function OrderPickupCta({
   storeSettings: initialStoreSettings,
   className,

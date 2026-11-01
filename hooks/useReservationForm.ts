@@ -2,12 +2,9 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useLiveStoreSettings } from "@/hooks/useLiveStoreSettings";
+import { getStoreLocalNow, isStorePaused } from "@/lib/availability";
 import {
-  getMaxScheduleDateStr,
-  getStoreLocalNow,
-  isStorePaused,
-} from "@/lib/availability";
-import {
+  getReservationDays,
   getReservationInvalidReason,
   RESERVATION_INVALID_MESSAGES,
 } from "@/lib/reservation";
@@ -33,17 +30,28 @@ export function useReservationForm(initialStoreSettings: StoreSettings) {
   const now = useMemo(() => new Date(), []);
   const canReserve = !isStorePaused(storeSettings.pausedUntil, new Date());
 
-  const minLocal = useMemo(() => {
-    const { dateStr, hhmm } = getStoreLocalNow(storeSettings, now);
-    return `${dateStr}T${hhmm}`;
-  }, [storeSettings, now]);
-  const maxLocal = useMemo(
-    () => `${getMaxScheduleDateStr(storeSettings, now)}T23:59`,
-    [storeSettings, now],
-  );
   const currentStoreTime = formatTimeHHmmTo12h(getStoreLocalNow(storeSettings, now).hhmm);
 
-  const [scheduledLocal, setScheduledLocal] = useState("");
+  // Days with their bookable times (live settings: hours, holidays, pause).
+  const days = useMemo(() => getReservationDays(storeSettings, now), [storeSettings, now]);
+  const [chosenDate, setChosenDate] = useState<string | null>(null);
+  const [time, setTime] = useState("");
+  // Default to the first day with any time left.
+  const selectedDate =
+    days.find((d) => d.dateStr === chosenDate)?.dateStr ??
+    days.find((d) => d.window)?.dateStr ??
+    days[0]?.dateStr ??
+    "";
+  const bookable = days.find((d) => d.dateStr === selectedDate)?.window ?? null;
+  // Live check of the typed time, with the same rules as the server.
+  const timeProblem =
+    time && selectedDate
+      ? (() => {
+          const reason = getReservationInvalidReason(storeSettings, selectedDate, time);
+          return reason ? RESERVATION_INVALID_MESSAGES[reason] : null;
+        })()
+      : null;
+  const selectDate = (dateStr: string) => setChosenDate(dateStr);
   const [guests, setGuests] = useState(2);
   const [specialRequests, setSpecialRequests] = useState("");
   const [name, setName] = useState("");
@@ -95,7 +103,7 @@ export function useReservationForm(initialStoreSettings: StoreSettings) {
 
   /** Back to an empty form, keeping the customer's contact details. */
   function reset() {
-    setScheduledLocal("");
+    setTime("");
     setGuests(2);
     setSpecialRequests("");
     setCancelError(null);
@@ -114,8 +122,7 @@ export function useReservationForm(initialStoreSettings: StoreSettings) {
       return;
     }
 
-    const [date, rawTime] = scheduledLocal.split("T");
-    const time = rawTime?.slice(0, 5);
+    const date = selectedDate;
     if (!date || !time) {
       setSubmitState({ status: "error", message: "Please choose a date and time." });
       return;
@@ -163,11 +170,14 @@ export function useReservationForm(initialStoreSettings: StoreSettings) {
 
   return {
     canReserve,
-    minLocal,
-    maxLocal,
     currentStoreTime,
-    scheduledLocal,
-    setScheduledLocal,
+    days,
+    selectedDate,
+    selectDate,
+    bookable,
+    time,
+    setTime,
+    timeProblem,
     guests,
     setGuests,
     specialRequests,

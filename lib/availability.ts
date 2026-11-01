@@ -164,14 +164,14 @@ const WEEKDAY_KEYS: StoreDayKey[] = [
 
 /** Which day-of-week a "YYYY-MM-DD" calendar date falls on — a pure calendar fact,
  * independent of timezone (unlike "now", which needs one). */
-function weekdayKeyForDateStr(dateStr: string): StoreDayKey {
+export function weekdayKeyForDateStr(dateStr: string): StoreDayKey {
   const [year, month, day] = dateStr.split("-").map(Number);
   const weekdayIndex = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
   return WEEKDAY_KEYS[weekdayIndex];
 }
 
 /** Adds `days` calendar days to a "YYYY-MM-DD" string. */
-function addDaysToDateStr(dateStr: string, days: number): string {
+export function addDaysToDateStr(dateStr: string, days: number): string {
   const [year, month, day] = dateStr.split("-").map(Number);
   const dt = new Date(Date.UTC(year, month - 1, day + days));
   return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-${String(dt.getUTCDate()).padStart(2, "0")}`;

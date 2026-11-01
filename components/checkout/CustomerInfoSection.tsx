@@ -13,6 +13,10 @@ type CustomerInfoSectionProps = {
   setEmail: (value: string) => void;
 };
 
+const inputClass =
+  "mt-1.5 w-full rounded-xl border border-sand-line bg-ivory/40 px-4 py-3 text-base font-normal text-ink placeholder:text-muted/70 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10";
+
+/** Name / phone / email — shared by checkout and reservations. */
 export default function CustomerInfoSection({
   name,
   setName,
@@ -22,19 +26,23 @@ export default function CustomerInfoSection({
   setEmail,
 }: CustomerInfoSectionProps) {
   return (
-    <fieldset className="rounded-xl border border-stone-200 p-5">
-      <legend className="px-1 font-semibold text-stone-900">Your info</legend>
-      <div className="mt-2 grid gap-3 sm:grid-cols-2">
-        <label className="block text-sm text-stone-700 sm:col-span-1">
+    <fieldset className="rounded-3xl border border-sand-line bg-white p-6 sm:p-8">
+      <legend className="sr-only">Your info</legend>
+      <p aria-hidden className="text-xl font-extrabold">
+        Your info
+      </p>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <label className="block text-sm font-bold">
           Name
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-base text-stone-900"
+            autoComplete="name"
+            className={inputClass}
           />
         </label>
-        <label className="block text-sm text-stone-700 sm:col-span-1">
+        <label className="block text-sm font-bold">
           Phone
           <input
             value={formatPhoneInput(phone)}
@@ -45,18 +53,20 @@ export default function CustomerInfoSection({
             }}
             type="tel"
             inputMode="numeric"
+            autoComplete="tel"
             placeholder="+1 (000) 000-0000"
-            className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-base text-stone-900"
+            className={inputClass}
           />
         </label>
-        <label className="block text-sm text-stone-700 sm:col-span-2">
+        <label className="block text-sm font-bold sm:col-span-2">
           Email
           <input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             type="email"
-            className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-base text-stone-900"
+            autoComplete="email"
+            className={inputClass}
           />
         </label>
       </div>

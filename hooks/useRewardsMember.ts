@@ -84,6 +84,7 @@ export function useRewardsMember() {
             email: typeof d.email === "string" ? d.email : nextUser.email ?? "",
             phone: typeof d.phone === "string" ? d.phone : "",
             points: typeof d.points === "number" ? d.points : 0,
+            hasFirstOrder: d.firstOrderId != null,
           });
           setStatus("member");
         },

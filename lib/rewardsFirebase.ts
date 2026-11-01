@@ -42,9 +42,28 @@ export const getRewardsAuth = (): Auth => getAuth(rewardsApp());
 export const getRewardsDb = (): Firestore => getFirestore(rewardsApp());
 
 /** members/{uid} in the rewards project — the fields the website reads. */
-export type RewardsMember = { id: string; name: string; email: string; phone: string; points: number };
+export type RewardsMember = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  points: number;
+  /** True once a first order has been collected (members/{uid}.firstOrderId) — no welcome bonus left. */
+  hasFirstOrder: boolean;
+};
 
 /** Same as the rewards app: 1 point per $1 of pre-tax subtotal, whole points. */
 export function estimatePoints(subTotal: number): number {
   return Math.floor(subTotal + 1e-9);
+}
+
+/** Same as the rewards functions (shared.ts): extra points on a member's first order,
+ * if its pre-tax subtotal is at least the minimum. A smaller first order uses it up. */
+export const WELCOME_BONUS_POINTS = 200;
+export const WELCOME_BONUS_MIN_SUBTOTAL = 15;
+
+/** Welcome bonus this order would get for this member (0 if none). */
+export function estimateWelcomeBonus(member: RewardsMember | null, subTotal: number): number {
+  if (!member || member.hasFirstOrder) return 0;
+  return subTotal + 1e-9 >= WELCOME_BONUS_MIN_SUBTOTAL ? WELCOME_BONUS_POINTS : 0;
 }

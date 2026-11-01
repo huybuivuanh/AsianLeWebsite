@@ -2,7 +2,13 @@
 
 import { useState, type KeyboardEvent, type SyntheticEvent } from "react";
 import type { RewardsMemberState } from "@/hooks/useRewardsMember";
-import { estimatePoints, REWARDS_APP_URL } from "@/lib/rewardsFirebase";
+import {
+  estimatePoints,
+  estimateWelcomeBonus,
+  REWARDS_APP_URL,
+  WELCOME_BONUS_MIN_SUBTOTAL,
+  WELCOME_BONUS_POINTS,
+} from "@/lib/rewardsFirebase";
 
 type RewardsSectionProps = {
   rewards: RewardsMemberState;
@@ -12,6 +18,18 @@ type RewardsSectionProps = {
 const inputClass =
   "mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-base text-stone-900";
 const linkClass = "font-semibold text-amber-700 hover:text-amber-800 hover:underline";
+
+/** Google's multicolour "G", for the sign-in button. */
+function GoogleIcon() {
+  return (
+    <svg viewBox="0 0 48 48" className="h-5 w-5" aria-hidden="true">
+      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.5z" />
+      <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.5z" />
+    </svg>
+  );
+}
 
 /** Optional Asian Le Rewards sign-in at checkout, so the order earns points. */
 export default function RewardsSection({ rewards, subTotal }: RewardsSectionProps) {
@@ -25,6 +43,13 @@ export default function RewardsSection({ rewards, subTotal }: RewardsSectionProp
   if (rewards.status === "disabled") return null;
 
   const points = estimatePoints(subTotal);
+  const member = rewards.status === "member" ? rewards.member : null;
+  const bonus = estimateWelcomeBonus(member, subTotal);
+  // A first order under the minimum still counts as the first, so say so up front.
+  const bonusShortBy =
+    member && !member.hasFirstOrder && bonus === 0
+      ? (WELCOME_BONUS_MIN_SUBTOTAL - subTotal).toFixed(2)
+      : null;
 
   async function run(action: () => Promise<string | null>, success?: string) {
     setBusy(true);
@@ -62,8 +87,16 @@ export default function RewardsSection({ rewards, subTotal }: RewardsSectionProp
             {rewards.member.points} pts
           </p>
           <p className="mt-1 font-semibold text-amber-800">
-            This order earns about {points} {points === 1 ? "point" : "points"} when you pick it up.
+            This order earns about {points} {points === 1 ? "point" : "points"}
+            {bonus > 0 ? ` + ${bonus} welcome bonus points` : ""} when you pick it up.
           </p>
+          {bonusShortBy ? (
+            <p className="mt-1 text-amber-800">
+              First order? Add ${bonusShortBy} more to get your {WELCOME_BONUS_POINTS}-point welcome
+              bonus — it only applies to your first order, if it&apos;s $
+              {WELCOME_BONUS_MIN_SUBTOTAL} or more.
+            </p>
+          ) : null}
         </div>
         <button
           type="button"
@@ -96,10 +129,16 @@ export default function RewardsSection({ rewards, subTotal }: RewardsSectionProp
   } else if (!open) {
     body = (
       <div className="mt-2 flex flex-wrap items-center justify-between gap-3 text-sm text-stone-700">
-        <p>
-          Earn about <span className="font-semibold">{points} points</span> on this order — 100
-          points = $5 off.
-        </p>
+        <div>
+          <p>
+            Earn about <span className="font-semibold">{points} points</span> on this order — 100
+            points = $5 off.
+          </p>
+          <p className="mt-1 text-amber-800">
+            New members get <span className="font-semibold">{WELCOME_BONUS_POINTS} bonus points</span>{" "}
+            on their first order of ${WELCOME_BONUS_MIN_SUBTOTAL} or more.
+          </p>
+        </div>
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -119,6 +158,7 @@ export default function RewardsSection({ rewards, subTotal }: RewardsSectionProp
           disabled={busy}
           className="flex w-full items-center justify-center gap-2 rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50 disabled:opacity-60"
         >
+          <GoogleIcon />
           Continue with Google
         </button>
         <p className="text-center text-xs uppercase tracking-widest text-stone-400">or</p>

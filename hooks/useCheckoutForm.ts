@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { cartSubtotal, useCartStore } from "@/lib/cartStore";
@@ -13,9 +13,9 @@ import {
   type ScheduledPickupInvalidReason,
 } from "@/lib/availability";
 import { calculateTaxBreakdown } from "@/lib/orderPricing";
-import { estimatePoints } from "@/lib/rewardsFirebase";
+import { estimatePoints, estimateWelcomeBonus } from "@/lib/rewardsFirebase";
 import { useRewardsMember } from "@/hooks/useRewardsMember";
-import { formatTimeHHmmTo12h } from "@/lib/utils";
+import { extractTenDigitPhoneFromPaste, formatTimeHHmmTo12h } from "@/lib/utils";
 import { OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
 
 /** Wire shape for fulfillment — "YYYY-MM-DD" + "HH:mm" over the wire; the persisted Order
@@ -186,13 +186,22 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
   const [cancelError, setCancelError] = useState<string | null>(null);
 
   const rewards = useRewardsMember();
-  // Fill in contact details from the rewards account — only fields still empty.
+  // On rewards sign-in, replace the contact details with the member's (blank profile
+  // fields are skipped). Once per sign-in, so later edits — and live points updates to
+  // the member doc — don't get overwritten.
   const rewardsMember = rewards.member;
+  const filledForMemberId = useRef<string | null>(null);
   useEffect(() => {
-    if (!rewardsMember) return;
-    setName((prev) => prev || rewardsMember.name);
-    setPhone((prev) => prev || rewardsMember.phone);
-    setEmail((prev) => prev || rewardsMember.email);
+    if (!rewardsMember) {
+      filledForMemberId.current = null;
+      return;
+    }
+    if (filledForMemberId.current === rewardsMember.id) return;
+    filledForMemberId.current = rewardsMember.id;
+    if (rewardsMember.name) setName(rewardsMember.name);
+    const memberPhone = extractTenDigitPhoneFromPaste(rewardsMember.phone);
+    if (memberPhone) setPhone(memberPhone);
+    if (rewardsMember.email) setEmail(rewardsMember.email);
   }, [rewardsMember]);
 
   // While "confirming", watch the order doc live for the restaurant's status change —
@@ -375,7 +384,10 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
         // Not known yet — the POS app only writes readyTimeMinutes onto the order once
         // staff confirm it, which the onSnapshot listener below picks up.
         readyBy: null,
-        rewardsPoints: rewardsFields ? estimatePoints(data.taxBreakDown.subTotal) : null,
+        rewardsPoints: rewardsFields
+          ? estimatePoints(data.taxBreakDown.subTotal) +
+            estimateWelcomeBonus(rewards.member, data.taxBreakDown.subTotal)
+          : null,
       });
     } catch {
       setSubmitState({

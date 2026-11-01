@@ -39,6 +39,8 @@ NEXT_PUBLIC_REWARDS_API_KEY, _AUTH_DOMAIN, _PROJECT_ID, _STORAGE_BUCKET, _MESSAG
 NEXT_PUBLIC_REWARDS_APP_URL   # optional, defaults to https://asian-le-rewards.web.app
 ```
 
+Using points online (`lib/rewardsRules.ts`, `lib/server/rewardsPoints.ts`, `/api/rewards/points`): 100 pts = $5 off before tax, saved as `taxBreakDown.discount` (POS shape) + `loyalty.pointsToRedeem`. Points are **not** taken at checkout — the Orders app takes them on Complete (`redeemPoints`, then `earnPoints` on the discounted subtotal) and sets `loyalty.pointsRedeemed`. To stop the same points being promised twice, `/api/orders` reads the member's balance from the rewards project as the member (their ID token over Firestore REST) and, in the same transaction as the save, subtracts `pointsToRedeem` on their other open orders.
+
 Without `SERVICE_ACCOUNT_KEY`, `/api/orders` fails cleanly (checkout UI shows "Network error", nothing crashes) — everything else in the app works fine without them.
 
 ## Architecture

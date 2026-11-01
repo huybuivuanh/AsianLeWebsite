@@ -110,6 +110,22 @@ export default function OrderSummaryPanel({
             {formatPriceCAD(taxBreakDown.subTotal)}
           </span>
         </div>
+        {taxBreakDown.discount ? (
+          <>
+            <div className="flex justify-between text-amber-800">
+              <span>Rewards points</span>
+              <span className="tabular-nums">
+                −{formatPriceCAD(taxBreakDown.discount.discountAmount)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Subtotal after points</span>
+              <span className="tabular-nums">
+                {formatPriceCAD(taxBreakDown.discount.taxableSubtotal)}
+              </span>
+            </div>
+          </>
+        ) : null}
         <div className="flex justify-between">
           <span>GST (5%)</span>
           <span className="tabular-nums">{formatPriceCAD(taxBreakDown.gst)}</span>

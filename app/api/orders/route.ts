@@ -12,8 +12,19 @@ import {
   resolveScheduledPickupInstant,
 } from "@/lib/availability";
 import { calculateTaxBreakdown } from "@/lib/orderPricing";
+import {
+  MAX_REDEEM_STEPS,
+  maxRedeemSteps,
+  redeemStepsToDollars,
+  redeemStepsToPoints,
+} from "@/lib/rewardsRules";
 import { orderNumberFromId, parseCustomerInfo } from "@/lib/server/orderHelpers";
 import { verifyRewardsIdToken } from "@/lib/server/rewardsAuth";
+import {
+  fetchMemberBalance,
+  memberOpenOrdersQuery,
+  pendingPointsFromDocs,
+} from "@/lib/server/rewardsPoints";
 import { KitchenType, OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
 
 /**
@@ -53,6 +64,8 @@ type IncomingOrder = {
   rewardsIdToken?: unknown;
   /** Display only (shown to staff) — the member is identified by the verified token. */
   rewardsMemberName?: unknown;
+  /** Optional: $5-off steps (100 points each) the member wants to use. */
+  redeemSteps?: unknown;
 };
 
 /** Wire shape returned to the client — "YYYY-MM-DD" + "HH:mm", not the persisted `scheduledAt: Date`. */
@@ -95,6 +108,18 @@ export async function POST(request: NextRequest) {
         ? body.rewardsMemberName.trim().slice(0, 100)
         : "";
     loyalty = { memberId, memberName: memberName || customerName };
+  }
+
+  // Using points: priced in below, checked against the member's available points when
+  // saving. The points are only taken from the balance when the Orders app completes it.
+  let redeemSteps = 0;
+  if (body.redeemSteps != null && body.redeemSteps !== 0) {
+    if (!loyalty) return badRequest("Sign in to rewards to use your points.");
+    const steps = body.redeemSteps;
+    if (typeof steps !== "number" || !Number.isInteger(steps) || steps < 1 || steps > MAX_REDEEM_STEPS) {
+      return badRequest("Invalid rewards points amount.");
+    }
+    redeemSteps = steps;
   }
 
   const [menuItems, optionGroups, options, storeSettings] = await Promise.all([
@@ -207,12 +232,29 @@ export async function POST(request: NextRequest) {
 
   // Matches POS's orderItemsSubtotal: price already includes options, so just price * quantity.
   const subTotal = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const taxBreakDown = calculateTaxBreakdown(subTotal);
+
+  if (redeemSteps > maxRedeemSteps(Number.POSITIVE_INFINITY, subTotal)) {
+    return badRequest("Your order total is too small to use that many points.");
+  }
+  const pointsToRedeem = redeemStepsToPoints(redeemSteps);
+  const taxBreakDown = calculateTaxBreakdown(subTotal, redeemStepsToDollars(redeemSteps));
+
+  // Balance straight from the rewards database, read as the member (see rewardsPoints.ts).
+  let balance = 0;
+  if (pointsToRedeem > 0) {
+    const fetched = await fetchMemberBalance(body.rewardsIdToken as string, loyalty!.memberId);
+    if (fetched == null) {
+      return badRequest(
+        "Couldn't check your rewards points — please try again, or order without using points.",
+      );
+    }
+    balance = fetched;
+  }
 
   const ref = adminDb.collection("orders").doc();
   const orderNumber = orderNumberFromId(ref.id);
 
-  await ref.set({
+  const orderDoc = {
     orderNumber,
     status: OrderStatus.New,
     fulfillment,
@@ -223,9 +265,30 @@ export async function POST(request: NextRequest) {
     printed: false,
     paid: false,
     taxBreakDown,
-    ...(loyalty ? { loyalty } : {}),
+    ...(loyalty ? { loyalty: { ...loyalty, ...(pointsToRedeem > 0 ? { pointsToRedeem } : {}) } } : {}),
     createdAt: FieldValue.serverTimestamp(),
-  });
+  };
+
+  if (pointsToRedeem > 0) {
+    // Same transaction as the save, so two orders placed at once can't both use the
+    // same points.
+    const available = await adminDb.runTransaction(async (tx) => {
+      const openOrders = await tx.get(memberOpenOrdersQuery(loyalty!.memberId));
+      const left = balance - pendingPointsFromDocs(openOrders.docs);
+      if (left < pointsToRedeem) return Math.max(0, left);
+      tx.set(ref, orderDoc);
+      return null;
+    });
+    if (available != null) {
+      return badRequest(
+        `You have ${available} points available to use${
+          available !== balance ? " (some are already on another open order)" : ""
+        } — please choose a smaller amount.`,
+      );
+    }
+  } else {
+    await ref.set(orderDoc);
+  }
 
   return NextResponse.json({
     orderId: ref.id,

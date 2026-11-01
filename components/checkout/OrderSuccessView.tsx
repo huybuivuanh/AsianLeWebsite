@@ -9,6 +9,8 @@ type OrderSuccessViewProps = {
   fulfillment: FulfillmentWire;
   readyBy: Date | null;
   rewardsPoints: number | null;
+  pointsUsed: number;
+  discount: number;
 };
 
 function formatReadyByLabel(date: Date): string {
@@ -44,6 +46,8 @@ export default function OrderSuccessView({
   fulfillment,
   readyBy,
   rewardsPoints,
+  pointsUsed,
+  discount,
 }: OrderSuccessViewProps) {
   return (
     <div className="mx-auto max-w-xl rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/90 via-stone-50 to-orange-50/70 p-8 text-center shadow-lg shadow-amber-900/5">
@@ -63,6 +67,12 @@ export default function OrderSuccessView({
       <p className="mt-1 font-semibold text-stone-900">
         Total: {formatPriceCAD(total)} — pay at pickup.
       </p>
+      {pointsUsed > 0 ? (
+        <p className="mt-2 text-sm text-stone-700">
+          Includes {formatPriceCAD(discount)} off with {pointsUsed} rewards points — they&apos;re
+          taken from your balance when you pick it up.
+        </p>
+      ) : null}
       {rewardsPoints ? (
         <p className="mt-2 text-sm font-semibold text-amber-800">
           You&apos;ll earn about {rewardsPoints} rewards points when you pick it up.

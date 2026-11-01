@@ -1,19 +1,98 @@
 "use client";
 
 import { useState, type KeyboardEvent, type SyntheticEvent } from "react";
+import type { CheckoutFormState } from "@/hooks/useCheckoutForm";
 import type { RewardsMemberState } from "@/hooks/useRewardsMember";
+import { REWARDS_APP_URL } from "@/lib/rewardsFirebase";
 import {
+  DOLLARS_PER_REDEEM_STEP,
   estimatePoints,
   estimateWelcomeBonus,
-  REWARDS_APP_URL,
+  POINTS_PER_REDEEM_STEP,
+  redeemStepsToDollars,
+  redeemStepsToPoints,
   WELCOME_BONUS_MIN_SUBTOTAL,
   WELCOME_BONUS_POINTS,
-} from "@/lib/rewardsFirebase";
+} from "@/lib/rewardsRules";
 
 type RewardsSectionProps = {
   rewards: RewardsMemberState;
+  /** Pre-tax subtotal after any points discount — what points are earned on. */
   subTotal: number;
+  redeem: CheckoutFormState["redeem"];
 };
+
+/** "Use points" picker: $5 off per 100 points, taken when the order is picked up. */
+function RedeemPicker({ redeem }: { redeem: CheckoutFormState["redeem"] }) {
+  const { availability, steps, maxSteps, setSteps } = redeem;
+  if (availability.status === "off") return null;
+
+  let content: React.ReactNode;
+  if (availability.status === "loading") {
+    content = <p className="text-stone-500">Checking points you can use…</p>;
+  } else if (availability.status === "error") {
+    content = (
+      <p className="text-stone-500">
+        Couldn&apos;t load your points right now — you&apos;ll still earn points on this order.
+      </p>
+    );
+  } else {
+    if (maxSteps === 0) {
+      content = (
+        <p className="text-stone-500">
+          {availability.available < POINTS_PER_REDEEM_STEP
+            ? `Collect ${POINTS_PER_REDEEM_STEP} points to get $${DOLLARS_PER_REDEEM_STEP} off.`
+            : `Your order needs to be at least $${DOLLARS_PER_REDEEM_STEP} to use points.`}
+        </p>
+      );
+    } else {
+      const btn =
+        "h-9 w-9 rounded-full border border-stone-300 bg-white text-lg font-semibold text-stone-800 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40";
+      content = (
+        <>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-semibold text-stone-900">Use points</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label="Use fewer points"
+                className={btn}
+                disabled={steps <= 0}
+                onClick={() => setSteps(Math.max(0, steps - 1))}
+              >
+                −
+              </button>
+              <span className="min-w-[9.5rem] text-center tabular-nums" aria-live="polite">
+                {steps === 0
+                  ? "None"
+                  : `$${redeemStepsToDollars(steps)} off · ${redeemStepsToPoints(steps)} pts`}
+              </span>
+              <button
+                type="button"
+                aria-label="Use more points"
+                className={btn}
+                disabled={steps >= maxSteps}
+                onClick={() => setSteps(Math.min(maxSteps, steps + 1))}
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <p className="mt-1 text-xs text-stone-500">
+            {POINTS_PER_REDEEM_STEP} points = ${DOLLARS_PER_REDEEM_STEP} off.
+            {steps > 0 ? " Points are taken from your balance when you pick up your order." : ""}
+          </p>
+        </>
+      );
+    }
+  }
+
+  return (
+    <div className="mt-3 rounded-lg border border-amber-200 bg-white/70 p-3 text-sm text-stone-700">
+      {content}
+    </div>
+  );
+}
 
 const inputClass =
   "mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-base text-stone-900";
@@ -32,7 +111,7 @@ function GoogleIcon() {
 }
 
 /** Optional Asian Le Rewards sign-in at checkout, so the order earns points. */
-export default function RewardsSection({ rewards, subTotal }: RewardsSectionProps) {
+export default function RewardsSection({ rewards, subTotal, redeem }: RewardsSectionProps) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,7 +123,7 @@ export default function RewardsSection({ rewards, subTotal }: RewardsSectionProp
 
   const points = estimatePoints(subTotal);
   const member = rewards.status === "member" ? rewards.member : null;
-  const bonus = estimateWelcomeBonus(member, subTotal);
+  const bonus = estimateWelcomeBonus(member ? member.hasFirstOrder : null, subTotal);
   // A first order under the minimum still counts as the first, so say so up front.
   const bonusShortBy =
     member && !member.hasFirstOrder && bonus === 0
@@ -84,7 +163,14 @@ export default function RewardsSection({ rewards, subTotal }: RewardsSectionProp
         <div className="text-sm text-stone-700">
           <p>
             Signed in as <span className="font-semibold">{rewards.member.name}</span> ·{" "}
-            {rewards.member.points} pts
+            {/* Minus points already promised on their other open online orders; "…" while
+                that's being checked, so a too-high number never flashes up. */}
+            {redeem.availability.status === "ready"
+              ? redeem.availability.available
+              : redeem.availability.status === "error"
+                ? rewards.member.points
+                : "…"}{" "}
+            pts
           </p>
           <p className="mt-1 font-semibold text-amber-800">
             This order earns about {points} {points === 1 ? "point" : "points"}
@@ -105,6 +191,9 @@ export default function RewardsSection({ rewards, subTotal }: RewardsSectionProp
         >
           Sign out
         </button>
+        <div className="basis-full">
+          <RedeemPicker redeem={redeem} />
+        </div>
       </div>
     );
   } else if (rewards.status === "no-profile") {

@@ -67,6 +67,8 @@ export default function CheckoutForm({
         fulfillment={checkout.submitState.fulfillment}
         readyBy={checkout.submitState.readyBy}
         rewardsPoints={checkout.submitState.rewardsPoints}
+        pointsUsed={checkout.submitState.pointsUsed}
+        discount={checkout.submitState.discount}
       />
     );
   }
@@ -112,7 +114,8 @@ export default function CheckoutForm({
 
         <RewardsSection
           rewards={checkout.rewards}
-          subTotal={checkout.taxBreakDown.subTotal}
+          subTotal={checkout.earnableSubtotal}
+          redeem={checkout.redeem}
         />
 
         <CustomerInfoSection

@@ -12,8 +12,14 @@ import {
   SCHEDULE_LEAD_MINUTES,
   type ScheduledPickupInvalidReason,
 } from "@/lib/availability";
-import { calculateTaxBreakdown } from "@/lib/orderPricing";
-import { estimatePoints, estimateWelcomeBonus } from "@/lib/rewardsFirebase";
+import { calculateTaxBreakdown, taxableSubtotalOf } from "@/lib/orderPricing";
+import {
+  estimatePoints,
+  estimateWelcomeBonus,
+  maxRedeemSteps,
+  redeemStepsToDollars,
+  redeemStepsToPoints,
+} from "@/lib/rewardsRules";
 import { useRewardsMember } from "@/hooks/useRewardsMember";
 import { extractTenDigitPhoneFromPaste, formatTimeHHmmTo12h } from "@/lib/utils";
 import { OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
@@ -43,6 +49,9 @@ export type SubmitState =
       readyBy: Date | null;
       // Estimated rewards points, if a member was signed in (earned at pickup).
       rewardsPoints: number | null;
+      // Points used for money off (taken at pickup), 0 if none.
+      pointsUsed: number;
+      discount: number;
     }
   | {
       status: "success";
@@ -51,8 +60,17 @@ export type SubmitState =
       fulfillment: FulfillmentWire;
       readyBy: Date | null;
       rewardsPoints: number | null;
+      pointsUsed: number;
+      discount: number;
     }
   | { status: "cancelled" };
+
+/** Points the signed-in member can use on this order (see /api/rewards/points). */
+export type RedeemAvailability =
+  | { status: "off" }
+  | { status: "loading" }
+  | { status: "error" }
+  | { status: "ready"; balance: number; pending: number; available: number };
 
 const SCHEDULED_PICKUP_INVALID_MESSAGES: Record<
   ScheduledPickupInvalidReason,
@@ -235,6 +253,8 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
             fulfillment: prev.fulfillment,
             readyBy,
             rewardsPoints: prev.rewardsPoints,
+            pointsUsed: prev.pointsUsed,
+            discount: prev.discount,
           };
         }
         return prev;
@@ -266,8 +286,60 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
     }
   }
 
+  // --- Using points for money off (members only; taken from the balance at pickup). ---
+  const memberSignedIn = rewards.status === "member" && rewardsMember != null;
+  const [redeemAvailability, setRedeemAvailability] = useState<RedeemAvailability>({
+    status: "off",
+  });
+  const [redeemRefresh, setRedeemRefresh] = useState(0);
+  const getOrderRewardsFields = rewards.getOrderRewardsFields;
+  // Re-check when the member, their live balance, or a failed order changes it.
+  const memberIdForRedeem = memberSignedIn ? rewardsMember.id : null;
+  const memberPoints = rewardsMember?.points;
+  useEffect(() => {
+    if (!memberIdForRedeem) {
+      setRedeemAvailability({ status: "off" });
+      return;
+    }
+    let cancelled = false;
+    setRedeemAvailability((prev) => (prev.status === "ready" ? prev : { status: "loading" }));
+    (async () => {
+      try {
+        const fields = await getOrderRewardsFields();
+        if (!fields) return;
+        const res = await fetch("/api/rewards/points", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rewardsIdToken: fields.rewardsIdToken }),
+        });
+        const data = await res.json();
+        if (cancelled) return;
+        setRedeemAvailability(
+          res.ok
+            ? { status: "ready", balance: data.balance, pending: data.pending, available: data.available }
+            : { status: "error" },
+        );
+      } catch {
+        if (!cancelled) setRedeemAvailability({ status: "error" });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // getOrderRewardsFields changes every render; the member id/points are what matter.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memberIdForRedeem, memberPoints, redeemRefresh]);
+
   const subTotal = cartSubtotal(lines);
-  const taxBreakDown = calculateTaxBreakdown(subTotal);
+  const [chosenRedeemSteps, setRedeemSteps] = useState(0);
+  const redeemMaxSteps =
+    redeemAvailability.status === "ready"
+      ? maxRedeemSteps(redeemAvailability.available, subTotal)
+      : 0;
+  // Never more than allowed right now (cart or points may have changed since choosing).
+  const redeemSteps = memberSignedIn ? Math.min(chosenRedeemSteps, redeemMaxSteps) : 0;
+  const taxBreakDown = calculateTaxBreakdown(subTotal, redeemStepsToDollars(redeemSteps));
+  const earnableSubtotal = taxableSubtotalOf(taxBreakDown);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -344,6 +416,7 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
 
     const payload = {
       ...(rewardsFields ?? {}),
+      ...(rewardsFields && redeemSteps > 0 ? { redeemSteps } : {}),
       lines: lines.map((line) => ({
         menuItemId: line.menuItemId,
         quantity: line.quantity,
@@ -372,9 +445,13 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
           status: "error",
           message: data.error ?? "Something went wrong. Please try again.",
         });
+        // Points may have changed (used elsewhere) — show the current amount.
+        if (redeemSteps > 0) setRedeemRefresh((n) => n + 1);
         return;
       }
       clearCart();
+      const savedTaxBreakDown = data.taxBreakDown as OrderTaxBreakDown;
+      const savedEarnable = taxableSubtotalOf(savedTaxBreakDown);
       setSubmitState({
         status: "confirming",
         orderId: data.orderId,
@@ -385,9 +462,11 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
         // staff confirm it, which the onSnapshot listener below picks up.
         readyBy: null,
         rewardsPoints: rewardsFields
-          ? estimatePoints(data.taxBreakDown.subTotal) +
-            estimateWelcomeBonus(rewards.member, data.taxBreakDown.subTotal)
+          ? estimatePoints(savedEarnable) +
+            estimateWelcomeBonus(rewards.member?.hasFirstOrder ?? null, savedEarnable)
           : null,
+        pointsUsed: rewardsFields ? redeemStepsToPoints(redeemSteps) : 0,
+        discount: savedTaxBreakDown.discount?.discountAmount ?? 0,
       });
     } catch {
       setSubmitState({
@@ -433,7 +512,14 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
     setEmail,
     submitState,
     taxBreakDown,
+    earnableSubtotal,
     rewards,
+    redeem: {
+      availability: redeemAvailability,
+      steps: redeemSteps,
+      maxSteps: redeemMaxSteps,
+      setSteps: setRedeemSteps,
+    },
     handleSubmit,
     handleCancelOrder,
     cancelling,

@@ -1,5 +1,6 @@
 import type {
   DayOfWeek,
+  DiscountType,
   KitchenType,
   OrderStatus,
   TakeOutFulfillmentKind,
@@ -156,8 +157,18 @@ declare global {
     kitchenType: KitchenType;
   }
 
+  /** Same shape as the POS's Discount (the receipt printer reads it). Online orders only
+   * get an Amount discount, from rewards points. Taxes are on `taxableSubtotal`. */
+  interface OrderDiscount {
+    discountType: DiscountType;
+    discountValue: number;
+    discountAmount: number;
+    taxableSubtotal: number;
+  }
+
   interface OrderTaxBreakDown {
     subTotal: number;
+    discount?: OrderDiscount;
     pst: number;
     gst: number;
     total: number;
@@ -175,6 +186,12 @@ declare global {
     memberName: string;
     pointsEarned?: number;
     collectedAt?: Date;
+    /** Points the customer chose to use at checkout (taxBreakDown.discount is the money
+     * off). Not taken yet — the Orders app takes them on Complete and sets pointsRedeemed /
+     * redeemedAmount (same names as the POS). */
+    pointsToRedeem?: number;
+    pointsRedeemed?: number;
+    redeemedAmount?: number;
     reversedAt?: Date;
     pointsReversed?: number;
     reversePending?: boolean;

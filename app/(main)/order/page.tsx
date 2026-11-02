@@ -6,19 +6,19 @@ import WaitTimeBadge from "@/components/order/WaitTimeBadge";
 import { fetchOrderMenuDataForServer } from "@/lib/orderMenuData";
 import { getStoreSettings } from "@/lib/storeSettings";
 import { STORE } from "@/lib/store";
+import { pageMetadata } from "@/lib/seo";
 
 export const revalidate = 900;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/order",
   title: "Order Online",
   description:
     "Order takeout online from Asian Le Restaurant in Prince Albert — pay in person when you pick up, no online payment required.",
-  openGraph: {
-    title: "Order Online | Asian Le Restaurant",
-    description:
-      "Order Chinese & Vietnamese takeout for pickup at Asian Le Restaurant, Prince Albert, SK.",
-  },
-};
+  ogTitle: "Order Online | Asian Le Restaurant",
+  ogDescription:
+    "Order Chinese & Vietnamese takeout for pickup at Asian Le Restaurant, Prince Albert, SK.",
+});
 
 export default async function OrderPage({
   searchParams,

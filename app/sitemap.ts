@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://asianle.ca";
+  const baseUrl = SITE_URL;
 
   return [
     {
@@ -11,6 +12,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/menu`,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/order`,
       changeFrequency: "weekly",
       priority: 0.9,
     },

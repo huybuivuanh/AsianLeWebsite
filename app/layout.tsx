@@ -5,7 +5,8 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
-import { STORE } from "@/lib/store";
+import RestaurantJsonLd from "../components/RestaurantJsonLd";
+import { ROOT_OPEN_GRAPH, SHARE_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin", "latin-ext", "vietnamese"],
@@ -22,30 +23,19 @@ const instrument = Instrument_Serif({
   display: "swap",
 });
 
-const siteName = "Asian Le Restaurant";
-const siteUrl = "https://asianle.ca";
-const siteDescription =
-  "Chinese and Vietnamese restaurant in Prince Albert, SK — dine-in, takeout, daily lunch specials, and Skip the Dishes delivery.";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: siteName,
-    template: `%s | ${siteName}`,
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
   },
-  description: siteDescription,
-  openGraph: {
-    title: siteName,
-    description: siteDescription,
-    url: siteUrl,
-    siteName,
-    locale: "en_CA",
-    type: "website",
-  },
+  description: SITE_DESCRIPTION,
+  openGraph: ROOT_OPEN_GRAPH,
   twitter: {
     card: "summary_large_image",
-    title: siteName,
-    description: siteDescription,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: [SHARE_IMAGE],
   },
 };
 
@@ -54,60 +44,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const restaurantJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Restaurant",
-    name: STORE.name,
-    description: siteDescription,
-    url: siteUrl,
-    telephone: "+1-306-764-7799",
-    email: STORE.email,
-    servesCuisine: ["Chinese", "Vietnamese"],
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: STORE.address.line1,
-      addressLocality: "Prince Albert",
-      addressRegion: "SK",
-      postalCode: "S6V 2K2",
-      addressCountry: "CA",
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: 53.2003288722473,
-      longitude: -105.7397006232774,
-    },
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-        ],
-        opens: "11:00",
-        closes: "20:00",
-      },
-    ],
-    sameAs: [
-      STORE.socialLinks.facebook,
-      STORE.socialLinks.skipthedishes,
-      STORE.socialLinks.tripadvisor,
-      STORE.socialLinks.yelp,
-      STORE.socialLinks.restaurantguru,
-    ],
-  };
-
   return (
     <html lang="en" className={`${jakarta.variable} ${instrument.variable}`}>
       <body className="min-h-screen bg-ivory font-sans text-ink antialiased">
-        <script
-          type="application/ld+json"
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurantJsonLd) }}
-        />
+        <RestaurantJsonLd />
         <Nav />
         <main>{children}</main>
         <Footer />

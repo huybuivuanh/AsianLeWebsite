@@ -4,20 +4,20 @@ import ReservationForm from "@/components/reservation/ReservationForm";
 import { fetchStoreSettingsForServer } from "@/lib/storeSettings";
 import { getStoreHours } from "@/lib/siteData.server";
 import { STORE } from "@/lib/store";
+import { pageMetadata } from "@/lib/seo";
 
 // Store hours/pause-ordering must be current at request time, not ISR-stale.
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/reservations",
   title: "Reserve a Table",
   description:
     "Book a table at Asian Le Restaurant in Prince Albert, SK — reserve online for lunch or dinner, Chinese & Vietnamese dine-in.",
-  openGraph: {
-    title: "Reserve a Table | Asian Le Restaurant",
-    description:
-      "Book a table online for Chinese & Vietnamese dine-in at Asian Le Restaurant, Prince Albert, SK.",
-  },
-};
+  ogTitle: "Reserve a Table | Asian Le Restaurant",
+  ogDescription:
+    "Book a table online for Chinese & Vietnamese dine-in at Asian Le Restaurant, Prince Albert, SK.",
+});
 
 const callHref = `tel:${STORE.phone.replace(/\D/g, "")}`;
 

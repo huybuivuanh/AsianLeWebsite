@@ -8,22 +8,22 @@ import KitchenSection from "@/components/home/KitchenSection";
 import VisitSection from "@/components/home/VisitSection";
 import { getPublicSiteData } from "@/lib/siteData.server";
 import { getStoreSettings } from "@/lib/storeSettings";
+import { pageMetadata } from "@/lib/seo";
 import { dayOfWeekInTimezone } from "@/lib/utils";
 import type { DayOfWeek } from "@/types/enum";
 
 /** Revalidate public Firestore-backed sections periodically (~15 min). */
 export const revalidate = 900;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/",
   title: "Chinese & Vietnamese restaurant in Prince Albert",
   description:
     "Asian Le Restaurant welcomes you for lunch and dinner in Prince Albert, Saskatchewan — fresh Chinese and Vietnamese dishes, daily lunch specials, online ordering for pickup, and Skip the Dishes delivery.",
-  openGraph: {
-    title: "Asian Le Restaurant — Prince Albert, SK",
-    description:
-      "Dine-in and takeout: Chinese & Vietnamese favorites, daily lunch specials, and delivery.",
-  },
-};
+  ogTitle: "Asian Le Restaurant — Prince Albert, SK",
+  ogDescription:
+    "Dine-in and takeout: Chinese & Vietnamese favorites, daily lunch specials, and delivery.",
+});
 
 export default async function Home() {
   const [site, settings] = await Promise.all([getPublicSiteData(), getStoreSettings()]);

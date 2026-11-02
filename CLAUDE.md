@@ -125,5 +125,6 @@ Home page (`app/(main)/page.tsx`) sections, in order: `HeroSection`, `WelcomeSec
 
 - `app/sitemap.ts` exports the sitemap.
 - `app/robots.ts` exports robots config.
-- Each page layout file exports `metadata` for Open Graph and Twitter cards.
-- The root layout injects a `Restaurant` JSON-LD schema using data from `lib/store.ts`.
+- Each public page builds its `metadata` with `pageMetadata({ path, title, description, ogTitle?, ogDescription? })` from `lib/seo.ts`. That adds the canonical link and the full Open Graph block (site name, locale, share image), which Next.js would otherwise drop because a page's `openGraph` replaces the root's instead of merging. Add new public pages to `app/sitemap.ts`.
+- Share image: `public/og-image.jpg` (1200×630, currently a placeholder dining room photo).
+- The root layout renders `components/RestaurantJsonLd.tsx` (schema.org `Restaurant`) from `lib/store.ts`. It has no opening hours on purpose: Google takes hours from the Google Business Profile, and the Firestore `hours` collection is free text for visitors.

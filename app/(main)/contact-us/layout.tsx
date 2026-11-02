@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
+import { STORE } from "@/lib/store";
 
 export const metadata: Metadata = {
   title: "Visit, hours & contact",
-  description:
-    "Find Asian Le Restaurant at Unit #3, 1400 6 Ave E, Prince Albert, SK — phone (306) 764-7799, email, opening hours, map, and dine-in or takeout reservations.",
+  description: `Find Asian Le Restaurant at ${STORE.address.line1}, ${STORE.address.city} — phone ${STORE.phone}, email ${STORE.email}, opening hours, map, and dine-in or takeout reservations.`,
   openGraph: {
     title: "Contact Asian Le Restaurant | Prince Albert",
-    description:
-      "Address, hours, phone, and map for our Chinese & Vietnamese restaurant on 6 Ave E.",
+    description: `Address, hours, phone, and map for our Chinese & Vietnamese restaurant at ${STORE.address.line1}, ${STORE.address.city}.`,
   },
 };
 

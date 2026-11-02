@@ -7,8 +7,8 @@ export const STORE = {
   name: "Asian Le Restaurant",
 
   address: {
-    line1: "Unit #3, 1400 6 Ave E",
-    city: "Prince Albert, SK S6V 2K2",
+    line1: "635 Branion Drive",
+    city: "Prince Albert, SK, S6V 2R9",
   },
 
   phone: "(306) 764-7799",
@@ -18,7 +18,7 @@ export const STORE = {
     "https://www.google.com/maps?cid=11746207782635991944&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAEYASAB&hl=en&gl=CA&source=embed",
 
   mapEmbedSrc:
-    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2389.9769899489197!2d-105.7397006232774!3d53.2003288722473!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x53017a65b9325e77%3A0xa302e9be85f27388!2sAsian%20Le!5e0!3m2!1sen!2sca!4v1773018326281!5m2!1sen!2sca",
+    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2390.5002611846494!2d-105.7391592222016!3d53.19094387224431!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x53017a5dd2075b97%3A0x541e0db670dc62f1!2s635%20Branion%20Dr%2C%20Prince%20Albert%2C%20SK%20S6V%202R9!5e0!3m2!1sen!2sca!4v1793644081172!5m2!1sen!2sca",
 
   socialLinks: {
     facebook: "https://www.facebook.com/profile.php?id=100027589556980",

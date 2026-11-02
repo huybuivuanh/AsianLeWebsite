@@ -27,6 +27,9 @@
   --color-brand-dark: #7a1d15;
   /* Brand red bright enough to read on dark surfaces (prices on dark cards). */
   --color-brand-bright: #e5574a;
+  /* Success messages on light surfaces (e.g. "message sent"), and their soft background. */
+  --color-success: #2f6b3a;
+  --color-success-soft: #eef5ec;
   /* Skip the Dishes orange — only for Skip the Dishes buttons/links (dark text on it). */
   --color-skip: #ff8000;
 

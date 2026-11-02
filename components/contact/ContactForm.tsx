@@ -86,7 +86,7 @@ export default function ContactForm() {
 
       {status === "success" && (
         <div
-          className="mt-5 rounded-2xl border border-[#2f6b3a]/30 bg-[#eef5ec] p-4 text-sm font-semibold text-[#2f6b3a]"
+          className="mt-5 rounded-2xl border border-success/30 bg-success-soft p-4 text-sm font-semibold text-success"
           role="alert"
         >
           Thanks! Your message has been sent. We&apos;ll reply as soon as we

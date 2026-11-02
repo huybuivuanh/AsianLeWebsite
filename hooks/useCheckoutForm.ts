@@ -427,7 +427,7 @@ export function useCheckoutForm(initialStoreSettings: StoreSettings) {
       fulfillment,
       customerName: name.trim(),
       // 11 digits: leading "1" country code + the 10 entered digits.
-      phoneNumber: `1${phone}`,
+      phoneNumber: phone,
       customerEmail: email.trim(),
     };
 

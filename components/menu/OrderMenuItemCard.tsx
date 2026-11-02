@@ -50,8 +50,8 @@ export default function OrderMenuItemCard({
       <button
         type="button"
         onClick={open}
-        className="group flex w-full flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
-        aria-label={`View details for ${item.name}`}
+        className="group flex h-full w-full items-stretch gap-4 rounded-3xl border border-sand-line bg-white p-3 text-left transition hover:border-ink hover:shadow-[0_12px_30px_rgba(20,18,16,0.08)] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-ivory"
+        aria-label={`${item.name} — choose options and add to your order`}
       >
         <MenuItemCardFace item={item} availability={availability} priority={priority} />
       </button>

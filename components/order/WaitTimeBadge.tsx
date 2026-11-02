@@ -3,10 +3,9 @@
 import { isStoreOpenNow } from "@/lib/availability";
 import { useLiveStoreSettings } from "@/hooks/useLiveStoreSettings";
 
-/** Live "estimated wait" pill shown beside the "Order for pickup" heading. `waitTime`
- * (minutes) is set by the restaurant in settings/store; this subscribes to that doc so
- * the number reflects the current kitchen load without a page reload — see
- * useLiveStoreSettings. Hidden while the store is closed, matching checkout's PickupSection. */
+/** Live status pill under the /order heading: "Taking orders · ~N min wait" while open
+ * (`waitTime` is set by the restaurant in settings/store and updates without a reload),
+ * or a "not taking orders" notice while closed/paused. */
 export default function WaitTimeBadge({
   initialStoreSettings,
 }: {
@@ -14,12 +13,19 @@ export default function WaitTimeBadge({
 }) {
   const storeSettings = useLiveStoreSettings(initialStoreSettings);
 
-  if (!isStoreOpenNow(storeSettings)) return null;
+  if (!isStoreOpenNow(storeSettings)) {
+    return (
+      <span className="inline-flex items-center gap-2 rounded-full border border-ink-line bg-ink-raised px-4 py-1.5 text-sm font-semibold text-on-ink-muted">
+        <span className="h-2 w-2 rounded-full bg-brand-bright" />
+        Not taking online orders right now
+      </span>
+    );
+  }
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-      <span className="h-1.5 w-1.5 rounded-full bg-amber-500 motion-safe:animate-pulse" />
-      ~{storeSettings.waitTime} min wait
+    <span className="inline-flex items-center gap-2 rounded-full border border-ink-line bg-ink-raised px-4 py-1.5 text-sm font-semibold text-on-ink">
+      <span className="h-2 w-2 rounded-full bg-gold motion-safe:animate-pulse" />
+      Taking orders · ~{storeSettings.waitTime} min wait
     </span>
   );
 }

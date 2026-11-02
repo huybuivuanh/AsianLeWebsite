@@ -13,8 +13,7 @@ import {
 import { buildMenuItemViewModel } from "@/lib/menuOptions";
 import { isStoreOpenNow } from "@/lib/availability";
 import { useLiveStoreSettings } from "@/hooks/useLiveStoreSettings";
-import PageContainer from "@/components/PageContainer";
-import OrderCategoryTabs from "@/components/order/OrderCategoryTabs";
+import MenuCategoryBar from "@/components/menu/MenuCategoryBar";
 import OrderMenuItemCard from "@/components/menu/OrderMenuItemCard";
 
 /**
@@ -94,56 +93,55 @@ export default function LiveOrderMenu({
 
   const isOrderingAvailable = isStoreOpenNow(storeSettings, now);
 
-  const categoryTabs = categories.map((c) => ({
-    id: `category-${c.id}`,
-    label: c.name,
+  const sections = categories
+    .map((category) => ({
+      category,
+      items: itemViewModels.filter((vm) => vm.item.categoryIds?.includes(category.id)),
+    }))
+    .filter((section) => section.items.length > 0);
+
+  const categoryLinks = sections.map(({ category }) => ({
+    id: `category-${category.id}`,
+    label: category.name,
   }));
 
   return (
     <>
-      <OrderCategoryTabs tabs={categoryTabs} />
+      <MenuCategoryBar links={categoryLinks} />
 
-      <section className="bg-white py-10 md:py-14">
-        <PageContainer>
-          <div className="mx-auto max-w-6xl">
-            <div className="space-y-16">
-              {categories.map((category, categoryIndex) => {
-                const itemsInCategory = itemViewModels.filter(
-                  (vm) => vm.item.categoryIds?.includes(category.id) ?? false,
-                );
-                return (
-                  <div
-                    key={category.id}
-                    id={`category-${category.id}`}
-                    className="scroll-mt-40 mx-auto w-full"
-                  >
-                    <div className="mb-5 text-center">
-                      <h2 className="text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">
-                        {category.name}
-                      </h2>
-                      {category.description ? (
-                        <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-stone-600">
-                          {category.description}
-                        </p>
-                      ) : null}
-                    </div>
-                    <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
-                      {itemsInCategory.map((vm, itemIndex) => (
-                        <OrderMenuItemCard
-                          key={vm.item.id}
-                          {...vm}
-                          isOrderingAvailable={isOrderingAvailable}
-                          autoOpen={vm.item.id === openItemId}
-                          priority={categoryIndex === 0 && itemIndex === 0}
-                        />
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
+      <section className="mx-auto max-w-7xl px-4 pb-24 pt-14 sm:px-6 lg:px-8">
+        {sections.map(({ category, items }, categoryIndex) => (
+          <div key={category.id} id={`category-${category.id}`} className="scroll-mt-36 pb-14">
+            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b-2 border-ink pb-3">
+              <h2 className="text-[clamp(1.6rem,3vw,2rem)] font-extrabold leading-tight tracking-[-0.02em]">
+                {category.name}
+              </h2>
+              <span className="text-sm font-semibold text-muted">
+                {items.length} {items.length === 1 ? "item" : "items"}
+              </span>
+              {category.description ? (
+                <span className="ml-auto text-[17px] font-medium text-body">
+                  {category.description}
+                </span>
+              ) : null}
             </div>
+            <ul className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {items.map((vm, itemIndex) => (
+                <OrderMenuItemCard
+                  key={vm.item.id}
+                  {...vm}
+                  isOrderingAvailable={isOrderingAvailable}
+                  autoOpen={vm.item.id === openItemId}
+                  priority={categoryIndex === 0 && itemIndex < 2}
+                />
+              ))}
+            </ul>
           </div>
-        </PageContainer>
+        ))}
+        <p className="border-t border-sand-line pt-8 text-center text-sm text-muted">
+          Please let us know about any allergies or dietary restrictions in the item&apos;s
+          special instructions.
+        </p>
       </section>
     </>
   );

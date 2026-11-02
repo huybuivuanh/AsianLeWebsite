@@ -1,15 +1,19 @@
 import Link from "next/link";
+import { STORE } from "@/lib/store";
+import { resultButtonClass, resultCardClass } from "@/components/checkout/resultCard";
 
 export default function StoreClosedView() {
   return (
-    <div className="mx-auto max-w-xl py-8 text-center">
-      <p className="text-lg text-stone-600">
-        We&apos;re currently closed for ordering. Please check back later.
+    <div className={resultCardClass}>
+      <p className="text-lg font-extrabold">Online ordering is paused right now</p>
+      <p className="mt-2 text-body">
+        Please check back later, or call us at{" "}
+        <a href={`tel:${STORE.phone.replace(/\D/g, "")}`} className="font-bold text-brand hover:text-brand-dark">
+          {STORE.phone}
+        </a>
+        .
       </p>
-      <Link
-        href="/menu"
-        className="mt-6 inline-flex items-center justify-center rounded-full bg-amber-500 px-6 py-3 text-sm font-semibold text-stone-900 shadow-md transition hover:bg-amber-400"
-      >
+      <Link href="/menu" className={`mt-6 ${resultButtonClass}`}>
         Back to menu
       </Link>
     </div>

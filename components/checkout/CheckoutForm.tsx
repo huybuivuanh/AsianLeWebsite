@@ -84,19 +84,19 @@ export default function CheckoutForm({
   return (
     <form
       onSubmit={checkout.handleSubmit}
-      className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-[1fr_22rem]"
+      className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]"
     >
       <InstructionsWarningModal
         open={checkout.showInstructionsWarning}
         onConfirm={checkout.confirmInstructionsWarning}
         onCancel={checkout.dismissInstructionsWarning}
       />
-      <div className="space-y-6">
+      <div className="space-y-5">
         <Link
           href="/order"
-          className="inline-flex items-center gap-2 rounded-full border-2 border-amber-600 px-4 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-sand-line bg-white px-5 text-sm font-bold text-ink transition hover:border-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
         >
-          ← Back to shopping
+          ← Keep ordering
           <BackToShoppingSpinner />
         </Link>
 
@@ -128,7 +128,7 @@ export default function CheckoutForm({
         />
 
         {checkout.submitState.status === "error" ? (
-          <p role="alert" className="text-sm font-medium text-red-600">
+          <p role="alert" className="rounded-2xl border border-brand/30 bg-white px-4 py-3 text-sm font-bold text-brand">
             {checkout.submitState.message}
           </p>
         ) : null}

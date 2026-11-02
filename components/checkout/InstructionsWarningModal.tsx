@@ -19,10 +19,10 @@ export default function InstructionsWarningModal({
       open={open}
       onClose={onCancel}
       ariaLabel="Confirm your order"
-      panelClassName="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+      panelClassName="w-full max-w-md rounded-3xl bg-ivory p-7 text-ink shadow-2xl"
     >
-      <h3 className="text-lg font-bold text-stone-900">Before you place this order</h3>
-      <p className="mt-2 text-sm text-stone-600">
+      <h3 className="text-xl font-extrabold">Before you place this order</h3>
+      <p className="mt-2 text-sm leading-relaxed text-body">
         If you added any special instructions (substitutions, extras, etc.), note that
         those aren&apos;t priced online — if one needs an extra charge, the restaurant will
         add it to your total when you pay at pickup.
@@ -31,14 +31,14 @@ export default function InstructionsWarningModal({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-full border-2 border-stone-300 px-5 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2"
+          className="min-h-11 rounded-full border border-sand-line bg-white px-5 text-sm font-bold text-ink transition hover:border-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
         >
-          Cancel
+          Go back
         </button>
         <button
           type="button"
           onClick={onConfirm}
-          className="rounded-full bg-amber-500 px-5 py-2.5 text-sm font-semibold text-stone-900 shadow-md transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
+          className="min-h-11 rounded-full bg-ink px-5 text-sm font-bold text-on-ink transition hover:bg-brand-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
         >
           Confirm and place order
         </button>

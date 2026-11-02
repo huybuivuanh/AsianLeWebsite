@@ -1,4 +1,5 @@
 import { TakeOutFulfillmentKind } from "@/types/enum";
+import { MAX_SCHEDULE_DAYS_AHEAD } from "@/lib/availability";
 
 type PickupSectionProps = {
   storeOpenNow: boolean;
@@ -12,6 +13,9 @@ type PickupSectionProps = {
   maxLocal: string;
 };
 
+const tileBase =
+  "flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand has-[:focus-visible]:ring-offset-2";
+
 export default function PickupSection({
   storeOpenNow,
   currentStoreTime,
@@ -23,47 +27,77 @@ export default function PickupSection({
   minLocal,
   maxLocal,
 }: PickupSectionProps) {
+  const asap = fulfillmentKind === TakeOutFulfillmentKind.Immediate;
+  const scheduled = fulfillmentKind === TakeOutFulfillmentKind.Scheduled;
+
   return (
-    <fieldset className="rounded-xl border border-stone-200 p-5">
-      <legend className="px-1 font-semibold text-stone-900">Pickup</legend>
-      <p className="text-xs text-stone-500">
-        Current store time: {currentStoreTime}
-        {storeOpenNow && ` · Estimated wait: ${waitTime} min`}
+    <fieldset className="rounded-3xl border border-sand-line bg-white p-6 sm:p-8">
+      <legend className="sr-only">Pickup time</legend>
+      <p aria-hidden className="text-xl font-extrabold">
+        Pickup time
       </p>
-      <div className="mt-2 flex flex-wrap gap-4">
-        <label className="flex items-center gap-2 text-sm text-stone-700">
+      <p className="mt-1 text-sm text-muted">Store time: {currentStoreTime}</p>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <label
+          className={`${tileBase} ${
+            !storeOpenNow
+              ? "cursor-not-allowed border-dashed border-sand-line bg-ivory/50 text-muted"
+              : asap
+                ? "border-ink bg-ink text-on-ink"
+                : "border-sand-line bg-white hover:border-ink"
+          }`}
+        >
           <input
             type="radio"
             name="fulfillment"
-            checked={fulfillmentKind === TakeOutFulfillmentKind.Immediate}
+            checked={asap}
             onChange={() => setFulfillmentKind(TakeOutFulfillmentKind.Immediate)}
             disabled={!storeOpenNow}
-            className="accent-amber-600"
+            className="mt-1 h-4 w-4 shrink-0 accent-gold"
           />
-          As soon as possible
-          {!storeOpenNow ? " (store not open yet)" : ""}
+          <span>
+            <span className="block font-extrabold">As soon as possible</span>
+            <span className={`text-sm ${asap && storeOpenNow ? "text-gold" : "text-muted"}`}>
+              {storeOpenNow ? `Ready in about ${waitTime} min` : "Store isn't open yet"}
+            </span>
+          </span>
         </label>
-        <label className="flex items-center gap-2 text-sm text-stone-700">
+
+        <label
+          className={`${tileBase} ${
+            scheduled ? "border-ink bg-ink text-on-ink" : "border-sand-line bg-white hover:border-ink"
+          }`}
+        >
           <input
             type="radio"
             name="fulfillment"
-            checked={fulfillmentKind === TakeOutFulfillmentKind.Scheduled}
+            checked={scheduled}
             onChange={() => setFulfillmentKind(TakeOutFulfillmentKind.Scheduled)}
-            className="accent-amber-600"
+            className="mt-1 h-4 w-4 shrink-0 accent-gold"
           />
-          Choose a date &amp; time
+          <span>
+            <span className="block font-extrabold">Schedule for later</span>
+            <span className={`text-sm ${scheduled ? "text-gold" : "text-muted"}`}>
+              Pick a day &amp; time, up to {MAX_SCHEDULE_DAYS_AHEAD} days ahead
+            </span>
+          </span>
         </label>
       </div>
-      {fulfillmentKind === TakeOutFulfillmentKind.Scheduled ? (
-        <input
-          type="datetime-local"
-          value={scheduledLocal}
-          onChange={(e) => setScheduledLocal(e.target.value)}
-          min={minLocal}
-          max={maxLocal}
-          required
-          className="mt-3 w-full rounded-lg border border-stone-300 px-3 py-2 text-base text-stone-900"
-        />
+
+      {scheduled ? (
+        <label className="mt-4 block max-w-sm text-sm font-bold">
+          Pickup date &amp; time
+          <input
+            type="datetime-local"
+            value={scheduledLocal}
+            onChange={(e) => setScheduledLocal(e.target.value)}
+            min={minLocal}
+            max={maxLocal}
+            required
+            className="mt-1.5 w-full rounded-xl border border-sand-line bg-ivory/40 px-4 py-3 text-base font-normal text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
+          />
+        </label>
       ) : null}
     </fieldset>
   );

@@ -139,7 +139,7 @@ export default async function MenuPage() {
                   {items.length} {items.length === 1 ? "item" : "items"}
                 </span>
                 {category.description ? (
-                  <span className="ml-auto font-accent text-lg italic text-muted">
+                  <span className="ml-auto text-[17px] font-medium text-body">
                     {category.description}
                   </span>
                 ) : null}

@@ -1,14 +1,13 @@
 import Link from "next/link";
+import { resultButtonClass, resultCardClass } from "@/components/checkout/resultCard";
 
 export default function EmptyCartView() {
   return (
-    <div className="mx-auto max-w-xl py-8 text-center">
-      <p className="text-lg text-stone-600">Your cart is empty.</p>
-      <Link
-        href="/menu"
-        className="mt-6 inline-flex items-center justify-center rounded-full bg-amber-500 px-6 py-3 text-sm font-semibold text-stone-900 shadow-md transition hover:bg-amber-400"
-      >
-        Browse the menu
+    <div className={resultCardClass}>
+      <p className="text-lg font-extrabold">Your order is empty.</p>
+      <p className="mt-2 text-body">Add a few dishes and come back here to place it.</p>
+      <Link href="/order" className={`mt-6 ${resultButtonClass}`}>
+        Start your order
       </Link>
     </div>
   );

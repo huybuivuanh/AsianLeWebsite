@@ -6,52 +6,60 @@ import type { AvailabilityStatus } from "@/lib/availability";
 type MenuItemCardFaceProps = {
   item: MenuItem;
   availability: AvailabilityStatus;
-  /** Set for the first card above the fold so Next.js eager-loads it instead of lazy-loading
-   * the page's LCP image (see next/image's loading="eager"/priority guidance). */
+  /** Set for the first cards above the fold so Next.js eager-loads them. */
   priority?: boolean;
 };
 
-/** Shared image/name/price/availability-badge/description card face, used by both /menu (MenuItemCard, read-only) and /order (OrderMenuItemCard, opens the order flow). */
+/** Face of a /order item card: photo (or the soup-bowl placeholder), name, description,
+ * red price and a "+" add badge. The whole card is the button (OrderMenuItemCard). */
 export default function MenuItemCardFace({
   item,
   availability,
   priority = false,
 }: MenuItemCardFaceProps) {
   const imageSrc = item.image?.url || "/Soup Bowl Icon.jpg";
+  const available = availability.available;
 
   return (
     <>
-      <div className="relative aspect-square w-full overflow-hidden bg-stone-100">
+      <span className="relative block aspect-square w-24 shrink-0 self-start overflow-hidden rounded-2xl bg-sand-deep sm:w-28">
         <Image
           src={imageSrc}
-          alt={item.name}
+          alt=""
           fill
-          className={`object-cover transition duration-300 group-hover:scale-105 ${availability.available ? "" : "grayscale"}`}
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className={`object-cover transition duration-300 group-hover:scale-105 ${available ? "" : "grayscale"}`}
+          sizes="112px"
           priority={priority}
           unoptimized={skipNextImageOptimization(imageSrc)}
         />
-        {!availability.available ? (
-          <span className="absolute left-2 top-2 rounded-full bg-stone-900/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white backdrop-blur">
+      </span>
+
+      <span className="flex min-w-0 flex-1 flex-col py-1 pr-1">
+        <span className={`text-[17px] font-extrabold leading-snug ${available ? "" : "text-muted"}`}>
+          {item.name}
+        </span>
+        {!available ? (
+          <span className="mt-1 self-start rounded-full bg-ink px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-on-ink">
             {availability.label}
           </span>
         ) : null}
-      </div>
-
-      <div className="flex flex-1 flex-col gap-1 p-3.5">
-        <span className="font-semibold text-stone-900 group-hover:text-amber-700">
-          {item.name}
-        </span>
         {item.description ? (
-          <p className="text-sm font-medium text-stone-600">{item.description}</p>
+          <span className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted">
+            {item.description}
+          </span>
         ) : null}
-        <span
-          className={`mt-auto pt-1 font-semibold tabular-nums text-amber-700 ${item.price > 0 ? "" : "invisible"}`}
-          aria-hidden={item.price > 0 ? undefined : true}
-        >
-          {formatPriceCAD(item.price > 0 ? item.price : 1)}
+        <span className="mt-auto flex items-center justify-between gap-3 pt-2">
+          <span className="font-extrabold tabular-nums text-brand">
+            {item.price > 0 ? formatPriceCAD(item.price) : ""}
+          </span>
+          <span
+            aria-hidden
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl font-bold leading-none transition ${available ? "bg-ink text-on-ink group-hover:bg-brand" : "bg-sand text-muted"}`}
+          >
+            +
+          </span>
         </span>
-      </div>
+      </span>
     </>
   );
 }

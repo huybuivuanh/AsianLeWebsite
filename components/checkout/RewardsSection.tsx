@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, type KeyboardEvent, type SyntheticEvent } from "react";
 import type { CheckoutFormState } from "@/hooks/useCheckoutForm";
 import type { RewardsMemberState } from "@/hooks/useRewardsMember";
@@ -29,17 +30,17 @@ function RedeemPicker({ redeem }: { redeem: CheckoutFormState["redeem"] }) {
 
   let content: React.ReactNode;
   if (availability.status === "loading") {
-    content = <p className="text-stone-500">Checking points you can use…</p>;
+    content = <p className="text-muted">Checking points you can use…</p>;
   } else if (availability.status === "error") {
     content = (
-      <p className="text-stone-500">
+      <p className="text-muted">
         Couldn&apos;t load your points right now — you&apos;ll still earn points on this order.
       </p>
     );
   } else {
     if (maxSteps === 0) {
       content = (
-        <p className="text-stone-500">
+        <p className="text-muted">
           {availability.available < POINTS_PER_REDEEM_STEP
             ? `Collect ${POINTS_PER_REDEEM_STEP} points to get $${DOLLARS_PER_REDEEM_STEP} off.`
             : `Your order needs to be at least $${DOLLARS_PER_REDEEM_STEP} to use points.`}
@@ -47,11 +48,11 @@ function RedeemPicker({ redeem }: { redeem: CheckoutFormState["redeem"] }) {
       );
     } else {
       const btn =
-        "h-9 w-9 rounded-full border border-stone-300 bg-white text-lg font-semibold text-stone-800 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40";
+        "h-9 w-9 rounded-full border border-sand-line bg-white text-lg font-bold text-ink transition hover:border-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-not-allowed disabled:opacity-40";
       content = (
         <>
           <div className="flex flex-wrap items-center gap-3">
-            <span className="font-semibold text-stone-900">Use points</span>
+            <span className="font-extrabold">Use points</span>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -62,7 +63,7 @@ function RedeemPicker({ redeem }: { redeem: CheckoutFormState["redeem"] }) {
               >
                 −
               </button>
-              <span className="min-w-[9.5rem] text-center tabular-nums" aria-live="polite">
+              <span className="min-w-[9.5rem] text-center font-bold tabular-nums" aria-live="polite">
                 {steps === 0
                   ? "None"
                   : `$${redeemStepsToDollars(steps)} off · ${redeemStepsToPoints(steps)} pts`}
@@ -78,7 +79,7 @@ function RedeemPicker({ redeem }: { redeem: CheckoutFormState["redeem"] }) {
               </button>
             </div>
           </div>
-          <p className="mt-1 text-xs text-stone-500">
+          <p className="mt-1 text-xs text-muted">
             {POINTS_PER_REDEEM_STEP} points = ${DOLLARS_PER_REDEEM_STEP} off.
             {steps > 0 ? " Points are taken from your balance when you pick up your order." : ""}
           </p>
@@ -88,15 +89,15 @@ function RedeemPicker({ redeem }: { redeem: CheckoutFormState["redeem"] }) {
   }
 
   return (
-    <div className="mt-3 rounded-lg border border-amber-200 bg-white/70 p-3 text-sm text-stone-700">
+    <div className="mt-4 rounded-2xl border border-sand-line bg-ivory/60 p-4 text-sm text-body">
       {content}
     </div>
   );
 }
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-base text-stone-900";
-const linkClass = "font-semibold text-amber-700 hover:text-amber-800 hover:underline";
+  "mt-1.5 w-full rounded-xl border border-sand-line bg-ivory/40 px-4 py-3 text-base font-normal text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10";
+const linkClass = "font-bold text-brand hover:text-brand-dark hover:underline";
 
 /** Google's multicolour "G", for the sign-in button. */
 function GoogleIcon() {
@@ -156,11 +157,11 @@ export default function RewardsSection({ rewards, subTotal, redeem }: RewardsSec
   let body: React.ReactNode;
 
   if (rewards.status === "loading") {
-    body = <p className="mt-2 text-sm text-stone-500">Checking your rewards sign-in…</p>;
+    body = <p className="mt-2 text-sm text-muted">Checking your rewards sign-in…</p>;
   } else if (rewards.status === "member" && rewards.member) {
     body = (
-      <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-        <div className="text-sm text-stone-700">
+      <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
+        <div className="text-sm text-body">
           <p>
             Signed in as <span className="font-semibold">{rewards.member.name}</span> ·{" "}
             {/* Minus points already promised on their other open online orders; "…" while
@@ -172,12 +173,12 @@ export default function RewardsSection({ rewards, subTotal, redeem }: RewardsSec
                 : "…"}{" "}
             pts
           </p>
-          <p className="mt-1 font-semibold text-amber-800">
+          <p className="mt-1 font-bold text-brand">
             This order earns about {points} {points === 1 ? "point" : "points"}
             {bonus > 0 ? ` + ${bonus} welcome bonus points` : ""} when you pick it up.
           </p>
           {bonusShortBy ? (
-            <p className="mt-1 text-amber-800">
+            <p className="mt-1 text-brand">
               First order? Add ${bonusShortBy} more to get your {WELCOME_BONUS_POINTS}-point welcome
               bonus — it only applies to your first order, if it&apos;s $
               {WELCOME_BONUS_MIN_SUBTOTAL} or more.
@@ -187,7 +188,7 @@ export default function RewardsSection({ rewards, subTotal, redeem }: RewardsSec
         <button
           type="button"
           onClick={() => void rewards.signOutRewards()}
-          className="text-sm text-stone-500 hover:text-stone-700 hover:underline"
+          className="text-sm text-muted hover:text-ink hover:underline"
         >
           Sign out
         </button>
@@ -198,7 +199,7 @@ export default function RewardsSection({ rewards, subTotal, redeem }: RewardsSec
     );
   } else if (rewards.status === "no-profile") {
     body = (
-      <div className="mt-2 text-sm text-stone-700">
+      <div className="mt-2 text-sm text-body">
         <p>
           Your rewards account isn&apos;t finished yet. Open the{" "}
           <a href={REWARDS_APP_URL} target="_blank" rel="noreferrer" className={linkClass}>
@@ -209,7 +210,7 @@ export default function RewardsSection({ rewards, subTotal, redeem }: RewardsSec
         <button
           type="button"
           onClick={() => void rewards.signOutRewards()}
-          className="mt-2 text-sm text-stone-500 hover:text-stone-700 hover:underline"
+          className="mt-2 text-sm text-muted hover:text-ink hover:underline"
         >
           Sign out
         </button>
@@ -217,13 +218,13 @@ export default function RewardsSection({ rewards, subTotal, redeem }: RewardsSec
     );
   } else if (!open) {
     body = (
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-3 text-sm text-stone-700">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 text-sm text-body">
         <div>
           <p>
             Earn about <span className="font-semibold">{points} points</span> on this order — 100
             points = $5 off.
           </p>
-          <p className="mt-1 text-amber-800">
+          <p className="mt-1 text-brand">
             New members get <span className="font-semibold">{WELCOME_BONUS_POINTS} bonus points</span>{" "}
             on their first order of ${WELCOME_BONUS_MIN_SUBTOTAL} or more.
           </p>
@@ -231,7 +232,7 @@ export default function RewardsSection({ rewards, subTotal, redeem }: RewardsSec
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="rounded-full border-2 border-amber-600 px-4 py-1.5 text-sm font-semibold text-amber-800 transition hover:bg-amber-100"
+          className="inline-flex min-h-11 items-center rounded-full bg-ink px-5 text-sm font-bold text-on-ink transition hover:bg-brand-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
         >
           Sign in to earn
         </button>
@@ -240,19 +241,19 @@ export default function RewardsSection({ rewards, subTotal, redeem }: RewardsSec
   } else {
     body = (
       // Not a nested <form> (invalid HTML inside the checkout form) — a div with its own handler.
-      <div className="mt-2 space-y-3">
+      <div className="mt-4 space-y-3">
         <button
           type="button"
           onClick={() => void run(rewards.signInWithGoogle)}
           disabled={busy}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50 disabled:opacity-60"
+          className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-sand-line bg-white px-4 text-sm font-bold text-ink transition hover:border-ink disabled:opacity-60"
         >
           <GoogleIcon />
           Continue with Google
         </button>
-        <p className="text-center text-xs uppercase tracking-widest text-stone-400">or</p>
+        <p className="text-center text-xs font-bold uppercase tracking-[0.2em] text-muted">or</p>
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className="block text-sm text-stone-700">
+          <label className="block text-sm font-bold">
             Email
             <input
               type="email"
@@ -263,7 +264,7 @@ export default function RewardsSection({ rewards, subTotal, redeem }: RewardsSec
               className={inputClass}
             />
           </label>
-          <label className="block text-sm text-stone-700">
+          <label className="block text-sm font-bold">
             Password
             <input
               type="password"
@@ -280,7 +281,7 @@ export default function RewardsSection({ rewards, subTotal, redeem }: RewardsSec
             type="button"
             onClick={handleSignIn}
             disabled={busy || !email || !password}
-            className="rounded-full bg-amber-500 px-5 py-2 text-sm font-semibold text-stone-900 shadow-sm transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center rounded-full bg-ink px-6 text-sm font-bold text-on-ink transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
           >
             {busy ? "Signing in…" : "Sign in"}
           </button>
@@ -295,7 +296,7 @@ export default function RewardsSection({ rewards, subTotal, redeem }: RewardsSec
                     )
                   : setError("Enter your email above first.")
               }
-              className="text-stone-500 hover:text-stone-700 hover:underline"
+              className="text-muted hover:text-ink hover:underline"
             >
               Forgot password?
             </button>
@@ -309,17 +310,28 @@ export default function RewardsSection({ rewards, subTotal, redeem }: RewardsSec
   }
 
   return (
-    <fieldset className="rounded-xl border border-amber-200 bg-amber-50/40 p-5">
-      <legend className="px-1 font-semibold text-stone-900">
-        Asian Le Rewards <span className="font-normal text-stone-500">(optional)</span>
-      </legend>
+    <fieldset className="rounded-3xl border border-sand-line bg-white p-6 sm:p-8">
+      <legend className="sr-only">Asian Le Rewards (optional)</legend>
+      <div aria-hidden className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="flex items-center gap-0.5 text-xl font-extrabold tracking-wide">
+          ASIAN
+          <span className="relative inline-block h-7 w-5">
+            <Image src="/logo.png" alt="" fill className="object-contain" sizes="20px" unoptimized />
+          </span>
+          LE
+        </span>
+        <span className="text-xl font-extrabold">
+          <span className="font-accent font-normal italic text-brand">Rewards</span>
+        </span>
+        <span className="text-sm font-semibold text-muted">(optional)</span>
+      </div>
       {body}
       {error ? (
-        <p role="alert" className="mt-2 text-sm font-medium text-red-600">
+        <p role="alert" className="mt-3 text-sm font-bold text-brand">
           {error}
         </p>
       ) : null}
-      {notice ? <p className="mt-2 text-sm text-green-700">{notice}</p> : null}
+      {notice ? <p className="mt-3 text-sm font-bold text-[#2f6b3a]">{notice}</p> : null}
     </fieldset>
   );
 }

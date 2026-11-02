@@ -7,7 +7,7 @@ import { formatTimeHHmmTo12h } from "@/lib/utils";
 
 export type AvailabilityStatus = { available: boolean; label?: string };
 
-type StoreDayKey = keyof StoreSettings["hours"];
+type StoreDayKey = keyof WeeklyHours;
 
 const WEEKDAY_TO_KEY: Record<string, StoreDayKey> = {
   Sun: "sun",
@@ -226,7 +226,6 @@ export type ScheduledPickupInvalidReason =
   | "holiday"
   | "closed"
   | "outside-hours"
-  | "too-close-to-closing"
   | "lead-time";
 
 export type ScheduledRequestOptions = {
@@ -234,9 +233,12 @@ export type ScheduledRequestOptions = {
   checkBusinessHours?: boolean;
   /** Minimum minutes from now for a same-day request (default SCHEDULE_LEAD_MINUTES). */
   leadMinutes?: number;
-  /** Requests must be at least this many minutes before closing (default 0) — e.g. a
-   * last-seating cutoff for reservations. Only applies when checkBusinessHours is on. */
-  closeBufferMinutes?: number;
+  /** Which weekly hours to check against (default `settings.hours`, the ordering hours).
+   * Reservations pass `settings.reservationHours`. */
+  weeklyHours?: WeeklyHours;
+  /** Treat `close` as the last allowed time (inclusive) instead of closing time
+   * (exclusive). Reservation hours store the last bookable time. */
+  closeIsLastTime?: boolean;
 };
 
 /**
@@ -259,7 +261,8 @@ export function getScheduledPickupInvalidReason(
   {
     checkBusinessHours = true,
     leadMinutes = SCHEDULE_LEAD_MINUTES,
-    closeBufferMinutes = 0,
+    weeklyHours = settings.hours,
+    closeIsLastTime = false,
   }: ScheduledRequestOptions = {},
 ): ScheduledPickupInvalidReason | null {
   if (checkBusinessHours && isStorePaused(settings.pausedUntil, now))
@@ -286,17 +289,15 @@ export function getScheduledPickupInvalidReason(
     });
     if (onHoliday) return "holiday";
 
-    const dayHours = settings.hours[weekdayKeyForDateStr(dateStr)];
+    const dayHours = weeklyHours[weekdayKeyForDateStr(dateStr)];
     if (!dayHours.isOpen) return "closed";
 
+    const closeMin = hhmmToMinutes(dayHours.close);
     if (
       requestedMin < hhmmToMinutes(dayHours.open) ||
-      requestedMin >= hhmmToMinutes(dayHours.close)
+      (closeIsLastTime ? requestedMin > closeMin : requestedMin >= closeMin)
     ) {
       return "outside-hours";
-    }
-    if (requestedMin > hhmmToMinutes(dayHours.close) - closeBufferMinutes) {
-      return "too-close-to-closing";
     }
   }
 

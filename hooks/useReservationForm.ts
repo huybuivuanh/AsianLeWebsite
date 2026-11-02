@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useLiveStoreSettings } from "@/hooks/useLiveStoreSettings";
-import { getStoreLocalNow, isStorePaused } from "@/lib/availability";
+import { getStoreLocalNow, isStorePaused, weekdayKeyForDateStr } from "@/lib/availability";
 import {
   getReservationDays,
   getReservationInvalidReason,
@@ -32,7 +32,7 @@ export function useReservationForm(initialStoreSettings: StoreSettings) {
 
   const currentStoreTime = formatTimeHHmmTo12h(getStoreLocalNow(storeSettings, now).hhmm);
 
-  // Days with their bookable times (live settings: hours, holidays, pause).
+  // Days with their bookable times (live settings: reservation hours, holidays, pause).
   const days = useMemo(() => getReservationDays(storeSettings, now), [storeSettings, now]);
   const [chosenDate, setChosenDate] = useState<string | null>(null);
   const [time, setTime] = useState("");
@@ -43,6 +43,16 @@ export function useReservationForm(initialStoreSettings: StoreSettings) {
     days[0]?.dateStr ??
     "";
   const bookable = days.find((d) => d.dateStr === selectedDate)?.window ?? null;
+  // On days we open before reservations start (e.g. open 11, first booking 1 PM), that
+  // stretch is the lunch rush: shown as a "no reservations then" note.
+  const noBookingStretch = (() => {
+    if (!selectedDate) return null;
+    const key = weekdayKeyForDateStr(selectedDate);
+    const store = storeSettings.hours[key];
+    const reservations = storeSettings.reservationHours[key];
+    if (!store?.isOpen || !reservations?.isOpen || reservations.open <= store.open) return null;
+    return { from: store.open, until: reservations.open };
+  })();
   // Live check of the typed time, with the same rules as the server.
   const timeProblem =
     time && selectedDate
@@ -175,6 +185,7 @@ export function useReservationForm(initialStoreSettings: StoreSettings) {
     selectedDate,
     selectDate,
     bookable,
+    noBookingStretch,
     time,
     setTime,
     timeProblem,

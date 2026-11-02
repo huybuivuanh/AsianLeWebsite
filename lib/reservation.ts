@@ -21,19 +21,21 @@ export const RESERVATION_ITEM = {
 } as const;
 
 export const RESERVATION_LEAD_MINUTES = 60;
-/** Last seating is this many minutes before the day's closing time. */
-export const RESERVATION_LAST_SEATING_MINUTES = 60;
 /** Sanity cap on the guest count only — large parties are confirmed by phone, not blocked. */
 export const RESERVATION_MAX_GUESTS_INPUT = 200;
 export const RESERVATION_MAX_REQUESTS_LENGTH = 200;
 
-/** Full business-hours check (paused, holiday, closed, hours) plus the reservation lead
- * time and last-seating cutoff. Unlike pickup orders, the API enforces all of this. */
-export const RESERVATION_RULES: ScheduledRequestOptions = {
-  checkBusinessHours: true,
-  leadMinutes: RESERVATION_LEAD_MINUTES,
-  closeBufferMinutes: RESERVATION_LAST_SEATING_MINUTES,
-};
+/** Reservation check: paused, holiday, the day's reservation hours (first to last
+ * bookable time, set in the website-admin app) and the lead time. Unlike pickup orders,
+ * the API enforces all of this. */
+function reservationRules(settings: StoreSettings): ScheduledRequestOptions {
+  return {
+    checkBusinessHours: true,
+    leadMinutes: RESERVATION_LEAD_MINUTES,
+    weeklyHours: settings.reservationHours,
+    closeIsLastTime: true,
+  };
+}
 
 export const RESERVATION_INVALID_MESSAGES: Record<
   ScheduledPickupInvalidReason,
@@ -44,9 +46,8 @@ export const RESERVATION_INVALID_MESSAGES: Record<
   past: "That time has already passed — please choose another.",
   "too-far-ahead": `Please choose a date within the next ${MAX_SCHEDULE_DAYS_AHEAD} days.`,
   holiday: "We're closed that day — please choose another date.",
-  closed: "We're closed that day — please choose another date.",
-  "outside-hours": "That time is outside our hours — please choose another.",
-  "too-close-to-closing": `Last seating is ${RESERVATION_LAST_SEATING_MINUTES} minutes before closing — please choose an earlier time.`,
+  closed: "We don't take reservations that day — please choose another date.",
+  "outside-hours": "Tables can't be booked at that time — please choose a time within the hours shown.",
   "lead-time": `Please book at least ${RESERVATION_LEAD_MINUTES} minutes ahead.`,
 };
 
@@ -61,7 +62,7 @@ export function getReservationInvalidReason(
     dateStr,
     time,
     now,
-    RESERVATION_RULES,
+    reservationRules(settings),
   );
 }
 
@@ -76,20 +77,20 @@ const toHhmm = (minutes: number) =>
   `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 
 /** Earliest and latest "HH:mm" a table can be booked on a date — checked with the same
- * rules as the API (hours, last seating, lead time, holidays, pause). Null when nothing
+ * rules as the API (reservation hours, lead time, holidays, pause). Null when nothing
  * on that day is bookable. */
 export function getReservationWindow(
   settings: StoreSettings,
   dateStr: string,
   now: Date = new Date(),
 ): { earliest: string; latest: string } | null {
-  const hours = settings.hours[weekdayKeyForDateStr(dateStr)];
+  const hours = settings.reservationHours[weekdayKeyForDateStr(dateStr)];
   if (!hours?.isOpen) return null;
   let earliest: string | null = null;
   let latest: string | null = null;
   const step = RESERVATION_TIME_STEP_MINUTES;
   const start = Math.ceil(toMinutes(hours.open) / step) * step;
-  for (let m = start; m < toMinutes(hours.close) && m < 24 * 60; m += step) {
+  for (let m = start; m <= toMinutes(hours.close) && m < 24 * 60; m += step) {
     const time = toHhmm(m);
     if (getReservationInvalidReason(settings, dateStr, time, now) === null) {
       earliest ??= time;

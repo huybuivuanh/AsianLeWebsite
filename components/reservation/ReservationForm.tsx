@@ -7,7 +7,6 @@ import CustomerInfoSection from "@/components/checkout/CustomerInfoSection";
 import OrderConfirmingView from "@/components/checkout/OrderConfirmingView";
 import { formatScheduledLabel } from "@/components/checkout/OrderSuccessView";
 import {
-  RESERVATION_LAST_SEATING_MINUTES,
   RESERVATION_LEAD_MINUTES,
   RESERVATION_MAX_GUESTS_INPUT,
   RESERVATION_MAX_REQUESTS_LENGTH,
@@ -136,8 +135,7 @@ export default function ReservationForm({
           When
         </h2>
         <p className="mt-1 text-sm text-muted">
-          Book at least {RESERVATION_LEAD_MINUTES} minutes ahead · last seating{" "}
-          {RESERVATION_LAST_SEATING_MINUTES} minutes before closing · store time{" "}
+          Book at least {RESERVATION_LEAD_MINUTES} minutes ahead · store time{" "}
           {form.currentStoreTime}
         </p>
 
@@ -208,19 +206,25 @@ export default function ReservationForm({
           )}
         </p>
 
-        <div className="mt-5 flex gap-3 rounded-2xl border border-gold/50 bg-gold/10 px-4 py-3.5 text-sm text-body">
-          <svg className="mt-0.5 size-5 shrink-0 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p>
-            <span className="font-bold text-ink">No reservations 11:00 AM – 1:00 PM.</span> Lunch
-            is our busiest time, so tables can&apos;t be reserved then. Please{" "}
-            <a href={callHref} className="font-bold text-brand hover:text-brand-dark">
-              call us
-            </a>{" "}
-            to check with the restaurant.
-          </p>
-        </div>
+        {form.noBookingStretch ? (
+          <div className="mt-5 flex gap-3 rounded-2xl border border-gold/50 bg-gold/10 px-4 py-3.5 text-sm text-body">
+            <svg className="mt-0.5 size-5 shrink-0 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p>
+              <span className="font-bold text-ink">
+                No reservations {formatTimeHHmmTo12h(form.noBookingStretch.from)} –{" "}
+                {formatTimeHHmmTo12h(form.noBookingStretch.until)}.
+              </span>{" "}
+              Lunch
+              is our busiest time, so tables can&apos;t be reserved then. Please{" "}
+              <a href={callHref} className="font-bold text-brand hover:text-brand-dark">
+                call us
+              </a>{" "}
+              to check with the restaurant.
+            </p>
+          </div>
+        ) : null}
       </section>
 
       <section className={cardClass} aria-labelledby="res-party">

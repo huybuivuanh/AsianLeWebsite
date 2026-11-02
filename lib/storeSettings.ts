@@ -28,6 +28,15 @@ const DEFAULT_STORE_SETTINGS: StoreSettings = {
     sat: DEFAULT_DAY_HOURS,
     sun: DEFAULT_DAY_HOURS,
   },
+  reservationHours: {
+    mon: DEFAULT_DAY_HOURS,
+    tue: DEFAULT_DAY_HOURS,
+    wed: DEFAULT_DAY_HOURS,
+    thu: DEFAULT_DAY_HOURS,
+    fri: DEFAULT_DAY_HOURS,
+    sat: DEFAULT_DAY_HOURS,
+    sun: DEFAULT_DAY_HOURS,
+  },
   holidays: [],
 };
 
@@ -41,7 +50,7 @@ function mapDayHours(raw: unknown): DayHours {
   };
 }
 
-export function mapWeeklyHours(raw: unknown): StoreSettings["hours"] {
+export function mapWeeklyHours(raw: unknown): WeeklyHours {
   const r = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   return {
     mon: mapDayHours(r.mon),
@@ -89,6 +98,7 @@ export function mapStoreSettingsDoc(
         ? d.restaurantPhoneNumber
         : fallback.restaurantPhoneNumber,
     hours: mapWeeklyHours(d.hours),
+    reservationHours: mapWeeklyHours(d.reservationHours),
     holidays: mapHolidays(d.holidays),
   };
 }

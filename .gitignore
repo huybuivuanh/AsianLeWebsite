@@ -42,3 +42,5 @@ yarn-error.log*
 next-env.d.ts
 
 .claude/
+# originals saved by scripts/shrink-storage-images.mjs
+/image-backup

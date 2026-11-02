@@ -107,7 +107,7 @@ All domain types are declared globally in `types/global.d.ts` — no import need
 ### Key lib files
 
 - `lib/store.ts` — Single source of truth for store details (address, phone, hours, social links). Import `STORE` wherever contact info is needed.
-- `lib/imagePolicy.ts` — `skipNextImageOptimization()` — pass this to `unoptimized` on `<Image>` for Firebase Storage URLs to avoid burning Vercel image optimization quota.
+- `lib/imagePolicy.ts` — `skipNextImageOptimization()` — pass this to `unoptimized` on `<Image>` for Firebase Storage URLs to avoid burning Vercel image optimization quota. Those images are kept small at the source instead: website-admin shrinks uploads (`lib/imageUpload.ts` there: max 2000 px, WebP, 1-year cache header), and `scripts/shrink-storage-images.mjs` did the same once for older uploads (dry run by default; `--apply` writes, backups go to `image-backup/`).
 
 ### Component conventions
 

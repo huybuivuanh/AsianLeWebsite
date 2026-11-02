@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { FieldValue } from "firebase-admin/firestore";
-import { adminDb } from "@/lib/firebaseAdmin";
-import { fetchStoreSettingsForServer } from "@/lib/storeSettings";
 import { resolveScheduledPickupInstant } from "@/lib/availability";
 import { calculateTaxBreakdown } from "@/lib/orderPricing";
 import {
@@ -11,8 +8,11 @@ import {
   RESERVATION_MAX_GUESTS_INPUT,
   RESERVATION_MAX_REQUESTS_LENGTH,
 } from "@/lib/reservation";
-import { orderNumberFromId, parseCustomerInfo } from "@/lib/server/orderHelpers";
-import { KitchenType, OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
+import { fetchStoreSettingsForServer } from "@/lib/storeSettings";
+import { jsonError, readJsonObject } from "@/lib/server/http";
+import { parseCustomerInfo } from "@/lib/server/orders/customer";
+import { newOrderDoc, newOrderRef } from "@/lib/server/orders/newOrder";
+import { KitchenType, TakeOutFulfillmentKind } from "@/types/enum";
 
 /**
  * Books a table. Saved as a regular scheduled order (same `orders` shape the admin app
@@ -32,24 +32,16 @@ type IncomingReservation = {
   customerEmail?: unknown;
 };
 
-function badRequest(message: string) {
-  return NextResponse.json({ error: message }, { status: 400 });
-}
-
 export async function POST(request: NextRequest) {
-  let body: IncomingReservation;
-  try {
-    body = await request.json();
-  } catch {
-    return badRequest("Invalid request body");
-  }
+  const body = await readJsonObject<IncomingReservation>(request);
+  if (!body) return jsonError("Invalid request body");
 
   const customer = parseCustomerInfo(body);
-  if ("error" in customer) return badRequest(customer.error);
+  if ("error" in customer) return jsonError(customer.error);
 
   const guests = typeof body.guests === "number" ? body.guests : NaN;
   if (!Number.isInteger(guests) || guests < 1 || guests > RESERVATION_MAX_GUESTS_INPUT) {
-    return badRequest("Please enter a valid number of guests");
+    return jsonError("Please enter a valid number of guests");
   }
 
   const date = typeof body.date === "string" ? body.date : "";
@@ -57,7 +49,7 @@ export async function POST(request: NextRequest) {
 
   const storeSettings = await fetchStoreSettingsForServer();
   const invalidReason = getReservationInvalidReason(storeSettings, date, time, new Date());
-  if (invalidReason) return badRequest(RESERVATION_INVALID_MESSAGES[invalidReason]);
+  if (invalidReason) return jsonError(RESERVATION_INVALID_MESSAGES[invalidReason]);
 
   const specialRequests =
     typeof body.specialRequests === "string"
@@ -76,25 +68,19 @@ export async function POST(request: NextRequest) {
     },
   ];
 
-  const fulfillment: OrderFulfillment = {
-    kind: TakeOutFulfillmentKind.Scheduled,
-    scheduledAt: resolveScheduledPickupInstant(storeSettings.timezone, date, time),
-  };
-
-  const ref = adminDb.collection("orders").doc();
-  const orderNumber = orderNumberFromId(ref.id);
-
-  await ref.set({
-    orderNumber,
-    status: OrderStatus.New,
-    fulfillment,
-    ...customer,
-    orderItems,
-    printed: false,
-    paid: false,
-    taxBreakDown: calculateTaxBreakdown(0),
-    createdAt: FieldValue.serverTimestamp(),
-  });
+  const { ref, orderNumber } = newOrderRef();
+  await ref.set(
+    newOrderDoc({
+      orderNumber,
+      customer,
+      fulfillment: {
+        kind: TakeOutFulfillmentKind.Scheduled,
+        scheduledAt: resolveScheduledPickupInstant(storeSettings.timezone, date, time),
+      },
+      orderItems,
+      taxBreakDown: calculateTaxBreakdown(0),
+    }),
+  );
 
   return NextResponse.json({ orderId: ref.id, orderNumber, date, time, guests });
 }

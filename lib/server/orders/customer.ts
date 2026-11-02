@@ -1,25 +1,15 @@
-// Shared by the order-writing API routes (/api/orders, /api/reservations).
+import "server-only";
 
-export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Customer contact details, shared by the order-writing routes (/api/orders, /api/reservations).
 
-// Hashes the Firestore doc id into a 6-digit number, purely for a short,
-// easy-to-call-out pickup code — not a uniqueness guarantee.
-export function orderNumberFromId(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash * 31 + id.charCodeAt(i)) % 1_000_000;
-  }
-  return hash.toString().padStart(6, "0");
-}
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export type CustomerInfo = { customerName: string; phoneNumber: string; customerEmail: string };
 
 type CustomerInput = { customerName?: unknown; phoneNumber?: unknown; customerEmail?: unknown };
 
 /** Trims and validates name/phone/email — returns an error message, or the clean values. */
-export function parseCustomerInfo(
-  body: CustomerInput,
-):
-  | { error: string }
-  | { customerName: string; phoneNumber: string; customerEmail: string } {
+export function parseCustomerInfo(body: CustomerInput): CustomerInfo | { error: string } {
   const customerName = typeof body.customerName === "string" ? body.customerName.trim() : "";
   const phoneNumber = typeof body.phoneNumber === "string" ? body.phoneNumber.trim() : "";
   if (!customerName) return { error: "Name is required" };

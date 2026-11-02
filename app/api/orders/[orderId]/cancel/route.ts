@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
+import { jsonError } from "@/lib/server/http";
 import { OrderStatus } from "@/types/enum";
 
 /**
  * Customer-initiated cancellation while waiting for restaurant confirmation
- * (see hooks/useCheckoutForm.ts's "confirming" state). Only succeeds while the
+ * (see hooks/checkout/usePlacedOrder.ts's "confirming" state). Only succeeds while the
  * order is still `New` — once the restaurant has moved it to InProgress (or
  * beyond), it's already being made and can no longer be cancelled from here.
  */
@@ -24,15 +25,12 @@ export async function POST(
   });
 
   if (result === "not-found") {
-    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    return jsonError("Order not found", 404);
   }
   if (result === "too-late") {
-    return NextResponse.json(
-      {
-        error:
-          "The restaurant has already started on your order, so it can no longer be cancelled here — please call us if you need to make a change.",
-      },
-      { status: 409 },
+    return jsonError(
+      "The restaurant has already started on your order, so it can no longer be cancelled here — please call us if you need to make a change.",
+      409,
     );
   }
   return NextResponse.json({ ok: true });

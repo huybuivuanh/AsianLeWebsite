@@ -1,299 +1,128 @@
 import { NextRequest, NextResponse } from "next/server";
-import { FieldValue } from "firebase-admin/firestore";
-import { adminDb } from "@/lib/firebaseAdmin";
-import {
-  fetchMenuItemsForServer,
-  fetchOptionGroupsForServer,
-  fetchItemOptionsForServer,
-} from "@/lib/orderMenuData";
-import { fetchStoreSettingsForServer } from "@/lib/storeSettings";
-import {
-  isValidScheduledPickup,
-  resolveScheduledPickupInstant,
-} from "@/lib/availability";
 import { calculateTaxBreakdown } from "@/lib/orderPricing";
-import {
-  MAX_REDEEM_STEPS,
-  maxRedeemSteps,
-  redeemStepsToDollars,
-  redeemStepsToPoints,
-} from "@/lib/rewardsRules";
-import { orderNumberFromId, parseCustomerInfo } from "@/lib/server/orderHelpers";
-import { verifyRewardsIdToken } from "@/lib/server/rewardsAuth";
-import {
-  fetchMemberBalance,
-  memberOpenOrdersQuery,
-  pendingPointsFromDocs,
-} from "@/lib/server/rewardsPoints";
-import { KitchenType, OrderStatus, TakeOutFulfillmentKind } from "@/types/enum";
+import type { PlaceOrderResponse } from "@/lib/orderApi";
+import { maxRedeemSteps, redeemStepsToDollars, redeemStepsToPoints } from "@/lib/rewardsRules";
+import { fetchStoreSettingsForServer } from "@/lib/storeSettings";
+import { jsonError, readJsonObject } from "@/lib/server/http";
+import { buildOrderItems } from "@/lib/server/orders/buildOrderItems";
+import { parseCustomerInfo } from "@/lib/server/orders/customer";
+import { resolveFulfillment } from "@/lib/server/orders/fulfillment";
+import { loadMenuIndex } from "@/lib/server/orders/menuIndex";
+import { newOrderDoc, newOrderRef } from "@/lib/server/orders/newOrder";
+import { saveOrder, type PointsRedemption } from "@/lib/server/orders/saveOrder";
+import { parseRedeemSteps, resolveRewardsMember } from "@/lib/server/rewards/member";
 
 /**
- * Places a pay-at-pickup order. Never trusts client-submitted prices — only
- * item/option ids and quantities are read from the request body; every price
- * is re-derived from live Firestore data here.
+ * Places a pay-at-pickup order. Never trusts client-submitted prices — only item/option
+ * ids and quantities are read from the request body; every price is re-derived from live
+ * Firestore data (lib/server/orders/buildOrderItems.ts).
  *
- * Deliberately does NOT block on sold-out/availability-window state, store hours,
- * or pause-ordering — those are surfaced to the customer as UX nudges earlier in the
- * flow (menu page badges, /api/cart/availability at checkout), but honoring an order
- * placed during a pause or outside hours is the restaurant's call, not this site's.
- * Scheduled-pickup requests still get a data-sanity check (real date, not in the past,
- * within the scheduling horizon, minimum lead time) — see getScheduledPickupInvalidReason.
+ * Deliberately does NOT block on sold-out/availability-window state, store hours, or
+ * pause-ordering — those are surfaced to the customer as UX nudges earlier in the flow
+ * (menu page badges, /api/cart/availability at checkout), but honoring an order placed
+ * during a pause or outside hours is the restaurant's call, not this site's. Scheduled
+ * pickups still get a sanity check (lib/server/orders/fulfillment.ts).
  *
- * Field names/shapes mirror the AsianLePOS app's Order model (a different Firebase
- * project — see orders-schema.md).
+ * A signed-in rewards member is linked to the order; points they choose to use come off
+ * before tax and are only taken from their balance when the Orders app completes it.
+ *
+ * Field names/shapes mirror the AsianLePOS app's Order model (see orders-schema.md).
  */
 
-const MAX_LINE_QUANTITY = 20;
-const MAX_INSTRUCTIONS_LENGTH = 200;
-
-type IncomingSelection = { optionId?: unknown; quantity?: unknown };
-type IncomingLine = {
-  menuItemId?: unknown;
-  quantity?: unknown;
-  options?: IncomingSelection[];
-  instructions?: unknown;
-};
-type IncomingFulfillment = { kind?: unknown; date?: unknown; time?: unknown };
 type IncomingOrder = {
-  lines?: IncomingLine[];
-  fulfillment?: IncomingFulfillment;
+  lines?: unknown;
+  fulfillment?: unknown;
   customerName?: unknown;
   phoneNumber?: unknown;
   customerEmail?: unknown;
-  /** Optional: sign-in token from the rewards project, to link a member for points. */
   rewardsIdToken?: unknown;
-  /** Display only (shown to staff) — the member is identified by the verified token. */
-  rewardsMemberName?: unknown;
-  /** Optional: $5-off steps (100 points each) the member wants to use. */
   redeemSteps?: unknown;
 };
 
-/** Wire shape returned to the client — "YYYY-MM-DD" + "HH:mm", not the persisted `scheduledAt: Date`. */
-type FulfillmentWire =
-  | { kind: TakeOutFulfillmentKind.Immediate }
-  | { kind: TakeOutFulfillmentKind.Scheduled; date: string; time: string };
-
-function badRequest(message: string) {
-  return NextResponse.json({ error: message }, { status: 400 });
-}
-
 export async function POST(request: NextRequest) {
-  let body: IncomingOrder;
-  try {
-    body = await request.json();
-  } catch {
-    return badRequest("Invalid request body");
-  }
-
+  const body = await readJsonObject<IncomingOrder>(request);
+  if (!body) return jsonError("Invalid request body");
   if (!Array.isArray(body.lines) || body.lines.length === 0) {
-    return badRequest("Your cart is empty");
+    return jsonError("Your cart is empty");
   }
 
   const customer = parseCustomerInfo(body);
-  if ("error" in customer) return badRequest(customer.error);
-  const { customerName, phoneNumber, customerEmail } = customer;
+  if ("error" in customer) return jsonError(customer.error);
 
-  // Rewards member, if the customer signed in at checkout. Points are earned later, when
-  // the admin app completes the order — this only links the member.
-  let loyalty: OrderLoyalty | null = null;
-  if (typeof body.rewardsIdToken === "string" && body.rewardsIdToken) {
-    const memberId = await verifyRewardsIdToken(body.rewardsIdToken);
-    if (!memberId) {
-      return badRequest(
-        "Your rewards sign-in has expired — please sign in again, or sign out to order without points.",
-      );
-    }
-    const memberName =
-      typeof body.rewardsMemberName === "string"
-        ? body.rewardsMemberName.trim().slice(0, 100)
-        : "";
-    loyalty = { memberId, memberName: memberName || customerName };
-  }
+  const redeem = parseRedeemSteps(body.redeemSteps);
+  if ("error" in redeem) return jsonError(redeem.error);
 
-  // Using points: priced in below, checked against the member's available points when
-  // saving. The points are only taken from the balance when the Orders app completes it.
-  let redeemSteps = 0;
-  if (body.redeemSteps != null && body.redeemSteps !== 0) {
-    if (!loyalty) return badRequest("Sign in to rewards to use your points.");
-    const steps = body.redeemSteps;
-    if (typeof steps !== "number" || !Number.isInteger(steps) || steps < 1 || steps > MAX_REDEEM_STEPS) {
-      return badRequest("Invalid rewards points amount.");
-    }
-    redeemSteps = steps;
-  }
+  const rewards = await resolveRewardsMember(body.rewardsIdToken);
+  if ("error" in rewards) return jsonError(rewards.error, rewards.status);
+  const { member } = rewards;
+  if (redeem.steps > 0 && !member) return jsonError("Sign in to rewards to use your points.");
 
-  const [menuItems, optionGroups, options, storeSettings] = await Promise.all([
-    fetchMenuItemsForServer(),
-    fetchOptionGroupsForServer(),
-    fetchItemOptionsForServer(),
+  const [menu, storeSettings] = await Promise.all([
+    loadMenuIndex(),
     fetchStoreSettingsForServer(),
   ]);
 
-  const now = new Date();
-  const menuItemsById = new Map(menuItems.map((i) => [i.id, i]));
-  const optionGroupsById = new Map(optionGroups.map((g) => [g.id, g]));
-  const optionsById = new Map(options.map((o) => [o.id, o]));
+  const pickup = resolveFulfillment(body.fulfillment, storeSettings, new Date());
+  if ("error" in pickup) return jsonError(pickup.error);
 
-  let fulfillment: OrderFulfillment;
-  let fulfillmentWire: FulfillmentWire;
-  if (body.fulfillment?.kind === TakeOutFulfillmentKind.Scheduled) {
-    const date = body.fulfillment.date;
-    const time = body.fulfillment.time;
-    if (
-      typeof date !== "string" ||
-      typeof time !== "string" ||
-      // Sanity only (format/past/too-far-ahead/lead-time) — not store hours/pause,
-      // see the file-level comment above.
-      !isValidScheduledPickup(storeSettings, date, time, now, { checkBusinessHours: false })
-    ) {
-      return badRequest("Selected pickup time is invalid");
+  const cart = buildOrderItems(body.lines, menu);
+  if ("error" in cart) return jsonError(cart.error);
+
+  let redemption: PointsRedemption | null = null;
+  if (member && redeem.steps > 0) {
+    if (redeem.steps > maxRedeemSteps(Number.POSITIVE_INFINITY, cart.subTotal)) {
+      return jsonError("Your order total is too small to use that many points.");
     }
-    const scheduledAt = resolveScheduledPickupInstant(storeSettings.timezone, date, time);
-    fulfillment = { kind: TakeOutFulfillmentKind.Scheduled, scheduledAt };
-    fulfillmentWire = { kind: TakeOutFulfillmentKind.Scheduled, date, time };
-  } else {
-    // readyTimeMinutes is deliberately left unset here — it's written by the POS/admin app
-    // when staff confirm the order into the kitchen, not guessed at creation time.
-    fulfillment = { kind: TakeOutFulfillmentKind.Immediate };
-    fulfillmentWire = { kind: TakeOutFulfillmentKind.Immediate };
-  }
-
-  const orderItems: OrderItem[] = [];
-
-  for (const line of body.lines) {
-    const menuItemId = typeof line.menuItemId === "string" ? line.menuItemId : "";
-    const quantity = typeof line.quantity === "number" ? Math.floor(line.quantity) : NaN;
-    if (!menuItemId || !Number.isInteger(quantity) || quantity < 1 || quantity > MAX_LINE_QUANTITY) {
-      return badRequest("Invalid item in cart");
-    }
-
-    const item = menuItemsById.get(menuItemId);
-    if (!item) return badRequest("One of the items in your cart no longer exists");
-
-    const itemGroups = (item.optionGroupIds ?? [])
-      .map((ref) => optionGroupsById.get(ref.optionGroupId))
-      .filter((g): g is OptionGroup => g != null);
-
-    // Reverse index: which group does a given option belong to, for this item.
-    const groupByOptionId = new Map<string, OptionGroup>();
-    for (const group of itemGroups) {
-      for (const optionId of group.optionIds ?? []) groupByOptionId.set(optionId, group);
-    }
-
-    const selectedOptions: OrderItemOption[] = [];
-    const selectionCountByGroup = new Map<string, number>();
-    let optionsTotal = 0;
-
-    for (const sel of line.options ?? []) {
-      const optionId = typeof sel.optionId === "string" ? sel.optionId : "";
-      const group = groupByOptionId.get(optionId);
-      if (!group) return badRequest(`Invalid option for ${item.name}`);
-
-      const option = optionsById.get(optionId);
-      if (!option) return badRequest(`Invalid option for ${item.name}`);
-
-      const rawQty = typeof sel.quantity === "number" ? Math.floor(sel.quantity) : 1;
-      const optionQuantity = group.multipleOptionQuantity
-        ? Math.max(1, Math.min(MAX_LINE_QUANTITY, rawQty || 1))
-        : 1;
-
-      selectedOptions.push({
-        name: option.name,
-        price: option.price,
-        quantity: optionQuantity,
-      });
-      optionsTotal += option.price * optionQuantity;
-      selectionCountByGroup.set(group.id, (selectionCountByGroup.get(group.id) ?? 0) + 1);
-    }
-
-    for (const group of itemGroups) {
-      const count = selectionCountByGroup.get(group.id) ?? 0;
-      if (count < group.minSelection || count > group.maxSelection) {
-        return badRequest(`Invalid selection for "${group.name}" on ${item.name}`);
-      }
-    }
-
-    const instructions =
-      typeof line.instructions === "string"
-        ? line.instructions.trim().slice(0, MAX_INSTRUCTIONS_LENGTH)
-        : "";
-
-    orderItems.push({
-      menuItemId: item.id,
-      name: item.name,
-      // Per-unit price INCLUDING selected options — matches POS's OrderItem.price convention.
-      price: item.price + optionsTotal,
-      quantity,
-      options: selectedOptions,
-      ...(instructions ? { instructions } : {}),
-      kitchenType: item.kitchenType ?? KitchenType.Other,
-    });
-  }
-
-  // Matches POS's orderItemsSubtotal: price already includes options, so just price * quantity.
-  const subTotal = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-
-  if (redeemSteps > maxRedeemSteps(Number.POSITIVE_INFINITY, subTotal)) {
-    return badRequest("Your order total is too small to use that many points.");
-  }
-  const pointsToRedeem = redeemStepsToPoints(redeemSteps);
-  const taxBreakDown = calculateTaxBreakdown(subTotal, redeemStepsToDollars(redeemSteps));
-
-  // Balance straight from the rewards database, read as the member (see rewardsPoints.ts).
-  let balance = 0;
-  if (pointsToRedeem > 0) {
-    const fetched = await fetchMemberBalance(body.rewardsIdToken as string, loyalty!.memberId);
-    if (fetched == null) {
-      return badRequest(
+    if (!member.profile) {
+      return jsonError(
         "Couldn't check your rewards points — please try again, or order without using points.",
+        503,
       );
     }
-    balance = fetched;
+    redemption = {
+      memberId: member.memberId,
+      balance: member.profile.points,
+      points: redeemStepsToPoints(redeem.steps),
+    };
   }
 
-  const ref = adminDb.collection("orders").doc();
-  const orderNumber = orderNumberFromId(ref.id);
+  const taxBreakDown = calculateTaxBreakdown(cart.subTotal, redeemStepsToDollars(redeem.steps));
+  const loyalty: OrderLoyalty | null = member
+    ? {
+        memberId: member.memberId,
+        // Shown to staff. Falls back to the order's name if the profile couldn't be read.
+        memberName: member.profile?.name || customer.customerName,
+        ...(redemption ? { pointsToRedeem: redemption.points } : {}),
+      }
+    : null;
 
-  const orderDoc = {
-    orderNumber,
-    status: OrderStatus.New,
-    fulfillment,
-    customerName,
-    phoneNumber,
-    customerEmail,
-    orderItems,
-    printed: false,
-    paid: false,
-    taxBreakDown,
-    ...(loyalty ? { loyalty: { ...loyalty, ...(pointsToRedeem > 0 ? { pointsToRedeem } : {}) } } : {}),
-    createdAt: FieldValue.serverTimestamp(),
-  };
-
-  if (pointsToRedeem > 0) {
-    // Same transaction as the save, so two orders placed at once can't both use the
-    // same points.
-    const available = await adminDb.runTransaction(async (tx) => {
-      const openOrders = await tx.get(memberOpenOrdersQuery(loyalty!.memberId));
-      const left = balance - pendingPointsFromDocs(openOrders.docs);
-      if (left < pointsToRedeem) return Math.max(0, left);
-      tx.set(ref, orderDoc);
-      return null;
-    });
-    if (available != null) {
-      return badRequest(
-        `You have ${available} points available to use${
-          available !== balance ? " (some are already on another open order)" : ""
-        } — please choose a smaller amount.`,
-      );
-    }
-  } else {
-    await ref.set(orderDoc);
+  const { ref, orderNumber } = newOrderRef();
+  const saved = await saveOrder(
+    ref,
+    newOrderDoc({
+      orderNumber,
+      customer,
+      fulfillment: pickup.fulfillment,
+      orderItems: cart.orderItems,
+      taxBreakDown,
+      loyalty,
+    }),
+    redemption,
+  );
+  if (!saved.ok) {
+    const onOtherOrders = redemption && saved.available !== redemption.balance;
+    return jsonError(
+      `You have ${saved.available} points available to use${
+        onOtherOrders ? " (some are already on another open order)" : ""
+      } — please choose a smaller amount.`,
+      409,
+    );
   }
 
-  return NextResponse.json({
+  return NextResponse.json<PlaceOrderResponse>({
     orderId: ref.id,
     orderNumber,
     taxBreakDown,
-    fulfillment: fulfillmentWire,
+    fulfillment: pickup.wire,
   });
 }

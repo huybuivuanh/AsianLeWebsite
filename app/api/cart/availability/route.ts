@@ -1,79 +1,63 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  fetchMenuItemsForServer,
-  fetchItemOptionsForServer,
-} from "@/lib/orderMenuData";
-import { fetchStoreSettingsForServer } from "@/lib/storeSettings";
 import { isAvailableNow } from "@/lib/availability";
+import type { CartAvailabilityResponse, LineAvailabilityResult } from "@/lib/orderApi";
+import { fetchStoreSettingsForServer } from "@/lib/storeSettings";
+import { jsonError, readJsonObject } from "@/lib/server/http";
+import { itemOptionGroups, loadMenuIndex, optionQuantity } from "@/lib/server/orders/menuIndex";
 
 /**
  * Read-only check of live item/option availability and pricing for a cart, so checkout
  * can flag stale cart lines (item went sold-out, availability window closed, price
  * changed) before the customer fills out the form — /api/orders re-checks the same
- * thing authoritatively at order time regardless, this is purely a UX nudge.
+ * thing authoritatively at order time regardless, this is purely a UX nudge. Prices use
+ * the same option rules as /api/orders (lib/server/orders/menuIndex.ts).
  */
 
-type IncomingOptionSelection = { optionId?: unknown; quantity?: unknown };
-type IncomingLine = { menuItemId?: unknown; options?: IncomingOptionSelection[] };
-type IncomingBody = { lines?: IncomingLine[] };
-
-type LineAvailabilityResult = {
-  itemAvailable: boolean;
-  unavailableOptionIds: string[];
-  // Per-unit price INCLUDING selected options (matches CartLine.price convention) —
-  // null when the item itself is unavailable/missing, since price is meaningless then.
-  currentPrice: number | null;
-};
+type IncomingSelection = { optionId?: unknown; quantity?: unknown };
+type IncomingLine = { menuItemId?: unknown; options?: unknown };
 
 export async function POST(request: NextRequest) {
-  let body: IncomingBody;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
-  }
+  const body = await readJsonObject<{ lines?: unknown }>(request);
+  if (!body || !Array.isArray(body.lines)) return jsonError("Invalid request body");
+  const lines = body.lines as (IncomingLine | null)[];
 
-  if (!Array.isArray(body.lines)) {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
-  }
-
-  const [menuItems, options, storeSettings] = await Promise.all([
-    fetchMenuItemsForServer(),
-    fetchItemOptionsForServer(),
+  const [menu, storeSettings] = await Promise.all([
+    loadMenuIndex(),
     fetchStoreSettingsForServer(),
   ]);
-
-  const menuItemsById = new Map(menuItems.map((i) => [i.id, i]));
-  const optionsById = new Map(options.map((o) => [o.id, o]));
   const now = new Date();
+  const availableNow = (entry: MenuItem | ItemOption) =>
+    isAvailableNow(entry, storeSettings.timezone, now);
 
-  const results: LineAvailabilityResult[] = body.lines.map((line) => {
-    const menuItemId = typeof line.menuItemId === "string" ? line.menuItemId : "";
-    const item = menuItemsById.get(menuItemId);
-    const itemAvailable = !!item && isAvailableNow(item, storeSettings.timezone, now);
+  const results = lines.map((line): LineAvailabilityResult => {
+    const menuItemId = typeof line?.menuItemId === "string" ? line.menuItemId : "";
+    const item = menu.itemsById.get(menuItemId);
+    if (!item) return { itemAvailable: false, unavailableOptionIds: [], currentPrice: null };
 
-    const selections = (Array.isArray(line.options) ? line.options : [])
-      .map((sel) => ({
-        optionId: typeof sel.optionId === "string" ? sel.optionId : "",
-        quantity: typeof sel.quantity === "number" && sel.quantity > 0 ? sel.quantity : 1,
-      }))
-      .filter((sel) => sel.optionId);
+    const { groupByOptionId } = itemOptionGroups(item, menu);
+    const selections: IncomingSelection[] = Array.isArray(line?.options) ? line.options : [];
+    const unavailableOptionIds: string[] = [];
+    let optionsTotal = 0;
 
-    const unavailableOptionIds = selections
-      .map((sel) => sel.optionId)
-      .filter((id) => {
-        const option = optionsById.get(id);
-        return !option || !isAvailableNow(option, storeSettings.timezone, now);
-      });
+    for (const sel of selections) {
+      const optionId = typeof sel?.optionId === "string" ? sel.optionId : "";
+      if (!optionId) continue;
+      const option = menu.optionsById.get(optionId);
+      const group = groupByOptionId.get(optionId);
+      // An option no longer on this item would be rejected by /api/orders too.
+      if (!option || !group || !availableNow(option)) {
+        unavailableOptionIds.push(optionId);
+        continue;
+      }
+      optionsTotal += option.price * optionQuantity(group, sel.quantity);
+    }
 
-    const optionsTotal = selections.reduce((sum, sel) => {
-      const option = optionsById.get(sel.optionId);
-      return option ? sum + option.price * sel.quantity : sum;
-    }, 0);
-    const currentPrice = item ? item.price + optionsTotal : null;
-
-    return { itemAvailable, unavailableOptionIds, currentPrice };
+    return {
+      itemAvailable: availableNow(item),
+      unavailableOptionIds,
+      currentPrice: item.price + optionsTotal,
+    };
   });
 
-  return NextResponse.json({ results });
+  return NextResponse.json<CartAvailabilityResponse>({ results });
 }

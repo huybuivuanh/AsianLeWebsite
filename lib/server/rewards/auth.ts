@@ -1,5 +1,6 @@
 import "server-only";
 import { createRemoteJWKSet, jwtVerify } from "jose";
+import { REWARDS_PROJECT_ID } from "@/lib/rewardsConfig";
 
 /**
  * Verifies a sign-in token from the rewards project (asian-le-rewards), so an order can be
@@ -20,13 +21,12 @@ const GOOGLE_KEYS = createRemoteJWKSet(
 
 /** The member's uid (= members/{uid} id) if the token is valid, otherwise null. */
 export async function verifyRewardsIdToken(idToken: string): Promise<string | null> {
-  const projectId = process.env.NEXT_PUBLIC_REWARDS_PROJECT_ID;
-  if (!projectId) return null;
+  if (!REWARDS_PROJECT_ID) return null;
   try {
     const { payload } = await jwtVerify(idToken, GOOGLE_KEYS, {
       algorithms: ["RS256"],
-      issuer: `https://securetoken.google.com/${projectId}`,
-      audience: projectId,
+      issuer: `https://securetoken.google.com/${REWARDS_PROJECT_ID}`,
+      audience: REWARDS_PROJECT_ID,
       requiredClaims: ["exp", "iat", "sub"],
       clockTolerance: 5,
     });

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import OrderPickupCta from "@/components/menu/OrderPickupCta";
+import { vietnameseSerif } from "@/lib/fonts";
 import { STORE } from "@/lib/store";
 
 // Placeholder photos — swap for the restaurant's own shots when they're ready.
@@ -30,7 +31,23 @@ export default function HeroSection({ hoursLine, storeSettings }: HeroSectionPro
           </span>{" "}
           come together.
         </h1>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <p
+          lang="vi"
+          className={`${vietnameseSerif.className} mt-7 text-[clamp(1.875rem,3.2vw,2.625rem)] leading-[1.1] text-gold`}
+        >
+          Chào mừng quý khách
+        </p>
+        <div className="mx-auto mt-3 flex max-w-[460px] items-center justify-center gap-4">
+          <span aria-hidden="true" className="h-px flex-1 bg-[#4a443d]" />
+          <p
+            lang="vi"
+            className={`${vietnameseSerif.className} whitespace-nowrap text-[clamp(1.25rem,1.9vw,1.5625rem)] leading-[1.2] text-on-ink-muted`}
+          >
+            Hương vị quê nhà
+          </p>
+          <span aria-hidden="true" className="h-px flex-1 bg-[#4a443d]" />
+        </div>
+        <div className="mt-7 flex flex-wrap justify-center gap-3">
           <OrderPickupCta storeSettings={storeSettings} className="inline-flex min-h-13 items-center rounded-full bg-gold px-7 font-bold text-ink transition hover:bg-on-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ink">
             Order for pickup
           </OrderPickupCta>

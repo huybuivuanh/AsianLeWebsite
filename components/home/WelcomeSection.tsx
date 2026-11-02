@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { vietnameseSerif } from "@/lib/fonts";
 
 export default function WelcomeSection() {
   return (
@@ -19,9 +20,12 @@ export default function WelcomeSection() {
           welcomed like family. We&apos;re proud to be your local go-to for comforting meals and
           warm hospitality.
         </p>
-        <p lang="vi" className="mt-5 font-accent text-[22px] italic leading-snug text-[#2a2520]">
-          “Chào mừng bạn đến với Asian Le Restaurant — món ăn nóng hổi, nguyên liệu tươi ngon,
-          ấm áp như ở nhà.”
+        <p
+          lang="vi"
+          className={`${vietnameseSerif.className} mt-5 text-[24px] leading-snug text-[#2a2520]`}
+        >
+          “Mời bạn ghé Asian Le Restaurant — món ăn nóng hổi, nguyên liệu tươi ngon, ấm áp
+          như ở nhà.”
         </p>
         <Link
           href="/about-us"

@@ -1,27 +1,57 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { skipNextImageOptimization } from "@/lib/imagePolicy";
 import { STORE } from "@/lib/store";
 
 const SWIPE_THRESHOLD = 50;
+/** How long each update stays up before the next one slides in. */
+const AUTOPLAY_MS = 6000;
+
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
+function subscribeReducedMotion(onChange: () => void) {
+  const query = window.matchMedia(REDUCED_MOTION);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+/** True when the visitor's device asks for less motion — autoplay stays off for them. */
+function usePrefersReducedMotion() {
+  return useSyncExternalStore(
+    subscribeReducedMotion,
+    () => window.matchMedia(REDUCED_MOTION).matches,
+    () => false,
+  );
+}
 
 type UpdatesSectionProps = {
   /** News images from Firestore `updates` — each image carries its own text. */
   items: ImageItem[];
 };
 
-/** News & updates: the update images shown whole (never cropped), one at a time. With
+/** News & updates: the update images shown whole (never cropped), one at a time,
+ * advancing every few seconds and looping. Autoplay pauses on hover, with the pause
+ * button, and for visitors who prefer reduced motion. With
  * nothing posted it shows a short placeholder instead, so the page's dark/light sections
  * keep alternating. */
 export default function UpdatesSection({ items }: UpdatesSectionProps) {
   const [index, setIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
+  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const reducedMotion = usePrefersReducedMotion();
 
   const count = items.length;
   const current = count ? index % count : 0;
   const go = (delta: number) => setIndex((i) => (i + delta + count) % count);
+  const playing = count > 1 && !paused && !reducedMotion;
+
+  // One timer per slide, so the clock restarts after a manual arrow click or swipe.
+  useEffect(() => {
+    if (!playing || hovered) return;
+    const timer = setTimeout(() => setIndex((i) => (i + 1) % count), AUTOPLAY_MS);
+    return () => clearTimeout(timer);
+  }, [playing, hovered, index, count]);
 
   return (
     <section id="updates" className="scroll-mt-20 bg-ivory text-ink">
@@ -47,7 +77,7 @@ export default function UpdatesSection({ items }: UpdatesSectionProps) {
               />
               <span
                 className="min-w-12 text-center text-sm font-semibold tabular-nums text-muted"
-                aria-live="polite"
+                aria-live={playing ? "off" : "polite"}
               >
                 {current + 1} / {count}
               </span>
@@ -56,6 +86,22 @@ export default function UpdatesSection({ items }: UpdatesSectionProps) {
                 onClick={() => go(1)}
                 direction="next"
               />
+              {reducedMotion ? null : (
+                <button
+                  type="button"
+                  aria-label={paused ? "Play updates" : "Pause updates"}
+                  onClick={() => setPaused((p) => !p)}
+                  className="flex h-12 w-12 items-center justify-center rounded-full border border-sand-line bg-white text-ink transition hover:border-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    {paused ? (
+                      <path d="M7 4.5v15l13-7.5z" />
+                    ) : (
+                      <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
+                    )}
+                  </svg>
+                </button>
+              )}
             </div>
           ) : null}
         </div>
@@ -94,6 +140,8 @@ export default function UpdatesSection({ items }: UpdatesSectionProps) {
         ) : (
           <div
             className="relative mt-9 aspect-[16/9] touch-pan-y overflow-hidden rounded-[28px] border border-sand-line bg-sand"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
             onTouchStart={(e) => {
               touchStartX.current = e.touches[0].clientX;
             }}

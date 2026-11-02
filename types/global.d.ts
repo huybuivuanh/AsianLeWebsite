@@ -205,6 +205,17 @@ declare global {
     reversePending?: boolean;
   }
 
+  /** members/{uid} in the separate rewards project — the fields this site reads. */
+  interface RewardsMember {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    points: number;
+    /** True once a first order has been collected (members/{uid}.firstOrderId) — no welcome bonus left. */
+    hasFirstOrder: boolean;
+  }
+
   interface Order {
     id: string;
     orderNumber: string;

@@ -1,6 +1,6 @@
 import { lineBasePrice, lineTotal, type CartLine } from "@/lib/cartStore";
 import { formatPriceCAD } from "@/lib/utils";
-import type { SubmitState } from "@/hooks/useCheckoutForm";
+import type { SubmitState } from "@/hooks/checkout/usePlacedOrder";
 import PayAtPickupNote from "@/components/checkout/PayAtPickupNote";
 
 type OrderSummaryPanelProps = {

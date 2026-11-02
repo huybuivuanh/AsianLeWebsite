@@ -1,10 +1,10 @@
 "use client";
 
 import Link, { useLinkStatus } from "next/link";
-import { useCheckoutForm } from "@/hooks/useCheckoutForm";
+import { useCheckoutForm } from "@/hooks/checkout/useCheckoutForm";
 import PickupSection from "@/components/checkout/PickupSection";
 import CustomerInfoSection from "@/components/checkout/CustomerInfoSection";
-import RewardsSection from "@/components/checkout/RewardsSection";
+import RewardsSection from "@/components/checkout/rewards/RewardsSection";
 import OrderSummaryPanel from "@/components/checkout/OrderSummaryPanel";
 import InstructionsWarningModal from "@/components/checkout/InstructionsWarningModal";
 import OrderConfirmingView from "@/components/checkout/OrderConfirmingView";
@@ -48,11 +48,12 @@ export default function CheckoutForm({
   initialStoreSettings,
 }: CheckoutFormProps) {
   const checkout = useCheckoutForm(initialStoreSettings);
+  const { pickup, customer } = checkout;
 
   if (checkout.submitState.status === "confirming") {
     return (
       <OrderConfirmingView
-        onCancel={checkout.handleCancelOrder}
+        onCancel={checkout.cancelOrder}
         cancelling={checkout.cancelling}
         cancelError={checkout.cancelError}
       />
@@ -61,15 +62,7 @@ export default function CheckoutForm({
 
   if (checkout.submitState.status === "success") {
     return (
-      <OrderSuccessView
-        orderNumber={checkout.submitState.orderNumber}
-        total={checkout.submitState.total}
-        fulfillment={checkout.submitState.fulfillment}
-        readyBy={checkout.submitState.readyBy}
-        rewardsPoints={checkout.submitState.rewardsPoints}
-        pointsUsed={checkout.submitState.pointsUsed}
-        discount={checkout.submitState.discount}
-      />
+      <OrderSuccessView {...checkout.submitState.order} readyBy={checkout.submitState.readyBy} />
     );
   }
 
@@ -79,7 +72,7 @@ export default function CheckoutForm({
 
   if (checkout.lines.length === 0) return <EmptyCartView />;
 
-  if (!checkout.canOrderAtAll) return <StoreClosedView />;
+  if (!pickup.canOrderAtAll) return <StoreClosedView />;
 
   return (
     <form
@@ -101,15 +94,15 @@ export default function CheckoutForm({
         </Link>
 
         <PickupSection
-          storeOpenNow={checkout.storeOpenNow}
-          currentStoreTime={checkout.currentStoreTime}
+          storeOpenNow={pickup.storeOpenNow}
+          currentStoreTime={pickup.currentStoreTime}
           waitTime={checkout.waitTime}
-          fulfillmentKind={checkout.fulfillmentKind}
-          setFulfillmentKind={checkout.setFulfillmentKind}
-          scheduledLocal={checkout.scheduledLocal}
-          setScheduledLocal={checkout.setScheduledLocal}
-          minLocal={checkout.minLocal}
-          maxLocal={checkout.maxLocal}
+          fulfillmentKind={pickup.fulfillmentKind}
+          setFulfillmentKind={pickup.setFulfillmentKind}
+          scheduledLocal={pickup.scheduledLocal}
+          setScheduledLocal={pickup.setScheduledLocal}
+          minLocal={pickup.minLocal}
+          maxLocal={pickup.maxLocal}
         />
 
         <RewardsSection
@@ -119,12 +112,12 @@ export default function CheckoutForm({
         />
 
         <CustomerInfoSection
-          name={checkout.name}
-          setName={checkout.setName}
-          phone={checkout.phone}
-          setPhone={checkout.setPhone}
-          email={checkout.email}
-          setEmail={checkout.setEmail}
+          name={customer.name}
+          setName={customer.setName}
+          phone={customer.phone}
+          setPhone={customer.setPhone}
+          email={customer.email}
+          setEmail={customer.setEmail}
         />
 
         {checkout.submitState.status === "error" ? (

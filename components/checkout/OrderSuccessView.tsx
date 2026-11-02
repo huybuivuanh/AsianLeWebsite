@@ -3,7 +3,7 @@ import { formatPriceCAD } from "@/lib/utils";
 import { STORE } from "@/lib/store";
 import { resultButtonClass, resultCardClass } from "@/components/checkout/resultCard";
 import { TakeOutFulfillmentKind } from "@/types/enum";
-import type { FulfillmentWire } from "@/hooks/useCheckoutForm";
+import type { FulfillmentWire } from "@/lib/orderApi";
 
 type OrderSuccessViewProps = {
   orderNumber: string;

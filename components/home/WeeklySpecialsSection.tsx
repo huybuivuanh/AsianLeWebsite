@@ -1,6 +1,6 @@
 import Image from "next/image";
 import OrderPickupCta from "@/components/menu/OrderPickupCta";
-import { REWARDS_APP_URL, rewardsEnabled } from "@/lib/rewardsFirebase";
+import { REWARDS_APP_URL, rewardsEnabled } from "@/lib/rewardsConfig";
 import {
   DOLLARS_PER_REDEEM_STEP,
   POINTS_PER_REDEEM_STEP,

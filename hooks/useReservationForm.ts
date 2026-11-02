@@ -22,7 +22,7 @@ export type ReservationSubmitState =
   | { status: "success"; orderNumber: string; details: ReservationDetails }
   | { status: "cancelled" };
 
-/** State and submission for the /reservations form — mirrors useCheckoutForm's
+/** State and submission for the /reservations form — mirrors the checkout hooks'
  * place → wait for the restaurant to accept → success/cancelled flow. */
 export function useReservationForm(initialStoreSettings: StoreSettings) {
   const storeSettings = useLiveStoreSettings(initialStoreSettings);

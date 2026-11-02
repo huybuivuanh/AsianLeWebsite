@@ -8,7 +8,7 @@ type OrderConfirmingViewProps = {
 
 /** Shown after the order is placed (Firestore status "New") but before the restaurant
  * has acknowledged it — the order number is deliberately withheld until then, see
- * useCheckoutForm's "confirming" state. */
+ * usePlacedOrder's "confirming" state. */
 export default function OrderConfirmingView({
   onCancel,
   cancelling,

@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import type { CartLineRequest } from "@/lib/orderApi";
 
 /**
  * Client-side cart, in-memory only (no persistence — cart does not survive a
@@ -146,4 +147,14 @@ export function cartSubtotal(lines: CartLine[]): number {
 
 export function cartItemCount(lines: CartLine[]): number {
   return lines.reduce((sum, line) => sum + line.quantity, 0);
+}
+
+/** What the API routes need from a cart line: ids and quantities only — never prices. */
+export function toCartLineRequest(line: CartLine): CartLineRequest {
+  return {
+    menuItemId: line.menuItemId,
+    quantity: line.quantity,
+    options: line.options.map((o) => ({ optionId: o.optionId, quantity: o.quantity })),
+    ...(line.instructions ? { instructions: line.instructions } : {}),
+  };
 }

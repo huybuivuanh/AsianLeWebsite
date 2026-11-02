@@ -27,5 +27,7 @@ export const STORE = {
       "https://www.tripadvisor.com/Restaurant_Review-g155041-d4881805-Reviews-Asian_Le-Prince_Albert_Saskatchewan.html",
     restaurantguru: "https://restaurantguru.com/Asian-Le-Prince-Albert",
     yelp: "https://www.yelp.ca/biz/asian-le-restaurant-prince-albert",
+    /** Opens the "write a review" box on our Google Business Profile. */
+    googleReview: "https://g.page/r/CYhz8oW-6QKjEAE/review",
   },
 } as const;

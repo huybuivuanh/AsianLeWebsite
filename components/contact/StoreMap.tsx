@@ -20,7 +20,7 @@ export default function StoreMap({
 }: StoreMapProps) {
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-xl border border-stone-200 bg-stone-100 ${aspectClasses[aspect]} ${className}`}
+      className={`relative w-full overflow-hidden border ${aspectClasses[aspect]} ${className}`}
     >
       <iframe
         src={embedSrc}

@@ -2,6 +2,7 @@ import Logo from "./Logo";
 import { STORE } from "@/lib/store";
 
 const SOCIAL_LINKS = [
+  { href: STORE.socialLinks.googleReview, label: "Review us on Google" },
   { href: STORE.socialLinks.facebook, label: "Facebook" },
   { href: STORE.socialLinks.skipthedishes, label: "SkipTheDishes" },
   { href: STORE.socialLinks.tripadvisor, label: "Tripadvisor" },

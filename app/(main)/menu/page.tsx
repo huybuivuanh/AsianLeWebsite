@@ -111,10 +111,11 @@ export default async function MenuPage() {
           today={today}
           storeSettings={storeSettings}
           showOrderCards={false}
+          tone="light"
         />
       </div>
 
-      <section className="mx-auto max-w-7xl px-4 pb-10 pt-20 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
         {error ? (
           <div className="mx-auto max-w-2xl rounded-3xl border border-sand-line bg-white p-8 text-center">
             <p className="text-[13px] font-bold uppercase tracking-[0.2em] text-brand">

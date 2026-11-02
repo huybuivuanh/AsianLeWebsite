@@ -22,8 +22,50 @@ type WeeklySpecialsSectionProps = {
   /** Today in the store's timezone — that day's card is highlighted. */
   today: DayOfWeek;
   storeSettings: StoreSettings;
-  /** The order-online and rewards cards under the specials (home page). Default true. */
+  /** The order-online and rewards cards under the specials (home page). Default true.
+   * They're styled for the dark tone. */
   showOrderCards?: boolean;
+  /** "dark" (home page, default) or "light" (menu page, same ivory as the menu list). */
+  tone?: "dark" | "light";
+};
+
+/** Card colours. A dark tone shows dark cards with today's card light; the light tone
+ * flips that, so today's card always stands out. */
+const DARK_CARD = {
+  card: "border-ink-line bg-ink-raised text-on-ink",
+  title: "text-gold",
+  number: "text-gold",
+  rule: "border-ink-line",
+  options: "text-on-ink-muted marker:text-gold",
+  price: "text-brand-bright",
+};
+const LIGHT_CARD = {
+  title: "",
+  number: "text-brand",
+  rule: "border-sand-line",
+  options: "text-body marker:text-brand",
+  price: "text-brand",
+};
+
+const TONES = {
+  dark: {
+    section: "bg-ink text-on-ink",
+    eyebrow: "text-gold",
+    accentWord: "text-gold",
+    intro: "text-on-ink-muted",
+    error: "text-red-300",
+    normalCard: DARK_CARD,
+    todayCard: { ...LIGHT_CARD, card: "border-on-ink bg-on-ink text-ink" },
+  },
+  light: {
+    section: "bg-ivory text-ink",
+    eyebrow: "text-brand",
+    accentWord: "",
+    intro: "text-muted",
+    error: "text-brand",
+    normalCard: { ...LIGHT_CARD, card: "border-sand-line bg-white text-ink" },
+    todayCard: { ...DARK_CARD, card: "border-ink bg-ink text-on-ink" },
+  },
 };
 
 /** The week's lunch specials (Firestore dailySpecials / dailySpecialItems), all days
@@ -35,7 +77,9 @@ export default function WeeklySpecialsSection({
   today,
   storeSettings,
   showOrderCards = true,
+  tone = "dark",
 }: WeeklySpecialsSectionProps) {
+  const t = TONES[tone];
   const itemsById = new Map(dailySpecialItems.map((item) => [item.id, item]));
   const days = [...dailySpecials].sort(
     (a, b) =>
@@ -44,28 +88,28 @@ export default function WeeklySpecialsSection({
   );
 
   return (
-    <section id="daily-special" className="scroll-mt-20 bg-ink text-on-ink">
+    <section id="daily-special" className={`scroll-mt-20 ${t.section}`}>
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-24 lg:px-8">
         <div className="flex flex-wrap items-end justify-between gap-5">
           <div>
-            <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-gold">
+            <p className={`text-[13px] font-semibold uppercase tracking-[0.2em] ${t.eyebrow}`}>
               Daily special
             </p>
             <h2 className="mt-3 text-[clamp(2.25rem,4.4vw,3.5rem)] font-extrabold leading-[1.05] tracking-[-0.03em]">
               This week&apos;s{" "}
-              <span className="font-accent font-normal italic text-gold">
+              <span className={`font-accent font-normal italic ${t.accentWord}`}>
                 lunch
               </span>
             </h2>
           </div>
-          <p className="max-w-[34ch] text-on-ink-muted">
+          <p className={`max-w-[34ch] ${t.intro}`}>
             Freshly prepared, great value, and perfect for a quick lunch.
             Today&apos;s specials are highlighted.
           </p>
         </div>
 
         {error ? (
-          <p className="mt-10 text-red-300" role="alert">
+          <p className={`mt-10 ${t.error}`} role="alert">
             {error}
           </p>
         ) : null}
@@ -73,8 +117,7 @@ export default function WeeklySpecialsSection({
         <div className="mt-10 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(13rem,1fr))]">
           {days.map((day) => {
             const isToday = day.dayOfWeek === today;
-            // Gold on the dark cards, brand red on today's light card.
-            const accent = isToday ? "text-brand" : "text-gold";
+            const c = isToday ? t.todayCard : t.normalCard;
             const items = sortAlphabetically(
               (day.itemIds ?? [])
                 .map((id) => itemsById.get(id))
@@ -84,12 +127,10 @@ export default function WeeklySpecialsSection({
             return (
               <article
                 key={day.id}
-                className={`rounded-3xl border p-5.5 ${isToday ? "border-on-ink bg-on-ink text-ink" : "border-ink-line bg-ink-raised text-on-ink"}`}
+                className={`rounded-3xl border p-5.5 ${c.card}`}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <h3
-                    className={`text-lg font-extrabold ${isToday ? "" : "text-gold"}`}
-                  >
+                  <h3 className={`text-lg font-extrabold ${c.title}`}>
                     {formatDayOfWeekLabel(day.dayOfWeek)}
                   </h3>
                   {isToday ? (
@@ -110,11 +151,11 @@ export default function WeeklySpecialsSection({
                     return (
                       <li
                         key={item.id}
-                        className={`mt-4 border-t pt-3.5 text-sm leading-normal ${isToday ? "border-sand-line" : "border-ink-line"}`}
+                        className={`mt-4 border-t pt-3.5 text-sm leading-normal ${c.rule}`}
                       >
                         <p className="font-semibold">
                           {number ? (
-                            <span className={`mr-1 font-extrabold ${accent}`}>
+                            <span className={`mr-1 font-extrabold ${c.number}`}>
                               {number}
                             </span>
                           ) : null}
@@ -122,7 +163,7 @@ export default function WeeklySpecialsSection({
                         </p>
                         {item.options && item.options.length > 0 ? (
                           <ul
-                            className={`mt-1.5 list-disc pl-5 font-semibold leading-relaxed ${isToday ? "text-body marker:text-brand" : "text-on-ink-muted marker:text-gold"}`}
+                            className={`mt-1.5 list-disc pl-5 font-semibold leading-relaxed ${c.options}`}
                           >
                             {item.options.map((option, i) => (
                               <li key={i}>{option}</li>
@@ -130,7 +171,7 @@ export default function WeeklySpecialsSection({
                           </ul>
                         ) : null}
                         <p
-                          className={`mt-1.5 text-right text-[15px] font-extrabold tabular-nums ${isToday ? "text-brand" : "text-brand-bright"}`}
+                          className={`mt-1.5 text-right text-[15px] font-extrabold tabular-nums ${c.price}`}
                         >
                           {formatPriceCAD(item.price)}
                         </p>
